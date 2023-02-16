@@ -49,3 +49,9 @@ Several toy example applications are provided to demonstrate the basic features 
 ### Backend
 - `generate() -> int`: Generate a random number and return it
 - `save(num: int) -> bool`: Save the given number into the database
+
+## 2. Logger
+### GUI
+- A read-only text field that prints out the log messages
+### Backend
+Not required.
