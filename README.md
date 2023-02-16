@@ -1,3 +1,5 @@
+[![Pylint](https://github.com/snu-quiqcl/swift/actions/workflows/pylint.yml/badge.svg)](https://github.com/snu-quiqcl/swift/actions/workflows/pylint.yml)
+
 # swift
 **S**NU **w**idget **i**ntegration **f**ramework for PyQ**t**
 
