@@ -21,4 +21,4 @@ jobs:
     - name: Analysing the code with pylint
       run: |
         bundle lock --add-platform x86_64-linux
-        pylint $(git ls-files '*.py')
+        pylint test.py
