@@ -21,6 +21,21 @@ A `Frame` is in fact a special `QWidget` which obeys the interface of `swift`, a
 ### Frame structure
 <img width="50%" alt="image" src="https://user-images.githubusercontent.com/76851886/219294817-c135dad4-bf7a-49f3-a33b-16b3bc632ca7.png">
 
+A `Frame` simply means a window of PyQt that we see.
+
+In fact, an engine which makes a `Frame` works is a `Logic`.
+A `Logic` can 
+- show/hide `Frame`s, which the `Logic` manages
+- set a slot for each signal of `Frame`
+- receive a signal which the `Frame` emits
+- emit a signal to `Frame` or a global signal to `swift`
+- communicate `backend` APIs
+
+A `swift` recognizes only `Logic`, not `Frame` or `backend`. Thus, every order for `Frame` is implemented in `Logic`.
+
+A `backend` is a set of APIs for handling UI-independent operations, such as controlling hardwards, polling something, and connecting DB.
+
+
 # Toy example applications
 Several toy example applications are provided to demonstrate the basic features of `swift`.
 
