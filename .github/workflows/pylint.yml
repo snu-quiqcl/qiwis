@@ -20,5 +20,4 @@ jobs:
         pip install pylint
     - name: Analysing the code with pylint
       run: |
-        bundle lock --add-platform x86_64-linux
         pylint test.py
