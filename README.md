@@ -11,3 +11,18 @@ A `Frame` is in fact a special `QWidget` which obeys the interface of `swift`, a
 - Independent development of each `Frame`, which is a sub-window application resides in the framework
 - Communication channel between `Frame`s
 - Thread-safety
+
+
+# Toy example applications
+Several toy example applications are provided to demonstrate the basic features of `swift`.
+
+## 1. Random number generator
+### GUI - generator frame
+- A combobox for selecting a database into which the generated number is saved
+- A button for generating new number
+### GUI - viewer frame
+- A label for showing the current status (database updated, random number generated, etc.)
+- A read-only spinbox showing the recently generated number
+### Backend
+- `generate() -> int`: Generate a random number and return it
+- `save(num: int) -> bool`: Save the given number into the database
