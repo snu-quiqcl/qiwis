@@ -55,3 +55,12 @@ Several toy example applications are provided to demonstrate the basic features 
 - A read-only text field that prints out the log messages
 ### Backend
 Not required.
+
+## 3. Poller
+### GUI
+- A spinbox for adjusting the polling period
+- A label for showing the polled count (how many numbers have been polled): this will confidently show when the polling occurs
+- A read-only spinbox showing the recently polled number
+### Backend
+- `poll() -> int`: Return a predictable number e.g. `time.time() % 100`
+- `save(num: int) -> bool`: Save the given number into the database
