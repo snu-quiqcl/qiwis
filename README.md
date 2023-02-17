@@ -71,3 +71,11 @@ Not required.
 - Line-edit(s) and a button to add a row (new database)
 ### Backend
 Not required.
+
+## 5. Data calculator
+### GUI
+- A combobox for selecting the database from which the value of 'A' is fetched
+- A combobox for selecting the database from which the value of 'B' is fetched
+- A label showing the sum of recently fetched 'A' and 'B', or an error message if something goes wrong
+### Backend
+- `read_from(db) -> int`: Read the given database and return the fetched number
