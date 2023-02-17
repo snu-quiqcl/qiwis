@@ -18,6 +18,60 @@ A `Frame` is in fact a special `QWidget` which obeys the interface of `swift`, a
 ### Overall structure
 <img width="80%" alt="image" src="https://user-images.githubusercontent.com/76851886/219294678-f93f729d-684b-4668-8094-9ae90680c817.png">
 
+```python
+### Please be careful because Frame and Logic are mixed.
+
+class Swift:
+    """
+    1. Read json setup files
+        - Frame information file       (e.g. whether to show frame A at the beginning, whether frame B is a subscriber of GB)
+        - Global bus information file  (e.g. name)
+    
+    2. Create instances of GlobalBus (GB) -> Able to be many GBs
+        - Create a signal for emitting to each frame
+        - Set global_signal_receiver() of subscribers as a slot
+
+    3. Create frames
+        - Connect bc signal of frames to corresponding GB
+        
+    4. Show frames
+    """
+    pass
+
+
+class GlobalBus:
+    def __init__():
+         queue = []  # Queue for storing signals
+         # start thread for popping from queue and emitting signal to frames
+         
+        _signal = pyqtSignal(...)
+
+        for frame in subscribers:
+            _signal.connect(frame.global_signal_receiver) 
+
+    # Method when called when a frame emits bc signal
+    def receive(msg):
+        queue.push(msg)
+        
+    # Method polling until queue is empty
+    def poll():
+        while True:
+            if queue is not empty:
+                msg = queue.pop()
+                _signal.emit(msg)
+    
+
+# This class means both Frame and Logic (not real)
+class Frame:
+    def __init__():
+        bc = pyqtSignal(...)  # create broadcasting signal
+
+    # If the frame wants to receive global signals, override desired operation on the below function
+    # This function is set as a slot in GB
+    def global_signal_receiver(...):
+        pass
+```
+
 ### Frame structure
 <img width="50%" alt="image" src="https://user-images.githubusercontent.com/76851886/219294817-c135dad4-bf7a-49f3-a33b-16b3bc632ca7.png">
 
