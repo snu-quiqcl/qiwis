@@ -42,7 +42,7 @@ class Swift:
 class GlobalBus:
     def __init__():
          queue = []  # Queue for storing signals
-         # start thread for popping from queue and emitting signal to frames
+         # Start thread for popping from queue and emitting signal to frames
          
         _signal = pyqtSignal(...)
 
@@ -89,6 +89,28 @@ A `swift` recognizes only `Logic`, not `Frame` or `backend`. Thus, every order f
 
 A `backend` is a set of APIs for handling UI-independent operations, such as controlling hardwards, polling something, and connecting DB.
 
+```python
+### Please be careful because Frame and Logic are mixed.
+
+class Logic:
+    """
+    1. Create frames (generally only one frame)
+         
+    2. Connect signal of frame elements to API of Logic
+        
+    3. Show frames
+    """
+    
+    # Example method that receive signal of frame elements
+    def receive(...):
+        # If necessary, start thread
+        # Communicate with backend
+        pass
+
+
+class Frame(QWidget):
+    pass
+```
 
 # Toy example applications
 Several toy example applications are provided to demonstrate the basic features of `swift`.
