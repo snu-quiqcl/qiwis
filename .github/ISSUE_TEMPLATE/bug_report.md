@@ -7,24 +7,24 @@ assignees: ''
 
 ---
 
-**Describe the bug**
+### Describe the bug
 A clear and concise description of what the bug is.
 
-**Expected behavior**
+### Expected behavior
 A clear and concise description of what you expected to happen.
 
-**To Reproduce**
+### To Reproduce
 Steps to reproduce the behavior:
 1. Go to '...'
 2. Click on '....'
 3. Scroll down to '....'
 4. See error
 
-**Expected causes and correction methods**
+### Expected causes and correction methods
 Creating helps someone modify, even if you're unsure
 
-**Screenshots**
+### Screenshots
 If applicable, add screenshots to help explain your problem.
 
-**Additional context**
+### Additional context
 Add any other context about the problem here.
