@@ -64,3 +64,10 @@ Not required.
 ### Backend
 - `poll() -> int`: Return a predictable number e.g. `time.time() % 100`
 - `save(num: int) -> bool`: Save the given number into the database
+
+## 4. Database manager
+### GUI
+- A list whose each row shows the database name, information (host address, etc.), and a button to remove the row from the list
+- Line-edit(s) and a button to add a row (new database)
+### Backend
+Not required.
