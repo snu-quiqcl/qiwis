@@ -16,7 +16,7 @@ A `Frame` is in fact a special `QWidget` which obeys the interface of `swift`, a
 
 ## Structure chart
 ### Overall structure
-<img width="80%" alt="image" src="https://user-images.githubusercontent.com/76851886/219294678-f93f729d-684b-4668-8094-9ae90680c817.png">
+<img width="80%" alt="image" src="https://user-images.githubusercontent.com/76851886/219574551-2f798863-ea48-4857-8db6-15840a0505e5.png">
 
 ```python
 ### Please be careful because Frame and Logic are mixed.
@@ -73,7 +73,7 @@ class Frame:
 ```
 
 ### Frame structure
-<img width="50%" alt="image" src="https://user-images.githubusercontent.com/76851886/219294817-c135dad4-bf7a-49f3-a33b-16b3bc632ca7.png">
+<img width="50%" alt="image" src="https://user-images.githubusercontent.com/76851886/219575722-408dc03a-c84e-417f-a541-e48dfda100c0.png">
 
 A `Frame` simply means a window of PyQt that we see.
 
