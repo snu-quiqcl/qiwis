@@ -124,7 +124,7 @@ Several toy example applications are provided to demonstrate the basic features 
 - A read-only spinbox showing the recently generated number
 ### Backend
 - `generate() -> int`: Generate a random number and return it
-- `save(num: int) -> bool`: Save the given number into the database
+- `save(num: int, db) -> bool`: Save the given number into the database
 
 ## 2. Logger
 ### GUI
@@ -134,12 +134,13 @@ Not required.
 
 ## 3. Poller
 ### GUI
+- A combobox for selecting a database into which the polled number is saved
 - A spinbox for adjusting the polling period
 - A label for showing the polled count (how many numbers have been polled): this will confidently show when the polling occurs
 - A read-only spinbox showing the recently polled number
 ### Backend
 - `poll() -> int`: Return a predictable number e.g. `time.time() % 100`
-- `save(num: int) -> bool`: Save the given number into the database
+- `save(num: int, db) -> bool`: Save the given number into the database
 
 ## 4. Database manager
 ### GUI
@@ -154,4 +155,4 @@ Not required.
 - A combobox for selecting the database from which the value of 'B' is fetched
 - A label showing the sum of recently fetched 'A' and 'B', or an error message if something goes wrong
 ### Backend
-- `read_from(db) -> int`: Read the given database and return the fetched number
+- `read(db) -> int`: Read the given database and return the fetched number
