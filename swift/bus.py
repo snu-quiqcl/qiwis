@@ -47,10 +47,13 @@ class QueueConsumer(QObject):
 
     consumed = pyqtSignal()
 
-    def __init__(self, queue_):
+    def __init__(self, queue_, timeout=1):
         """
         Args:
             queue_: A thread-safe queue object which implements `get()` method.
+            timeout: Desired timeout for blocking queue reading, in seconds.
+              This should not be None in order not to become uniterruptible.
         """
         super().__init__()
         self._queue = queue_
+        self._timeout = timeout
