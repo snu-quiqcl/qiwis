@@ -18,6 +18,9 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install pylint
-    - name: Analysing the code with pylint
+    - name: Add dependencies about external libraries
+      run: |
+        printf "[MASTER]\nextension-pkg-whitelist=PyQt" > ~/.pylintrc
+    - name: Analyze the code with pylint
       run: |
         pylint $(git ls-files '*.py')
