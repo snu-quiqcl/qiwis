@@ -36,3 +36,21 @@ class Bus(QObject):
             msg: Given message string to put in the queue.
         """
         self._queue.put(msg)
+
+
+class QueueConsumer(QObject):
+    """Threaded queue consumer.
+    
+    Signals:
+        consumed: Emitted when an item is found and consumed from the queue.
+    """
+
+    consumed = pyqtSignal()
+
+    def __init__(self, queue_):
+        """
+        Args:
+            queue_: A thread-safe queue object which implements `get()` method.
+        """
+        super().__init__()
+        self._queue = queue_
