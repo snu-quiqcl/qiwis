@@ -1,11 +1,12 @@
 {
     "frame": {
         "logger_frame": {
-            "module": "frame.logger",
-            "class": "LoggerLogic",
+            "module": "base",
+            "class": "BaseLogic",
             "show": false,
             "pos": "left",
-            "bus": "log_bus"
+            "dest_bus": ["example_bus"],
+            "subs_bus": ["another_example_bus"]
         }
     },
     "bus": {
