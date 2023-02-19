@@ -59,3 +59,19 @@ class QueueConsumer(QObject):
         super().__init__()
         self._queue = queue_
         self._timeout = timeout
+        self._running = True
+
+    def run(self):
+        """Keeps consuming the items in the queue whenever there exist some.
+        
+        This method will be connected to QThread.started signal.
+        Whenever it consumes an item, it emits `consumed` signal with the content.
+        """
+        while self._running:
+            try:
+                item = self._queue.get(block=True, timeout=self._timeout)
+            except Empty:
+                pass
+            else:
+                self.consumed.emit(item)
+        self.finished.emit()
