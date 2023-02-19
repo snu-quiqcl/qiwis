@@ -75,3 +75,11 @@ class QueueConsumer(QObject):
             else:
                 self.consumed.emit(item)
         self.finished.emit()
+    
+    def stop(self):
+        """Stops the consuming thread.
+        
+        It may take a while for the thread to actually stop, depending on
+          the timeout parameter.
+        """
+        self._running = False
