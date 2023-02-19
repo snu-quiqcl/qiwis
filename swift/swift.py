@@ -24,11 +24,17 @@ class Swift:
         setup_bus: A set-up information about buses.
     """
 
-    def __init__(self, setup_path):
+    def __init__(self, setup_path: str):
+        """Constructor.
+
+        Args:
+            setup_path (str): A path of set-up file.
+        """
         self.read_setup_file(setup_path)
         self.init_bus()
+        self.init_frame()
 
-    def read_setup_file(self, setup_path):
+    def read_setup_file(self, setup_path: str):
         """Read set-up information from set-up file.
 
         Read set-up file and store information about frame and bus at fields.
@@ -56,7 +62,30 @@ class Swift:
             self.buses[name] = cls(name)
 
     def init_frame(self):
-        pass
+        """Initialize frames using set-up environment.
+
+        Create the instance of each frame (exactly, Logic class) and store them at dictionary field.
+        """
+        self.frames = {}
+
+        for name, info in self.setup_frame.items():
+            mod = importlib.import_module(info['module'])
+            cls = getattr(mod, info['class'])
+
+            frame = cls(name, info['show'], info['pos'])
+            # Set a slot of broadcast signal of each frame
+            # to the method receiving this signal in Bus.
+            for bus_name in info['dest_bus']:
+                bus = self.buses[bus_name]
+                frame.broadcast_signal.connect(bus.write)
+
+            # Set a slot of received signal of each global bus
+            # to the method receiving this signal in Frame.
+            for bus_name in info['subs_bus']:
+                bus = self.buses[bus_name]
+                bus.received.connect(frame.receive_bus_signal)
+
+            self.frames[name] = frame
 
 
 def get_argparser():
