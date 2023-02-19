@@ -20,7 +20,7 @@ jobs:
         pip install pylint
     - name: Add dependencies about external libraries
       run: |
-        printf "[MASTER]\nextension-pkg-whitelist=PyQt" > ~/.pylintrc
+        printf "[MASTER]\nextension-pkg-whitelist=PyQt5" > ~/.pylintrc
     - name: Analyze the code with pylint
       run: |
         pylint $(git ls-files '*.py')
