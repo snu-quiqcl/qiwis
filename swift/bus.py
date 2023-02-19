@@ -2,7 +2,7 @@
 Module for bus features.
 """
 
-from queue import SimpleQueue
+from queue import SimpleQueue, Empty
 
 from PyQt5.QtCore import QObject, pyqtSignal
 
