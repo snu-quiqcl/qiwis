@@ -13,6 +13,7 @@ Usage:
 
 import argparse
 import json
+import importlib
 
 
 class Swift:
@@ -25,6 +26,7 @@ class Swift:
 
     def __init__(self, setup_path):
         self.read_setup_file(setup_path)
+        self.init_bus()
 
     def read_setup_file(self, setup_path):
         """Read set-up information from set-up file.
@@ -41,7 +43,17 @@ class Swift:
             self.setup_bus = setup_data['bus']
 
     def init_bus(self):
-        pass
+        """Initialize global buses using set-up environment.
+
+        Create the instance of each global bus and store them at dictionary field.
+        """
+        self.buses = {}
+
+        for name, info in self.setup_bus.items():
+            mod = importlib.import_module(info['module'])
+            cls = getattr(mod, info['class'])
+
+            self.buses[name] = cls(name)
 
     def init_frame(self):
         pass
