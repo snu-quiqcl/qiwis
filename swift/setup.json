@@ -9,9 +9,13 @@
         }
     },
     "bus": {
-        "log_bus": {
-            "module": "swift.bus",
-            "class": "LogBus"
+        "example_bus": {
+            "module": "example_bus",
+            "class": "ExampleBus"
+        },
+        "another_example_bus": {
+            "module": "example_bus",
+            "class": "AnotherExampleBus"
         }
     }
 }
