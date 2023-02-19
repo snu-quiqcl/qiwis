@@ -1,0 +1,17 @@
+{
+    "frame": {
+        "logger_frame": {
+            "module": "frame.logger",
+            "class": "LoggerLogic",
+            "show": false,
+            "pos": "left",
+            "bus": "log_bus"
+        }
+    },
+    "bus": {
+        "log_bus": {
+            "module": "swift.bus",
+            "class": "LogBus"
+        }
+    }
+}
