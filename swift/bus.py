@@ -50,7 +50,7 @@ class QueueConsumer(QObject):
     def __init__(self, queue_, timeout=1):
         """
         Args:
-            queue_: A thread-safe queue object which implements `get()` method.
+            queue_: A queue.Queue-like object which implements get() and Empty.
             timeout: Desired timeout for blocking queue reading, in seconds.
               This should not be None in order not to become uniterruptible.
         """
