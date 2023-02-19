@@ -29,7 +29,7 @@ class Swift:
     def read_setup_file(self, setup_path):
         """Read set-up information from set-up file.
 
-        Read set-up file and store information about frame and bus as fields.
+        Read set-up file and store information about frame and bus at fields.
 
         Args:
             setup_path (str): A path of set-up file.
