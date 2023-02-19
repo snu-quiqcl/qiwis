@@ -43,9 +43,11 @@ class QueueConsumer(QObject):
     
     Signals:
         consumed(str): Emitted when an item is found and consumed from the queue.
+        finished: Emitted when run() method finishes.
     """
 
     consumed = pyqtSignal(str)
+    finished = pyqtSignal()
 
     def __init__(self, queue_, timeout=1):
         """
