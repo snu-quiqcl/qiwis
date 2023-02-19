@@ -42,10 +42,10 @@ class QueueConsumer(QObject):
     """Threaded queue consumer.
     
     Signals:
-        consumed: Emitted when an item is found and consumed from the queue.
+        consumed(str): Emitted when an item is found and consumed from the queue.
     """
 
-    consumed = pyqtSignal()
+    consumed = pyqtSignal(str)
 
     def __init__(self, queue_, timeout=1):
         """
