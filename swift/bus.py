@@ -28,7 +28,7 @@ class Bus(QObject):
         super().__init__()
         self.name = name
         self._queue = SimpleQueue()  # message queue
-    
+
     def write(self, msg: str):
         """Puts a message into the queue.
         
@@ -75,7 +75,7 @@ class QueueConsumer(QObject):
             else:
                 self.consumed.emit(item)
         self.finished.emit()
-    
+
     def stop(self):
         """Stops the consuming thread.
         
