@@ -2,6 +2,8 @@
 Module for bus features.
 """
 
+from queue import SimpleQueue
+
 from PyQt5.QtCore import QObject, pyqtSignal
 
 class Bus(QObject):
@@ -25,3 +27,12 @@ class Bus(QObject):
         """
         super().__init__()
         self.name = name
+        self._queue = SimpleQueue()  # message queue
+    
+    def write(self, msg: str):
+        """Puts a message into the queue.
+        
+        Args:
+            msg: Given message string to put in the queue.
+        """
+        self._queue.put(msg)
