@@ -20,14 +20,16 @@ class Bus(QObject):
 
     received = pyqtSignal(str)
 
-    def __init__(self, name: str):
+    def __init__(self, name: str, timeout: float = 1):
         """
         Args:
             name: Name of the bus for identification.
+            timeout: See QueueConsumer.__init__().
         """
         super().__init__()
         self.name = name
         self._queue = SimpleQueue()  # message queue
+        self._timeout = timeout
 
     def write(self, msg: str):
         """Puts a message into the queue.
