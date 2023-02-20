@@ -96,6 +96,10 @@ class QueueConsumer(QObject):
         self._timeout = timeout
         self._running = True
 
+    def isRunning(self) -> bool:
+        """Returns whether the consumer is running."""
+        return self._running
+
     def run(self):
         """Keeps consuming the items in the queue whenever there exist some.
         
