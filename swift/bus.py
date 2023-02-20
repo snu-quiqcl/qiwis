@@ -30,6 +30,7 @@ class Bus(QObject):
         self.name = name
         self._queue = SimpleQueue()  # message queue
         self._timeout = timeout
+        self._consumer = None  # QueueConsumer
 
     def write(self, msg: str):
         """Puts a message into the queue.
@@ -38,6 +39,15 @@ class Bus(QObject):
             msg: Given message string to put in the queue.
         """
         self._queue.put(msg)
+    
+    def start(self):
+        """Creates a queue consumer thread and starts it.
+        
+        This can be called only if there is no queue consumer.
+        """
+        if self._consumer is not None:
+            raise RuntimeError("queue consumer already exists.")
+        self._consumer = QueueConsumer(self._queue, self._timeout)
 
 
 class QueueConsumer(QObject):
