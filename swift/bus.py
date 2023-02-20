@@ -40,7 +40,7 @@ class Bus(QObject):
             msg: Given message string to put in the queue.
         """
         self._queue.put(msg)
-    
+
     def start(self):
         """Creates a queue consumer thread and starts it.
         
