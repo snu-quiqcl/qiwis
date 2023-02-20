@@ -61,6 +61,17 @@ class Bus(QObject):
         # start the thread
         self._thread.start()
 
+    def stop(self):
+        """Stops the queue consumer thread.
+        
+        This can be called only if there is an active queue consumer thread.
+        This method call does not guarantee the immediate termination of the
+        thread. It may take a while depending on the `timeout` parameter.
+        """
+        if self._consumer is None:
+            raise RuntimeError("There is no queue consumer to stop.")
+        self._consumer.stop()
+
 
 class QueueConsumer(QObject):
     """Threaded queue consumer.
