@@ -68,7 +68,7 @@ class Bus(QObject):
         This method call does not guarantee the immediate termination of the
         thread. It may take a while depending on the `timeout` parameter.
         """
-        if self._consumer is None:
+        if self._consumer is None or not self._consumer.isRunning():
             raise RuntimeError("There is no queue consumer to stop.")
         self._consumer.stop()
 
