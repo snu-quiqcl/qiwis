@@ -23,4 +23,4 @@ jobs:
         printf "[MASTER]\nextension-pkg-whitelist=PyQt5" > ~/.pylintrc
     - name: Analyze the code with pylint
       run: |
-        pylint $(git ls-files '*.py')
+        pylint $(git ls-files '*.py') --extension-pkg-whitelist=PyQt5
