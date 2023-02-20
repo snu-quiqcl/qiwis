@@ -109,6 +109,7 @@ class QueueConsumer(QObject):
         """Returns whether the consumer is running."""
         return self._running
 
+    @pyqtSlot()
     def run(self):
         """Keeps consuming the items in the queue whenever there exist some.
         
