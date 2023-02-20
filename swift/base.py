@@ -11,9 +11,9 @@ class BaseLogic(QObject):
 
     Signals: 
         broadcastRequested(str, str): A signal for broadcasting to a bus 
-            which contains the destination bus name and the message.
+          which contains the destination bus name and the message.
         received(str, str): A signal for receiving a global signal from a bus
-            which contains the departure bus name and the message.
+          which contains the departure bus name and the message.
     """
     broadcastRequested = pyqtSignal(str, str)
     received = pyqtSignal(str, str)
@@ -25,10 +25,11 @@ class BaseLogic(QObject):
             name: A string that indicates the name of Logic.
             show: Whether Frames are shown at the beginning.
             pos: An initial position of Frames.
-                It should be one of "left", "right", "top", or "bottom"; and is case-insensitive.
-                Otherwise, it will be regarded as default (AllDockWidgetAreas).
+              It should be one of "left", "right", "top", or "bottom"; 
+              and is case-insensitive.
+              Otherwise, it will be regarded as default (AllDockWidgetAreas).
         """
-        super().__init__(self)
+        super().__init__()
         self.name = name
         self.show = show
         self.pos = pos
