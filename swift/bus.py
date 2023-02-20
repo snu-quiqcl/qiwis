@@ -4,7 +4,7 @@ Module for bus features.
 
 from queue import SimpleQueue, Empty
 
-from PyQt5.QtCore import QObject, pyqtSignal
+from PyQt5.QtCore import QObject, QThread, pyqtSignal
 
 class Bus(QObject):
     """Communication channel for frame logic instances in swift.
@@ -31,6 +31,7 @@ class Bus(QObject):
         self._queue = SimpleQueue()  # message queue
         self._timeout = timeout
         self._consumer = None  # QueueConsumer
+        self._thread = None
 
     def write(self, msg: str):
         """Puts a message into the queue.
@@ -48,6 +49,17 @@ class Bus(QObject):
         if self._consumer is not None:
             raise RuntimeError("queue consumer already exists.")
         self._consumer = QueueConsumer(self._queue, self._timeout)
+        # move consumer to thread
+        self._thread = QThread()
+        self._consumer.moveToThread(self._thread)
+        # signal connection
+        self._thread.started.connect(self._consumer.run)
+        self._thread.finished.connect(self._thread.deleteLater)
+        self._consumer.finished.connect(self._thread.quit)
+        self._consumer.finished.connect(self._consumer.deleteLater)
+        self._consumer.consumed.connect(self.received)
+        # start the thread
+        self._thread.start()
 
 
 class QueueConsumer(QObject):
