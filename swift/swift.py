@@ -11,10 +11,16 @@ Usage:
     python swift.py (-s <SETUP_PATH>)
 """
 
+import sys
 import argparse
 import json
 import importlib
 
+<<<<<<< HEAD
+=======
+from PyQt5.QtCore import QObject, pyqtSlot, Qt
+from PyQt5.QtWidgets import QApplication, QMainWindow, QDockWidget
+>>>>>>> 2536c54 (Wrap frames around QDockWidget and show them)
 
 class Swift:
     """The actual manager for swift system.
@@ -33,6 +39,7 @@ class Swift:
         self.read_setup_file(setup_path)
         self.init_bus()
         self.init_frame()
+        self.show_frame()
 
     def read_setup_file(self, setup_path: str):
         """Read set-up information from set-up file.
@@ -87,6 +94,58 @@ class Swift:
 
             self.frames[name] = frame
 
+<<<<<<< HEAD
+=======
+    def show_frame(self):
+        """Show frames using set-up environment.
+
+        Show only frames of which 'show' option is true.
+        """
+        self.dock_widgets = {}
+
+        self.main_window = QMainWindow()
+
+        for name, info in self.setup_frame.items():
+            if info['show']:  # Show the frame if the 'show' option is true.
+                frame = self.frames[name].frame
+                dock_widget = QDockWidget(name, self.main_window)
+                dock_widget.setWidget(frame)
+
+                self.main_window.addDockWidget(Qt.RightDockWidgetArea, dock_widget)
+
+                self.dock_widgets[name] = dock_widget
+
+        self.main_window.show()
+
+    @pyqtSlot(str, str)
+    def route_to_bus(self, bus_name: str, msg: str):
+        """Route a signal from a frame to the destination bus.
+
+        This is a slot for the broadcast signal of each frame.
+
+        Args:
+            bus_name (str): A name of the destination bus which will transfer the global signal.
+            msg (str): An input message that will be transferred through the glboal signal.
+        """
+        bus = self.buses[bus_name]
+        bus.write(msg)
+
+    @pyqtSlot(str)
+    def route_to_frame(self, msg: str):
+        """Route a signal from a bus to the subscriber frames.
+
+        This is a slot for the received signal of each bus.
+
+        Args:
+            msg (str): An input message that be transferred through the global bus.
+        """
+        bus_name = self.sender().name
+
+        # Emit a signal of all subscriber frames.
+        for frame in self.subs[bus_name]:
+            frame.received.emit(bus_name, msg)
+
+>>>>>>> 2536c54 (Wrap frames around QDockWidget and show them)
 
 def get_argparser():
     """Parse command line arguments
@@ -111,7 +170,9 @@ def main():
     """
     args = get_argparser().parse_args()
 
+    app = QApplication(sys.argv)
     _swift = Swift(args.setup_path)
+    app.exec_()
 
 
 if __name__ == "__main__":

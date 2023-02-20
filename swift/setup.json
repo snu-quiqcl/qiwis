@@ -3,7 +3,7 @@
         "logger_frame": {
             "module": "base",
             "class": "BaseLogic",
-            "show": false,
+            "show": true,
             "pos": "left",
             "dest_bus": ["example_bus"],
             "subs_bus": ["another_example_bus"]

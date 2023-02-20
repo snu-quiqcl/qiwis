@@ -1,22 +1,21 @@
-"""Base module for Frame and Logic.
+"""Base module for Logic.
 
-Every Frame and Logic class should be a subclass of BaseFrame and BaseLogic, repectively.
+Every Logic class should be a subclass of BaseLogic.
 """
 
-from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
-
-
-class BaseFrame:
-    """Base Frame class 
-    """
+from PyQt5.QtCore import QObject, pyqtSignal
 
 
 class BaseLogic(QObject):
     """Base Logic class.
     """
 
-    # Signal for broadcasting to buses to which Logic subscribes.
-    broadcast_signal = pyqtSignal(str)
+    # Signal for broadcasting to a bus
+    # which contains the destination bus name and the message.
+    broadcast_signal = pyqtSignal(str, str)
+    # Signal for receiving a global signal from a bus
+    # which contains the departure bus name and the message.
+    received = pyqtSignal(str, str)
 
     def __init__(self, name: str, show: bool, pos: str):
         """Constructor.
@@ -30,11 +29,3 @@ class BaseLogic(QObject):
         self.name = name
         self.show = show
         self.pos = pos
-
-    @pyqtSlot(str)
-    def receive_bus_signal(self, msg: str):
-        """Receive a message which be transferred through the global bus.
-
-        Args:
-            msg (str): An input message that be transferred through the global bus.
-        """
