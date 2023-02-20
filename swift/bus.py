@@ -4,7 +4,7 @@ Module for bus features.
 
 from queue import SimpleQueue, Empty
 
-from PyQt5.QtCore import QObject, QThread, pyqtSignal
+from PyQt5.QtCore import QObject, QThread, pyqtSignal, pyqtSlot
 
 class Bus(QObject):
     """Communication channel for frame logic instances in swift.
@@ -57,6 +57,7 @@ class Bus(QObject):
         self._thread.finished.connect(self._thread.deleteLater)
         self._consumer.finished.connect(self._thread.quit)
         self._consumer.finished.connect(self._consumer.deleteLater)
+        self._consumer.finished.connect(self._clean_up)
         self._consumer.consumed.connect(self.received)
         # start the thread
         self._thread.start()
@@ -71,6 +72,14 @@ class Bus(QObject):
         if self._consumer is None or not self._consumer.isRunning():
             raise RuntimeError("There is no queue consumer to stop.")
         self._consumer.stop()
+
+    @pyqtSlot()
+    def _clean_up(self):
+        """Cleans up after the thread is finished.
+        
+        This erases the reference of the queue consumer when its run() is done.
+        """
+        self._consumer = None
 
 
 class QueueConsumer(QObject):
