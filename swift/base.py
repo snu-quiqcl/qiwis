@@ -15,7 +15,6 @@ class BaseLogic(QObject):
         received(str, str): A signal for receiving a global signal from a bus
             which contains the departure bus name and the message.
     """
-    
     broadcastRequested = pyqtSignal(str, str)
     received = pyqtSignal(str, str)
 
