@@ -12,18 +12,13 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QDockWidget,
 from swift.logic import BaseLogic
 
 class _NumGenFrame(QWidget):
-    """Frame class for reque
-
-    Args:
-        QWidget (_type_): _description_
-    """
+    """Frame class for showing the button and the label."""
     def __init__(self):
         super().__init__()
         self.init_widget()
 
     def init_widget(self):
-        """Initializes widgets in the frame.
-        """
+        """Initializes widgets in the frame."""
         self.btn = QPushButton("generate number", self)
         self.label = QLabel("not generated", self)
 
@@ -43,18 +38,16 @@ class NumGenLogic(BaseLogic):
         self.frame = _NumGenFrame()
 
         # connect the button clicked signal to the slot generating a number
-        self.frame.btn.clicked.connect(self.generate_number)
+        self.frame.btn.clicked.connect(self.generateNumber)
 
     def frames(self):
-        return (self.frame, )
+        return (self.frame,)
 
     @pyqtSlot()
-    def generate_number(self):
-        """Generates and shows a random number when the button is clicked.
-        """
+    def generateNumber(self):
+        """Generates and shows a random number when the button is clicked."""
         num = random.randrange(0, 10)
 
-        self.frame.label.clear()
         self.frame.label.setText(f"generated number: {num}")
 
 
