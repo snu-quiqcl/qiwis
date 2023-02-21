@@ -21,7 +21,8 @@ jobs:
     - name: Add dependencies about external libraries
       run: |
         pip install pyqt5
-        printf "[MASTER]\nextension-pkg-whitelist=PyQt5" > ~/.pylintrc
+        printf "[MASTER]\nextension-pkg-whitelist=PyQt5\n" > ~/.pylintrc
+        printf "[BASIC]\nmethod-rgx=_?_?(?:(?:[a-z0-9]+(?:_[a-z0-9]+)*_?_?)|(?:[a-z0-9]+(?:[A-Z][a-z0-9]*)*))$" >> ~/.pylintrc
     - name: Analyze the code with pylint
       run: |
         pylint $(git ls-files '*.py')
