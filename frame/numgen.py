@@ -52,8 +52,7 @@ class NumGenLogic(BaseLogic):
 
 
 def main():
-    """Main function that runs when numgen.py is called. 
-    """
+    """Main function that runs when numgen.py is called."""
     app = QApplication(sys.argv)
     main_window = QMainWindow()
 
