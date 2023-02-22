@@ -6,6 +6,13 @@
             "show": true,
             "pos": "left",
             "bus": []
+        },
+        "numgen2": {
+            "path": "C:\\Users\\jaehu\\OneDrive - SNU\\Documents\\서울대\\QuIQCL\\swift\\swift\\apps\\numgen.py",
+            "class": "NumGenApp",
+            "show": true,
+            "pos": "right",
+            "bus": []
         }
     },
     "bus": {

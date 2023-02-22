@@ -9,7 +9,8 @@ Usage:
     python swift.py (-s <SETUP_PATH>)
 """
 
-import sys, os
+import sys
+import os
 import argparse
 import json
 import importlib.util
@@ -111,7 +112,14 @@ class Swift(QObject):
 
     def show_frame(self):
         """Shows frames of each app."""
-        self.main_window = QMainWindow()
+        self.mainWindow = QMainWindow()
+
+        pos_to_area = {
+            "left": Qt.LeftDockWidgetArea,
+            "right": Qt.RightDockWidgetArea,
+            "top": Qt.TopDockWidgetArea,
+            "bottom": Qt.BottomDockWidgetArea
+        }
 
         for name, info in self.setup_app.items():
             # show frames if the 'show' option is true.
@@ -119,12 +127,13 @@ class Swift(QObject):
                 frames = self.apps[name].frames()
 
                 for frame in frames:
-                    dock_widget = QDockWidget(name, self.main_window)
-                    dock_widget.setWidget(frame)
+                    dockWidget = QDockWidget(name, self.mainWindow)
+                    dockWidget.setWidget(frame)
 
-                    self.main_window.addDockWidget(Qt.RightDockWidgetArea, dock_widget)
+                    area = pos_to_area.get(info['pos'], Qt.AllDockWidgetAreas)
+                    self.mainWindow.addDockWidget(area, dockWidget)
 
-        self.main_window.show()
+        self.mainWindow.show()
 
     @pyqtSlot(str, str)
     def route_to_bus(self, bus_name: str, msg: str):
