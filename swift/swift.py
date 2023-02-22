@@ -144,11 +144,11 @@ class Swift(QObject):
         This is a slot for the received signal of each bus.
 
         Args:
-            msg (str): An input message that be transferred through the global bus.
+            msg: An input message that be transferred through the bus.
         """
         bus_name = self.sender().name
 
-        # Emit a signal of all subscriber apps.
+        # Emit a signal of all apps that subscribe to the bus.
         for app in self.subs[bus_name]:
             app.received.emit(bus_name, msg)
 
