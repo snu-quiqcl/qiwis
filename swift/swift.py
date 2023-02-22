@@ -42,7 +42,7 @@ class Swift(QObject):
         self.read_setup_file(setup_path)
         self.init_bus()
         self.init_app()
-        # self.show_frame()
+        self.show_frame()
 
     def read_setup_file(self, setup_path: str):
         """Reads set-up information from set-up file.
@@ -101,7 +101,7 @@ class Swift(QObject):
             app = cls(name)
 
             # set a slot of broadcast signal to router
-            app.broadcast_signal.connect(self.route_to_bus)
+            app.broadcastRequested.connect(self.route_to_bus)
 
             # add the app to the list of subscribers on each bus
             for bus_name in info['bus']:
@@ -111,19 +111,18 @@ class Swift(QObject):
 
     def show_frame(self):
         """Shows frames of each app."""
-        self.dock_widgets = {}
-
         self.main_window = QMainWindow()
 
-        for name, info in self.setup_frame.items():
-            if info['show']:  # Show the frame if the 'show' option is true.
-                frame = self.frames[name].frame
-                dock_widget = QDockWidget(name, self.main_window)
-                dock_widget.setWidget(frame)
+        for name, info in self.setup_app.items():
+            # show frames if the 'show' option is true.
+            if info['show']:
+                frames = self.apps[name].frames()
 
-                self.main_window.addDockWidget(Qt.RightDockWidgetArea, dock_widget)
+                for frame in frames:
+                    dock_widget = QDockWidget(name, self.main_window)
+                    dock_widget.setWidget(frame)
 
-                self.dock_widgets[name] = dock_widget
+                    self.main_window.addDockWidget(Qt.RightDockWidgetArea, dock_widget)
 
         self.main_window.show()
 
@@ -180,9 +179,9 @@ def main():
     """Main function that runs when swift.py is called."""
     args = get_argparser().parse_args()
 
-    # app = QApplication(sys.argv)
+    app = QApplication(sys.argv)
     _swift = Swift(args.setup_path)
-    # app.exec_()
+    app.exec_()
 
 
 if __name__ == "__main__":
