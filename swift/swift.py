@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
-"""Swift is a main manager for swift system.
 
-Using a set-up file created by an user, it sets up Buses and Frames.
+"""
+Swift is a main manager for swift system.
 
-1. Read a set-up file about Frame and Bus.
-2. Create an instance of each Bus.
-3. Create and show Frames.
+Using a set-up file created by an user, it sets up Logics and Buses.
 
 Usage:
     python swift.py (-s <SETUP_PATH>)
@@ -16,14 +14,19 @@ import argparse
 import json
 import importlib
 
-<<<<<<< HEAD
-=======
 from PyQt5.QtCore import QObject, pyqtSlot, Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QDockWidget
->>>>>>> 2536c54 (Wrap frames around QDockWidget and show them)
 
-class Swift:
-    """The actual manager for swift system.
+from swift.bus import Bus
+
+class Swift():
+    """Actual manager for swift system.
+
+    Brief procedure:
+        1. Read a set-up file about logic and bus.
+        2. Create buses.
+        3. Create logics.
+        4. Show frames of each logic.
 
     Attributes:
         setup_frame: A set-up information about frames.
@@ -31,47 +34,51 @@ class Swift:
     """
 
     def __init__(self, setup_path: str):
-        """Constructor.
-
+        """
         Args:
-            setup_path (str): A path of set-up file.
+            setup_path: A path of set-up file.
         """
         self.read_setup_file(setup_path)
         self.init_bus()
-        self.init_frame()
-        self.show_frame()
+        # self.init_logic()
+        # self.show_frame()
 
     def read_setup_file(self, setup_path: str):
-        """Read set-up information from set-up file.
+        """Reads set-up information from set-up file.
 
-        Read set-up file and store information about frame and bus at fields.
+        Read set-up file and store information about logic and bus.
 
         Args:
-            setup_path (str): A path of set-up file.
+            setup_path: A path of set-up file.
         """
         with open(setup_path, encoding="utf-8") as setup_file:
             setup_data = json.load(setup_file)
 
-            self.setup_frame = setup_data['frame']
+            self.setup_logic = setup_data['logic']
             self.setup_bus = setup_data['bus']
 
     def init_bus(self):
-        """Initialize global buses using set-up environment.
+        """Initializes global buses using set-up environment.
 
-        Create the instance of each global bus and store them at dictionary field.
+        Create the instance of each global bus and store them at self.buses.
         """
         self.buses = {}
 
         for name, info in self.setup_bus.items():
-            mod = importlib.import_module(info['module'])
-            cls = getattr(mod, info['class'])
+            bus = None
 
-            self.buses[name] = cls(name)
+            if "timeout" in info:
+                timeout = info['timeout']
+                bus = Bus(name, timeout)
+            else:
+                bus = Bus(name)
 
-    def init_frame(self):
-        """Initialize frames using set-up environment.
+            self.buses[name] = bus
 
-        Create the instance of each frame (exactly, Logic class) and store them at dictionary field.
+    def init_logic(self):
+        """Initializes logics using set-up environment.
+
+        Create the instance of each logic and store them at self.logics.
         """
         self.frames = {}
 
@@ -94,13 +101,8 @@ class Swift:
 
             self.frames[name] = frame
 
-<<<<<<< HEAD
-=======
     def show_frame(self):
-        """Show frames using set-up environment.
-
-        Show only frames of which 'show' option is true.
-        """
+        """Shows frames of each logic."""
         self.dock_widgets = {}
 
         self.main_window = QMainWindow()
@@ -119,13 +121,13 @@ class Swift:
 
     @pyqtSlot(str, str)
     def route_to_bus(self, bus_name: str, msg: str):
-        """Route a signal from a frame to the destination bus.
+        """Routes a signal from a logic to the desired bus.
 
-        This is a slot for the broadcast signal of each frame.
+        This is a slot for the broadcast signal of each logic.
 
         Args:
-            bus_name (str): A name of the destination bus which will transfer the global signal.
-            msg (str): An input message that will be transferred through the glboal signal.
+            bus_name: A name of the desired bus that will transfer the signal.
+            msg: An input message that will be transferred through the bus.
         """
         bus = self.buses[bus_name]
         bus.write(msg)
@@ -145,17 +147,18 @@ class Swift:
         for frame in self.subs[bus_name]:
             frame.received.emit(bus_name, msg)
 
->>>>>>> 2536c54 (Wrap frames around QDockWidget and show them)
 
 def get_argparser():
-    """Parse command line arguments
+    """Parses command line arguments
 
     -s, --setup: A path of set-up file.
 
     Returns:
         argparse.ArgumentParser: A namespace containing arguments
     """
-    parser = argparse.ArgumentParser(description="SNU widget integration framework for PyQt")
+    parser = argparse.ArgumentParser(
+        description="SNU widget integration framework for PyQt"
+    )
 
     parser.add_argument(
         "-s", "--setup", dest="setup_path", default="./setup.json",
@@ -166,13 +169,12 @@ def get_argparser():
 
 
 def main():
-    """Main function that runs when swift.py is called. 
-    """
+    """Main function that runs when swift.py is called."""
     args = get_argparser().parse_args()
 
-    app = QApplication(sys.argv)
+    # app = QApplication(sys.argv)
     _swift = Swift(args.setup_path)
-    app.exec_()
+    # app.exec_()
 
 
 if __name__ == "__main__":

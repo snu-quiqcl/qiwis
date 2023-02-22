@@ -1,0 +1,16 @@
+{
+    "logic": {
+        "numgen": {
+            "module": "frame.numgen",
+            "class": "NumGenLogic",
+            "show": true,
+            "pos": "left",
+            "bus": []
+        }
+    },
+    "bus": {
+        "log_bus": {
+            "timeout": 5
+        }
+    }
+}
