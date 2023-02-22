@@ -3,7 +3,7 @@
 """
 Swift is a main manager for swift system.
 
-Using a set-up file created by an user, it sets up Logics and Buses.
+Using a set-up file created by an user, it sets up apps and buses.
 
 Usage:
     python swift.py (-s <SETUP_PATH>)
@@ -19,17 +19,17 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QDockWidget
 
 from swift.bus import Bus
 
-class Swift():
+class Swift(QObject):
     """Actual manager for swift system.
 
     Brief procedure:
-        1. Read a set-up file about logic and bus.
+        1. Read a set-up file about app and bus.
         2. Create buses.
-        3. Create logics.
-        4. Show frames of each logic.
+        3. Create apps.
+        4. Show frames of each app.
 
     Attributes:
-        setup_frame: A set-up information about frames.
+        setup_app: A set-up information about apps.
         setup_bus: A set-up information about buses.
     """
 
@@ -38,15 +38,16 @@ class Swift():
         Args:
             setup_path: A path of set-up file.
         """
+        super().__init__()
         self.read_setup_file(setup_path)
         self.init_bus()
-        # self.init_logic()
+        # self.init_app()
         # self.show_frame()
 
     def read_setup_file(self, setup_path: str):
         """Reads set-up information from set-up file.
 
-        Read set-up file and store information about logic and bus.
+        Read set-up file and store information about app and bus.
 
         Args:
             setup_path: A path of set-up file.
@@ -54,7 +55,7 @@ class Swift():
         with open(setup_path, encoding="utf-8") as setup_file:
             setup_data = json.load(setup_file)
 
-            self.setup_logic = setup_data['logic']
+            self.setup_app = setup_data['app']
             self.setup_bus = setup_data['bus']
 
     def init_bus(self):
@@ -67,18 +68,22 @@ class Swift():
         for name, info in self.setup_bus.items():
             bus = None
 
+            # create a bus
             if "timeout" in info:
                 timeout = info['timeout']
                 bus = Bus(name, timeout)
             else:
                 bus = Bus(name)
 
+            # set a slot of received signal to router
+            bus.received.connect(self.route_to_app)
+
             self.buses[name] = bus
 
-    def init_logic(self):
-        """Initializes logics using set-up environment.
+    def init_app(self):
+        """Initializes apps using set-up environment.
 
-        Create the instance of each logic and store them at self.logics.
+        Create the instance of each app and store them at self.apps.
         """
         self.frames = {}
 
@@ -102,7 +107,7 @@ class Swift():
             self.frames[name] = frame
 
     def show_frame(self):
-        """Shows frames of each logic."""
+        """Shows frames of each app."""
         self.dock_widgets = {}
 
         self.main_window = QMainWindow()
@@ -121,9 +126,9 @@ class Swift():
 
     @pyqtSlot(str, str)
     def route_to_bus(self, bus_name: str, msg: str):
-        """Routes a signal from a logic to the desired bus.
+        """Routes a signal from an app to the desired bus.
 
-        This is a slot for the broadcast signal of each logic.
+        This is a slot for the broadcast signal of each app.
 
         Args:
             bus_name: A name of the desired bus that will transfer the signal.
@@ -133,8 +138,8 @@ class Swift():
         bus.write(msg)
 
     @pyqtSlot(str)
-    def route_to_frame(self, msg: str):
-        """Route a signal from a bus to the subscriber frames.
+    def route_to_app(self, msg: str):
+        """Routes a signal from a bus to the apps that subscribe to it.
 
         This is a slot for the received signal of each bus.
 
@@ -143,9 +148,9 @@ class Swift():
         """
         bus_name = self.sender().name
 
-        # Emit a signal of all subscriber frames.
-        for frame in self.subs[bus_name]:
-            frame.received.emit(bus_name, msg)
+        # Emit a signal of all subscriber apps.
+        for app in self.subs[bus_name]:
+            app.received.emit(bus_name, msg)
 
 
 def get_argparser():
@@ -162,7 +167,7 @@ def get_argparser():
 
     parser.add_argument(
         "-s", "--setup", dest="setup_path", default="./setup.json",
-        help="a path of set-up file containing the infomation about frame and bus"
+        help="a path of set-up file containing the infomation about app and bus"
     )
 
     return parser

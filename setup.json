@@ -1,8 +1,8 @@
 {
-    "logic": {
+    "app": {
         "numgen": {
-            "module": "frame.numgen",
-            "class": "NumGenLogic",
+            "module": "app.numgen",
+            "class": "NumGenApp",
             "show": true,
             "pos": "left",
             "bus": []
