@@ -9,10 +9,10 @@ Usage:
     python swift.py (-s <SETUP_PATH>)
 """
 
-import sys
+import sys, os
 import argparse
 import json
-import importlib
+import importlib.util
 
 from PyQt5.QtCore import QObject, pyqtSlot, Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QDockWidget
@@ -41,7 +41,7 @@ class Swift(QObject):
         super().__init__()
         self.read_setup_file(setup_path)
         self.init_bus()
-        # self.init_app()
+        self.init_app()
         # self.show_frame()
 
     def read_setup_file(self, setup_path: str):
@@ -85,26 +85,29 @@ class Swift(QObject):
 
         Create the instance of each app and store them at self.apps.
         """
-        self.frames = {}
+        self.apps = {}
 
-        for name, info in self.setup_frame.items():
-            mod = importlib.import_module(info['module'])
-            cls = getattr(mod, info['class'])
+        for name, info in self.setup_app.items():
+            # import app
+            file_path, cls_name = info['path'], info['class']
 
-            frame = cls(name, info['show'], info['pos'])
-            # Set a slot of broadcast signal of each frame
-            # to the method receiving this signal in Bus.
-            for bus_name in info['dest_bus']:
-                bus = self.buses[bus_name]
-                frame.broadcast_signal.connect(bus.write)
+            module_name = os.path.basename(file_path)
+            spec = importlib.util.spec_from_file_location(module_name, file_path)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
 
-            # Set a slot of received signal of each global bus
-            # to the method receiving this signal in Frame.
-            for bus_name in info['subs_bus']:
-                bus = self.buses[bus_name]
-                bus.received.connect(frame.receive_bus_signal)
+            # create an app
+            cls = getattr(module, cls_name)
+            app = cls(name)
 
-            self.frames[name] = frame
+            # set a slot of broadcast signal to router
+            app.broadcast_signal.connect(self.route_to_bus)
+
+            # add the app to the list of subscribers on each bus
+            for bus_name in info['bus']:
+                self.subs[bus_name].append(app)
+
+            self.apps[name] = app
 
     def show_frame(self):
         """Shows frames of each app."""

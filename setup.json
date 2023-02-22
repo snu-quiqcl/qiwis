@@ -1,7 +1,7 @@
 {
     "app": {
         "numgen": {
-            "module": "app.numgen",
+            "path": "C:\\Users\\jaehu\\OneDrive - SNU\\Documents\\서울대\\QuIQCL\\swift\\swift\\apps\\numgen.py",
             "class": "NumGenApp",
             "show": true,
             "pos": "left",
