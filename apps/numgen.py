@@ -1,5 +1,7 @@
+#!/usr/bin/env python3
+
 """
-Logic module for generating a random number.
+App module for generating a random number.
 """
 
 import sys
@@ -9,7 +11,7 @@ from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QDockWidget,
                              QWidget, QHBoxLayout, QPushButton, QLabel)
 
-from swift.logic import BaseLogic
+from swift.app import BaseApp
 
 class _NumGenFrame(QWidget):
     """Frame class for showing the button and the label."""
@@ -27,8 +29,8 @@ class _NumGenFrame(QWidget):
         layout.addWidget(self.label)
 
 
-class NumGenLogic(BaseLogic):
-    """Logic class for managing a frame and generating a random number.
+class NumGenApp(BaseApp):
+    """App class for managing a frame and generating a random number.
 
     Attributes:
         frame: A frame that request generating and show a random number.
@@ -56,11 +58,11 @@ def main():
     app = QApplication(sys.argv)
     main_window = QMainWindow()
 
-    # create a logic
-    logic = NumGenLogic("numgen")
+    # create a app
+    app = NumGenApp("numgen")
 
-    # get frames from the logic and add them as dock widgets
-    for frame in logic.frames():
+    # get frames from the app and add them as dock widgets
+    for frame in app.frames():
         dock_widget = QDockWidget("random number generator", main_window)
         dock_widget.setWidget(frame)
 

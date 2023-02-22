@@ -1,13 +1,13 @@
 """
-Base module for Logic.
+Base module for App.
 
-Every Logic class should be a subclass of BaseLogic.
+Every App class should be a subclass of BaseApp.
 """
 
 from PyQt5.QtCore import QObject, pyqtSignal
 
-class BaseLogic(QObject):
-    """Base Logic class that all Logics should inherit.
+class BaseApp(QObject):
+    """Base App class that all apps should inherit.
 
     Signals: 
         broadcastRequested(str, str): A signal for broadcasting to a bus 
@@ -20,16 +20,15 @@ class BaseLogic(QObject):
     received = pyqtSignal(str, str)
 
     def __init__(self, name: str):
-        """Constructor.
-
+        """
         Args:
-            name: A string that indicates the name of Logic.
+            name: A string that indicates the name of App.
         """
         super().__init__()
         self.name = name
 
     def frames(self):
-        """Gets frames for which are managed by the Logic.
+        """Gets frames for which are managed by the App.
 
         Returns:
             Iterable: An iterable object of Frame objects for showing.
