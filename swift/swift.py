@@ -44,95 +44,72 @@ class Swift(QObject):
         self._show_frame()
 
     def _read_setup_file(self, setup_path: str):
-        """Reads set-up information from set-up file.
-
-        Read set-up file and store information about app and bus.
+        """Reads set-up information about app and bus from set-up file.
 
         Args:
             setup_path: A path of set-up file.
         """
         with open(setup_path, encoding="utf-8") as setup_file:
             setup_data = json.load(setup_file)
-
-            self._setup_app = setup_data['app']
-            self._setup_bus = setup_data['bus']
+            self._setup_app = setup_data["app"]
+            self._setup_bus = setup_data["bus"]
 
     def _init_bus(self):
-        """Initializes global buses using set-up environment.
-
-        Create the instance of each global bus and store them at self.buses.
-        """
+        """Initializes global buses using set-up environment."""
         self._buses = {}
         self._subs = {}
-
         for name, info in self._setup_bus.items():
-            bus = None
-
             # create a bus
             if "timeout" in info:
-                timeout = info['timeout']
+                timeout = info["timeout"]
                 bus = Bus(name, timeout)
             else:
                 bus = Bus(name)
-
             # set a slot of received signal to router
             bus.received.connect(self._route_to_app)
             bus.start()
-
+            # store the bus
             self._buses[name] = bus
             self._subs[name] = []
 
     def _init_app(self):
-        """Initializes apps using set-up environment.
-
-        Create the instance of each app and store them at self.apps.
-        """
+        """Initializes apps using set-up environment."""
         self._apps = {}
-
         for name, info in self._setup_app.items():
             # import the app module
             path = info.get("path", ".")
-            mod_name, cls_name = info['module'], info['class']
-
+            mod_name, cls_name = info["module"], info["class"]
             with _add_to_path(os.path.dirname(path)):
                 module = importlib.import_module(mod_name)
-
             # create an app
             cls = getattr(module, cls_name)
             app = cls(name)
-
             # set a slot of broadcast signal to router
             app.broadcastRequested.connect(self._route_to_bus)
-
             # add the app to the list of subscribers on each bus
-            for bus_name in info['bus']:
+            for bus_name in info["bus"]:
                 self._subs[bus_name].append(app)
-
+            # store the app
             self._apps[name] = app
 
     def _show_frame(self):
         """Shows frames of each app."""
         self._mainWindow = QMainWindow()
-
         pos_to_area = {
             "left": Qt.LeftDockWidgetArea,
             "right": Qt.RightDockWidgetArea,
             "top": Qt.TopDockWidgetArea,
             "bottom": Qt.BottomDockWidgetArea
         }
-
         for name, info in self._setup_app.items():
             # show frames if the 'show' option is true.
-            if info['show']:
+            if info["show"]:
                 frames = self._apps[name].frames()
-
                 for frame in frames:
                     dockWidget = QDockWidget(name, self._mainWindow)
                     dockWidget.setWidget(frame)
-
-                    area = pos_to_area.get(info['pos'], Qt.AllDockWidgetAreas)
+                    area = pos_to_area.get(info["pos"], Qt.AllDockWidgetAreas)
                     self._mainWindow.addDockWidget(area, dockWidget)
-
         self._mainWindow.show()
 
     @pyqtSlot(str, str)
@@ -158,7 +135,6 @@ class Swift(QObject):
             msg: An input message that be transferred through the bus.
         """
         bus_name = self.sender().name
-
         # Emit a signal of all apps that subscribe to the bus.
         for app in self._subs[bus_name]:
             app.received.emit(bus_name, msg)
@@ -168,11 +144,9 @@ class Swift(QObject):
 def _add_to_path(path):
     old_path = sys.path
     old_modules = sys.modules
-
     sys.modules = old_modules.copy()
     sys.path = sys.path[:]
     sys.path.insert(0, path)
-
     try:
         yield
     finally:
@@ -191,19 +165,16 @@ def get_argparser():
     parser = argparse.ArgumentParser(
         description="SNU widget integration framework for PyQt"
     )
-
     parser.add_argument(
         "-s", "--setup", dest="setup_path", default="./setup.json",
         help="a path of set-up file containing the infomation about app and bus"
     )
-
     return parser
 
 
 def main():
     """Main function that runs when swift.py is called."""
     args = get_argparser().parse_args()
-
     app = QApplication(sys.argv)
     _swift = Swift(args.setup_path)
     app.exec_()
