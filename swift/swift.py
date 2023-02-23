@@ -13,7 +13,9 @@ import sys
 import os
 import argparse
 import json
+import importlib
 import importlib.util
+from contextlib import contextmanager
 
 from PyQt5.QtCore import QObject, pyqtSlot, Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QDockWidget
@@ -28,10 +30,6 @@ class Swift(QObject):
         2. Create buses.
         3. Create apps.
         4. Show frames of each app.
-
-    Attributes:
-        setup_app: A set-up information about apps.
-        setup_bus: A set-up information about buses.
     """
 
     def __init__(self, setup_path: str):
@@ -40,12 +38,12 @@ class Swift(QObject):
             setup_path: A path of set-up file.
         """
         super().__init__()
-        self.read_setup_file(setup_path)
-        self.init_bus()
-        self.init_app()
-        self.show_frame()
+        self._read_setup_file(setup_path)
+        self._init_bus()
+        self._init_app()
+        self._show_frame()
 
-    def read_setup_file(self, setup_path: str):
+    def _read_setup_file(self, setup_path: str):
         """Reads set-up information from set-up file.
 
         Read set-up file and store information about app and bus.
@@ -56,17 +54,18 @@ class Swift(QObject):
         with open(setup_path, encoding="utf-8") as setup_file:
             setup_data = json.load(setup_file)
 
-            self.setup_app = setup_data['app']
-            self.setup_bus = setup_data['bus']
+            self._setup_app = setup_data['app']
+            self._setup_bus = setup_data['bus']
 
-    def init_bus(self):
+    def _init_bus(self):
         """Initializes global buses using set-up environment.
 
         Create the instance of each global bus and store them at self.buses.
         """
-        self.buses = {}
+        self._buses = {}
+        self._subs = {}
 
-        for name, info in self.setup_bus.items():
+        for name, info in self._setup_bus.items():
             bus = None
 
             # create a bus
@@ -77,42 +76,43 @@ class Swift(QObject):
                 bus = Bus(name)
 
             # set a slot of received signal to router
-            bus.received.connect(self.route_to_app)
+            bus.received.connect(self._route_to_app)
+            bus.start()
 
-            self.buses[name] = bus
+            self._buses[name] = bus
+            self._subs[name] = []
 
-    def init_app(self):
+    def _init_app(self):
         """Initializes apps using set-up environment.
 
         Create the instance of each app and store them at self.apps.
         """
-        self.apps = {}
+        self._apps = {}
 
-        for name, info in self.setup_app.items():
-            # import app
-            file_path, cls_name = info['path'], info['class']
+        for name, info in self._setup_app.items():
+            # import the app module
+            path = info.get("path", ".")
+            mod_name, cls_name = info['module'], info['class']
 
-            module_name = os.path.basename(file_path)
-            spec = importlib.util.spec_from_file_location(module_name, file_path)
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
+            with _add_to_path(os.path.dirname(path)):
+                module = importlib.import_module(mod_name)
 
             # create an app
             cls = getattr(module, cls_name)
             app = cls(name)
 
             # set a slot of broadcast signal to router
-            app.broadcastRequested.connect(self.route_to_bus)
+            app.broadcastRequested.connect(self._route_to_bus)
 
             # add the app to the list of subscribers on each bus
             for bus_name in info['bus']:
-                self.subs[bus_name].append(app)
+                self._subs[bus_name].append(app)
 
-            self.apps[name] = app
+            self._apps[name] = app
 
-    def show_frame(self):
+    def _show_frame(self):
         """Shows frames of each app."""
-        self.mainWindow = QMainWindow()
+        self._mainWindow = QMainWindow()
 
         pos_to_area = {
             "left": Qt.LeftDockWidgetArea,
@@ -121,22 +121,22 @@ class Swift(QObject):
             "bottom": Qt.BottomDockWidgetArea
         }
 
-        for name, info in self.setup_app.items():
+        for name, info in self._setup_app.items():
             # show frames if the 'show' option is true.
             if info['show']:
-                frames = self.apps[name].frames()
+                frames = self._apps[name].frames()
 
                 for frame in frames:
-                    dockWidget = QDockWidget(name, self.mainWindow)
+                    dockWidget = QDockWidget(name, self._mainWindow)
                     dockWidget.setWidget(frame)
 
                     area = pos_to_area.get(info['pos'], Qt.AllDockWidgetAreas)
-                    self.mainWindow.addDockWidget(area, dockWidget)
+                    self._mainWindow.addDockWidget(area, dockWidget)
 
-        self.mainWindow.show()
+        self._mainWindow.show()
 
     @pyqtSlot(str, str)
-    def route_to_bus(self, bus_name: str, msg: str):
+    def _route_to_bus(self, bus_name: str, msg: str):
         """Routes a signal from an app to the desired bus.
 
         This is a slot for the broadcast signal of each app.
@@ -145,11 +145,11 @@ class Swift(QObject):
             bus_name: A name of the desired bus that will transfer the signal.
             msg: An input message that will be transferred through the bus.
         """
-        bus = self.buses[bus_name]
+        bus = self._buses[bus_name]
         bus.write(msg)
 
     @pyqtSlot(str)
-    def route_to_app(self, msg: str):
+    def _route_to_app(self, msg: str):
         """Routes a signal from a bus to the apps that subscribe to it.
 
         This is a slot for the received signal of each bus.
@@ -160,8 +160,24 @@ class Swift(QObject):
         bus_name = self.sender().name
 
         # Emit a signal of all apps that subscribe to the bus.
-        for app in self.subs[bus_name]:
+        for app in self._subs[bus_name]:
             app.received.emit(bus_name, msg)
+
+
+@contextmanager
+def _add_to_path(path):
+    old_path = sys.path
+    old_modules = sys.modules
+
+    sys.modules = old_modules.copy()
+    sys.path = sys.path[:]
+    sys.path.insert(0, path)
+
+    try:
+        yield
+    finally:
+        sys.path = old_path
+        sys.modules = old_modules
 
 
 def get_argparser():
