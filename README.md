@@ -19,38 +19,32 @@ A `Frame` is in fact a special `QWidget` which obeys the interface of `swift`, a
 <img width="80%" alt="image" src="https://user-images.githubusercontent.com/76851886/219574551-2f798863-ea48-4857-8db6-15840a0505e5.png">
 
 ```python
-### Please be careful because Frame and Logic are mixed.
-
 class Swift:
     """
-    1. Read json setup files
-        - Frame information file       (e.g. whether to show frame A at the beginning, whether frame B is a subscriber of GB)
-        - Global bus information file  (e.g. name)
+    1. Read json set-up files
+        - App information file  (e.g. whether to show frames at the beginning, which bus the app subscribes to)
+        - Bus information file  (e.g. name, timeout)
     
-    2. Create instances of GlobalBus (GB) -> Able to be many GBs
-        - Create a signal for emitting to each frame
-        - Set global_signal_receiver() of subscribers as a slot
+    2. Create an instance of each bus
+        - set a slot of received signal to router method
 
-    3. Create frames
-        - Connect bc signal of frames to corresponding GB
+    3. Create an instance of each app
+        - Set a slot of broadcast signal to router method
         
-    4. Show frames
+    4. Show frames of each app
     """
     pass
 
 
-class GlobalBus:
+class Bus:
+    received = pyqtSignal(...)
+    
     def __init__():
          queue = []  # Queue for storing signals
          # Start thread for popping from queue and emitting signal to frames
          
-        _signal = pyqtSignal(...)
-
-        for frame in subscribers:
-            _signal.connect(frame.global_signal_receiver) 
-
-    # Method when called when a frame emits bc signal
-    def receive(msg):
+    # Method when called when a frame emits a broadcast signal
+    def write(msg):
         queue.push(msg)
         
     # Method polling until queue is empty
@@ -58,48 +52,45 @@ class GlobalBus:
         while True:
             if queue is not empty:
                 msg = queue.pop()
-                _signal.emit(msg)
+                received.emit(msg)
     
 
-# This class means both Frame and Logic (not real)
-class Frame:
-    def __init__():
-        bc = pyqtSignal(...)  # create broadcasting signal
-
-    # If the frame wants to receive global signals, override desired operation on the below function
-    # This function is set as a slot in GB
-    def global_signal_receiver(...):
-        pass
+class App:
+    broadcastRequested = pyqtSignal(...)
+    received = pyqtSignal(...)
+    
+    def frames():
+        # return frames to show
 ```
 
-### Frame structure
-<img width="50%" alt="image" src="https://user-images.githubusercontent.com/76851886/219575722-408dc03a-c84e-417f-a541-e48dfda100c0.png">
+### App structure
+<img width="50%" alt="image" src="https://user-images.githubusercontent.com/76851886/220836255-055aab3f-d65c-4809-9024-34fb2122a933.png">
 
 A `Frame` simply means a window of PyQt that we see.
 
-In fact, an engine which makes a `Frame` works is a `Logic`.
-A `Logic` can 
-- show/hide `Frame`s, which the `Logic` manages
+In fact, an engine which makes a `Frame` works is a `App`.
+A `App` can 
+- show/hide `Frame`s, which the `App` manages
 - set a slot for each signal of `Frame`
 - receive a signal which the `Frame` emits
 - emit a signal to `Frame` or a global signal to `swift`
 - communicate `backend` APIs
 
-A `swift` recognizes only `Logic`, not `Frame` or `backend`. Thus, every order for `Frame` is implemented in `Logic`.
+A `swift` recognizes only `App`, not `Frame` or `backend`. Thus, every order for `Frame` is implemented in `App`.
 
 A `backend` is a set of APIs for handling UI-independent operations, such as controlling hardwards, polling something, and connecting DB.
 
 ```python
-### Please be careful because Frame and Logic are mixed.
-
-class Logic:
+class App(BaseApp):
     """
     1. Create frames (generally only one frame)
          
-    2. Connect signal of frame elements to API of Logic
-        
-    3. Show frames
+    2. Connect signal of frame elements to API of App
     """
+    
+    # Method returning frames for showing
+    def frames():
+        return [...]
     
     # Example method that receive signal of frame elements
     def receive(...):
