@@ -113,9 +113,9 @@ class NumGenApp(BaseApp):
 
 def main():
     """Main function that runs when numgen module is executed rather than imported."""
-    app = QApplication(sys.argv)
+    _app = QApplication([])
     mainWindow = QMainWindow()
-    # create a app
+    # create an app
     app = NumGenApp("numgen")
     # get frames from the app and add them as dock widgets
     for frame in app.frames():
@@ -123,7 +123,7 @@ def main():
         dockWidget.setWidget(frame)
         mainWindow.addDockWidget(Qt.LeftDockWidgetArea, dockWidget)
     mainWindow.show()
-    app.exec_()
+    _app.exec_()
 
 
 if __name__ == "__main__":
