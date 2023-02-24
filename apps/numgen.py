@@ -1,56 +1,71 @@
 #!/usr/bin/env python3
 
 """
-App module for generating a random number.
+App module for generating and showing a random number.
 """
 
 import sys
-import random
 
 from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QDockWidget,
-                             QWidget, QHBoxLayout, QPushButton, QLabel)
+                             QWidget, QVBoxLayout, QPushButton, QLabel, QComboBox)
 
 from swift.app import BaseApp
 
-class _NumGenFrame(QWidget):
-    """Frame class for showing the button and the label."""
+class GeneratorFrame(QWidget):
+    """Frame for requesting generating a random number.
+    
+    Attributes:
+        databaseSelector: A combobox for selecting a database 
+          into which the generated number is saved
+        generateButton: A button for generating new number Viewer frame
+    """
     def __init__(self):
         super().__init__()
+        self.db_list = ["None"]  # this will be developed later
         self.init_widget()
 
     def init_widget(self):
         """Initializes widgets in the frame."""
-        self.btn = QPushButton("generate number", self)
-        self.label = QLabel("not generated", self)
+        # database selector
+        self.databaseSelector = QComboBox(self)
+        for db_name in self.db_list:
+            self.databaseSelector.addItem(db_name)
+        # generator button
+        self.generatorButton = QPushButton("generate number", self)
+        # set layout
+        layout = QVBoxLayout(self)
+        layout.addWidget(self.databaseSelector)
+        layout.addWidget(self.generatorButton)
 
-        layout = QHBoxLayout(self)
-        layout.addWidget(self.btn)
-        layout.addWidget(self.label)
+
+class ViewerFrame(QWidget):
+    """Frame for showing the generated number.
+
+    Attributes:
+        statusLabel: A label for showing the current status 
+          (database updated, random number generated, etc.)
+        numberViewer: A read-only spinbox showing the recently generated number
+    """
 
 
 class NumGenApp(BaseApp):
-    """App class for managing a frame and generating a random number.
+    """App for generating and showing a random number.
+
+    Manage a generator frame and a viewer frame.
+    Communicate with the backend.
 
     Attributes:
-        frame: A frame that request generating and show a random number.
+        generatorFrame: A frame that requests generating a random number.
+        viewerFrame: A frame that shows the generated number.
     """
     def __init__(self, name: str):
         super().__init__(name)
-        self.frame = _NumGenFrame()
-
-        # connect the button clicked signal to the slot generating a number
-        self.frame.btn.clicked.connect(self.generateNumber)
+        self.generatorFrame = GeneratorFrame()
+        # self.viewerFrame = ViewerFrame()
 
     def frames(self):
-        return (self.frame,)
-
-    @pyqtSlot()
-    def generateNumber(self):
-        """Generates and shows a random number when the button is clicked."""
-        num = random.randrange(0, 10)
-
-        self.frame.label.setText(f"generated number: {num}")
+        return (self.generatorFrame,)
 
 
 def main():

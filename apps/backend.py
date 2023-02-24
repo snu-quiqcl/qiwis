@@ -23,7 +23,7 @@ def save(_num: int, db_name: str):
     Returns:
         bool: True if store succeeds, otherwise False.
     """
-    if db_name is None:
+    if db_name == "None":
         return False
 
     return True
