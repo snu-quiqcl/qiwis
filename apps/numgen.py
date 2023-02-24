@@ -113,7 +113,7 @@ class NumGenApp(BaseApp):
 
 def main():
     """Main function that runs when numgen module is executed rather than imported."""
-    _app = QApplication([])
+    _app = QApplication(sys.argv)
     mainWindow = QMainWindow()
     # create an app
     app = NumGenApp("numgen")
