@@ -7,8 +7,8 @@ App module for generating and showing a random number.
 import sys
 
 from PyQt5.QtCore import Qt, pyqtSlot
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QDockWidget,
-                             QWidget, QVBoxLayout, QPushButton, QLabel, QComboBox)
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QDockWidget, QWidget,
+                             QVBoxLayout, QComboBox, QPushButton, QLabel)
 
 from swift.app import BaseApp
 
@@ -45,8 +45,22 @@ class ViewerFrame(QWidget):
     Attributes:
         statusLabel: A label for showing the current status 
           (database updated, random number generated, etc.)
-        numberViewer: A read-only spinbox showing the recently generated number
+        numberViewer: A label for showing the recently generated number
     """
+    def __init__(self):
+        super().__init__()
+        self.init_widget()
+
+    def init_widget(self):
+        """Initializes widgets in the frame."""
+        # status label
+        self.statusLabel = QLabel("initialized", self)
+        # number viewer
+        self.numberViewer = QLabel("not generated", self)
+        # set layout
+        layout = QVBoxLayout(self)
+        layout.addWidget(self.statusLabel)
+        layout.addWidget(self.numberViewer)
 
 
 class NumGenApp(BaseApp):
@@ -62,10 +76,10 @@ class NumGenApp(BaseApp):
     def __init__(self, name: str):
         super().__init__(name)
         self.generatorFrame = GeneratorFrame()
-        # self.viewerFrame = ViewerFrame()
+        self.viewerFrame = ViewerFrame()
 
     def frames(self):
-        return (self.generatorFrame,)
+        return (self.generatorFrame, self.viewerFrame)
 
 
 def main():
