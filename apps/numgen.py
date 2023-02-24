@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QDockWidget, QWidget,
                              QVBoxLayout, QComboBox, QPushButton, QLabel)
 
 from swift.app import BaseApp
-from .backend import generate, save
+from apps.backend import generate, save
 
 class GeneratorFrame(QWidget):
     """Frame for requesting generating a random number.
@@ -102,7 +102,6 @@ class NumGenApp(BaseApp):
         """Generates and shows a random number when the button is clicked."""
         # generate a random number
         num = generate()
-        self.viewerFrame.statusLabel.setText("random number generated")
         self.viewerFrame.numberViewer.setText(f"generated number: {num}")
         # save the generated number
         is_save_success = save(num, self.db_name)
@@ -113,17 +112,17 @@ class NumGenApp(BaseApp):
 
 
 def main():
-    """Main function that runs when numgen.py is called."""
+    """Main function that runs when numgen module is executed rather than imported."""
     app = QApplication(sys.argv)
-    main_window = QMainWindow()
+    mainWindow = QMainWindow()
     # create a app
     app = NumGenApp("numgen")
     # get frames from the app and add them as dock widgets
     for frame in app.frames():
-        dock_widget = QDockWidget("random number generator", main_window)
-        dock_widget.setWidget(frame)
-        main_window.addDockWidget(Qt.LeftDockWidgetArea, dock_widget)
-    main_window.show()
+        dockWidget = QDockWidget("random number generator", mainWindow)
+        dockWidget.setWidget(frame)
+        mainWindow.addDockWidget(Qt.LeftDockWidgetArea, dockWidget)
+    mainWindow.show()
     app.exec_()
 
 
