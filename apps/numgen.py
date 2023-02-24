@@ -11,6 +11,7 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QDockWidget, QWidget,
                              QVBoxLayout, QComboBox, QPushButton, QLabel)
 
 from swift.app import BaseApp
+from .backend import generate, save
 
 class GeneratorFrame(QWidget):
     """Frame for requesting generating a random number.
@@ -77,26 +78,36 @@ class NumGenApp(BaseApp):
         super().__init__(name)
         self.generatorFrame = GeneratorFrame()
         self.viewerFrame = ViewerFrame()
+        # connect signals to slots
+        self.generatorFrame.generatorButton.clicked.connect(self.generateNumber)
 
     def frames(self):
+        """Gets frames for which are managed by the app.
+
+        Returns:
+            tuple: A tuple containing frames for showing.
+        """
         return (self.generatorFrame, self.viewerFrame)
+    
+    @pyqtSlot()
+    def generateNumber(self):
+        """Generates and shows a random number when the button is clicked."""
+        num = generate()
+        self.viewerFrame.statusLabel.setText("random number generated")
+        self.viewerFrame.numberViewer.setText(f"generated number: {num}")
 
 
 def main():
     """Main function that runs when numgen.py is called."""
     app = QApplication(sys.argv)
     main_window = QMainWindow()
-
     # create a app
     app = NumGenApp("numgen")
-
     # get frames from the app and add them as dock widgets
     for frame in app.frames():
         dock_widget = QDockWidget("random number generator", main_window)
         dock_widget.setWidget(frame)
-
         main_window.addDockWidget(Qt.LeftDockWidgetArea, dock_widget)
-
     main_window.show()
     app.exec_()
 
