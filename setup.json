@@ -1,0 +1,25 @@
+{
+    "app": {
+        "app1": {
+            "path": "C:\\Users\\QuIQCL\\apps\\",
+            "module": "test",
+            "class": "TestApp",
+            "show": true,
+            "pos": "left",
+            "bus": []
+        },
+        "app2": {
+            "module": "apps.log",
+            "class": "LogApp",
+            "show": true,
+            "pos": "right",
+            "bus": ["bus1"]
+        }
+    },
+    "bus": {
+        "bus1": {
+            "timeout": 5
+        },
+        "bus2": {}
+    }
+}
