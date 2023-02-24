@@ -25,6 +25,8 @@ from swift.bus import Bus
 class Swift(QObject):
     """Actual manager for swift system.
 
+    Note that QApplication instance must be created before instantiating Swift object.
+
     Brief procedure:
         1. Create buses.
         2. Create apps.
@@ -159,7 +161,7 @@ def _add_to_path(path):
     old_modules = sys.modules
     sys.modules = old_modules.copy()
     old_path = sys.path
-    sys.path = sys.path.copy()
+    sys.path = old_path.copy()
     sys.path.insert(0, path)
     try:
         yield
