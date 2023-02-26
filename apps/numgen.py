@@ -18,21 +18,19 @@ class GeneratorFrame(QWidget):
     
     Attributes:
         databaseSelector: A combobox for selecting a database 
-          into which the generated number is saved
-        generateButton: A button for generating new number Viewer frame
+          into which the generated number is saved.
+        generateButton: A button for generating a new number.
     """
     def __init__(self):
         super().__init__()
-        self.db_list = ["None", "mock_db"]  # this will be developed later
+        self.dbList = ["None", "mock_db"]  # this will be developed later
         self.init_widget()
 
     def init_widget(self):
         """Initializes widgets in the frame."""
-        # database selector
         self.databaseSelector = QComboBox(self)
-        for db_name in self.db_list:
-            self.databaseSelector.addItem(db_name)
-        # generator button
+        for dbName in self.dbList:
+            self.databaseSelector.addItem(dbName)
         self.generatorButton = QPushButton("generate number", self)
         # set layout
         layout = QVBoxLayout(self)
@@ -44,9 +42,9 @@ class ViewerFrame(QWidget):
     """Frame for showing the generated number.
 
     Attributes:
-        statusLabel: A label for showing the current status 
+        statusLabel: A label for showing the current status.
           (database updated, random number generated, etc.)
-        numberViewer: A label for showing the recently generated number
+        numberViewer: A label for showing the recently generated number.
     """
     def __init__(self):
         super().__init__()
@@ -54,9 +52,7 @@ class ViewerFrame(QWidget):
 
     def init_widget(self):
         """Initializes widgets in the frame."""
-        # status label
         self.statusLabel = QLabel("initialized", self)
-        # number viewer
         self.numberViewer = QLabel("not generated", self)
         # set layout
         layout = QVBoxLayout(self)
@@ -76,11 +72,11 @@ class NumGenApp(BaseApp):
     """
     def __init__(self, name: str):
         super().__init__(name)
-        self.db_name = "None"
+        self.dbName = "None"
         self.generatorFrame = GeneratorFrame()
         self.viewerFrame = ViewerFrame()
         # connect signals to slots
-        self.generatorFrame.databaseSelector.currentIndexChanged.connect(self.setDataset)
+        self.generatorFrame.databaseSelector.currentIndexChanged.connect(self.setDatabase)
         self.generatorFrame.generatorButton.clicked.connect(self.generateNumber)
 
     def frames(self):
@@ -92,9 +88,9 @@ class NumGenApp(BaseApp):
         return (self.generatorFrame, self.viewerFrame)
 
     @pyqtSlot()
-    def setDataset(self):
-        """Set the dataset to store the number."""
-        self.db_name = self.generatorFrame.databaseSelector.currentText()
+    def setDatabase(self):
+        """Set the database to store the number."""
+        self.dbName = self.generatorFrame.databaseSelector.currentText()
         self.viewerFrame.statusLabel.setText("database updated")
 
     @pyqtSlot()
@@ -104,7 +100,7 @@ class NumGenApp(BaseApp):
         num = generate()
         self.viewerFrame.numberViewer.setText(f"generated number: {num}")
         # save the generated number
-        is_save_success = save(num, self.db_name)
+        is_save_success = save(num, self.dbName)
         if is_save_success:
             self.viewerFrame.statusLabel.setText("number saved successfully")
         else:
