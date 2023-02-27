@@ -13,6 +13,7 @@ def generate() -> int:
     return random.randrange(0, 100)
 
 
+# TODO(BECATRUE): Save the number at the database.
 def save(_num: int, db_name: str) -> bool:
     """Store the number in the database.
 

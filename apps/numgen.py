@@ -17,24 +17,25 @@ class GeneratorFrame(QWidget):
     """Frame for requesting generating a random number.
     
     Attributes:
-        databaseSelector: A combobox for selecting a database 
+        dbSelector: A combobox for selecting a database 
           into which the generated number is saved.
         generateButton: A button for generating a new number.
     """
     def __init__(self):
         super().__init__()
-        self.dbList = ["None", "mock_db"]  # this will be developed later
+        # TODO(BECATRUE): Connect to real databases through a DB manager.
+        self.dbList = ["None", "mock_db"]
         self.init_widget()
 
     def init_widget(self):
         """Initializes widgets in the frame."""
-        self.databaseSelector = QComboBox(self)
+        self.dbSelector = QComboBox(self)
         for dbName in self.dbList:
-            self.databaseSelector.addItem(dbName)
+            self.db.addItem(dbName)
         self.generatorButton = QPushButton("generate number", self)
         # set layout
         layout = QVBoxLayout(self)
-        layout.addWidget(self.databaseSelector)
+        layout.addWidget(self.dbSelector)
         layout.addWidget(self.generatorButton)
 
 
@@ -76,21 +77,21 @@ class NumGenApp(BaseApp):
         self.generatorFrame = GeneratorFrame()
         self.viewerFrame = ViewerFrame()
         # connect signals to slots
-        self.generatorFrame.databaseSelector.currentIndexChanged.connect(self.setDatabase)
+        self.generatorFrame.dbSelector.currentIndexChanged.connect(self.setDatabase)
         self.generatorFrame.generatorButton.clicked.connect(self.generateNumber)
 
     def frames(self):
         """Gets frames for which are managed by the app.
 
         Returns:
-            tuple: A tuple containing frames for showing.
+            A tuple containing frames for showing.
         """
         return (self.generatorFrame, self.viewerFrame)
 
     @pyqtSlot()
     def setDatabase(self):
-        """Set the database to store the number."""
-        self.dbName = self.generatorFrame.databaseSelector.currentText()
+        """Sets the database to store the number."""
+        self.dbName = self.generatorFrame.dbSelector.currentText()
         self.viewerFrame.statusLabel.setText("database updated")
 
     @pyqtSlot()
