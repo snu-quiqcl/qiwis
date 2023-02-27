@@ -13,12 +13,12 @@ def generate() -> int:
     return random.randrange(0, 100)
 
 
-# TODO(BECATRUE): Save the number at the database.
+# TODO(BECATRUE): Change _num to num when saving to a database is implemented.
 def save(_num: int, db_name: str) -> bool:
     """Store the number in the database.
 
     Args:
-        num: Number to store.
+        _num: Number to store.
         db_name: A string that indicates the name of database.
 
     Returns:

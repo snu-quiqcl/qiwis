@@ -23,7 +23,11 @@ class GeneratorFrame(QWidget):
     """
     def __init__(self):
         super().__init__()
-        # TODO(BECATRUE): Connect to real databases through a DB manager.
+        # TODO(BECATRUE): Remove mock_db when connecting to real databases is implemented.
+        # For testing whether dbSelector works correctly, I added mock_db temporarily.
+        # Later, It will have to be implemented as below.
+        # - When this frame is created, dbList is created as ["None"]
+        # - When this app receives a global signal from database bus, dbList is updated.
         self.dbList = ["None", "mock_db"]
         self.init_widget()
 
@@ -31,7 +35,7 @@ class GeneratorFrame(QWidget):
         """Initializes widgets in the frame."""
         self.dbSelector = QComboBox(self)
         for dbName in self.dbList:
-            self.db.addItem(dbName)
+            self.dbSelector.addItem(dbName)
         self.generatorButton = QPushButton("generate number", self)
         # set layout
         layout = QVBoxLayout(self)
