@@ -15,8 +15,31 @@ def generate() -> int:
     return random.randrange(0, 100)
 
 
+def read(db_path: str, table: str):
+    """Reads the value from the database.
+
+    Args:
+        db_path: A path of database file.
+        table: A name of table to read.
+
+    Returns:
+        The read value if reading is successful, otherwise None.
+    """
+    if db_path == "None":  # if there is no database
+        return None
+    con = sqlite3.connect(db_path)
+    try:
+        with con:
+            value = con.execute(f"SELECT * FROM {table} ORDER BY rowid DESC LIMIT 1").fetchone()[0]
+    except sqlite3.Error as e:
+        print(e)
+        return None
+    con.close()
+    return value
+
+
 def write(db_path: str, table: str, value) -> bool:
-    """Write the value in the database.
+    """Writes the value to the database.
 
     Args:
         db_path: A path of database file.
@@ -31,7 +54,7 @@ def write(db_path: str, table: str, value) -> bool:
     con = sqlite3.connect(db_path)
     try:
         with con:
-            con.execute(f"insert into {table} values (?, ?)", (value, str(datetime.now())))
+            con.execute(f"INSERT INTO {table} VALUES (?, ?)", (value, str(datetime.now())))
     except sqlite3.Error as e:
         print(e)
         return False
