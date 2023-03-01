@@ -20,8 +20,8 @@ def read(db_path: str, table: str):
     It can only read the last row in a specific table.
 
     Database structure:
-        db.sqlite: There is 1 table; number.
-          In the number table, there are 2 columns; num and time.
+        There is at least one table and in the table, there is at least one column.
+        The value to read should be in the first column.
 
     Error handling:
         An error may occur if it tries to access the database before another one commits.
@@ -30,13 +30,13 @@ def read(db_path: str, table: str):
 
     Args:
         db_path: A path of database file.
-          It will be None if the user does not select a specific database. 
+          It will be "None" if the user does not select a specific database. 
         table: A name of table to read.
 
     Returns:
         The read value if reading is successful, otherwise None.
     """
-    if db_path == "None":  # if the user does not select a specific database
+    if db_path == "None":
         return None
     con = sqlite3.connect(db_path)
     try:
@@ -45,7 +45,7 @@ def read(db_path: str, table: str):
                 f"SELECT * FROM {table} ORDER BY rowid DESC LIMIT 1"
             ).fetchone()[0]
     except sqlite3.Error as e:
-        print("The error occurred in read function:", e.args)
+        print(f"apps.backend.read(): {e!r}")
         return None
     finally:
         con.close()
@@ -56,6 +56,7 @@ def write(db_path: str, table: str, value) -> bool:
     """Writes the value to the database.
 
     It can only add the value into the last row in a specific table.
+    The value and saved time are read in the first and second column, respectively. 
 
     Database structure:
         See read().
@@ -74,7 +75,7 @@ def write(db_path: str, table: str, value) -> bool:
     Returns:
         True if writing is successful, otherwise False.
     """
-    if db_path == "None":  # if there is no database
+    if db_path == "None":
         return False
     con = sqlite3.connect(db_path)
     try:
@@ -84,7 +85,7 @@ def write(db_path: str, table: str, value) -> bool:
                 (value,)
             )
     except sqlite3.Error as e:
-        print("The error occurred in write function:", e.args)
+        print(f"apps.backend.write(): {e!r}")
         return False
     finally:
         con.close()
