@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QDockWidget, QWidget,
                              QVBoxLayout, QComboBox, QPushButton, QLabel)
 
 from swift.app import BaseApp
-from apps.backend import generate, save
+from apps.backend import generate, write
 
 class GeneratorFrame(QWidget):
     """Frame for requesting generating a random number.
@@ -24,18 +24,18 @@ class GeneratorFrame(QWidget):
     def __init__(self):
         super().__init__()
         # TODO(BECATRUE): Remove mock_db when connecting to real databases is implemented.
-        # For testing whether dbBox works correctly, I added mock_db temporarily.
+        # For testing whether dbBox works correctly, I added a definite path temporarily.
         # Later, It will have to be implemented as below.
         # - When this frame is created, dbList is created as ["None"]
         # - When this app receives a global signal from database bus, dbList is updated.
-        self.dbList = ["None", "mock_db"]
+        self.dbList = ["None", "./db.sqlite"]
         self.init_widget()
 
     def init_widget(self):
         """Initializes widgets in the frame."""
         self.dbBox = QComboBox(self)
-        for dbName in self.dbList:
-            self.dbBox.addItem(dbName)
+        for dbPath in self.dbList:
+            self.dbBox.addItem(dbPath)
         self.generateButton = QPushButton("generate number", self)
         # set layout
         layout = QVBoxLayout(self)
@@ -77,7 +77,7 @@ class NumGenApp(BaseApp):
     """
     def __init__(self, name: str):
         super().__init__(name)
-        self.dbName = "None"
+        self.dbPath = "None"
         self.generatorFrame = GeneratorFrame()
         self.viewerFrame = ViewerFrame()
         # connect signals to slots
@@ -95,7 +95,7 @@ class NumGenApp(BaseApp):
     @pyqtSlot()
     def setDatabase(self):
         """Sets the database to store the number."""
-        self.dbName = self.generatorFrame.dbBox.currentText()
+        self.dbPath = self.generatorFrame.dbBox.currentText()
         self.viewerFrame.statusLabel.setText("database updated")
 
     @pyqtSlot()
@@ -105,7 +105,7 @@ class NumGenApp(BaseApp):
         num = generate()
         self.viewerFrame.numberLabel.setText(f"generated number: {num}")
         # save the generated number
-        is_save_success = save(num, self.dbName)
+        is_save_success = write(self.dbPath, "number", num)
         if is_save_success:
             self.viewerFrame.statusLabel.setText("number saved successfully")
         else:
