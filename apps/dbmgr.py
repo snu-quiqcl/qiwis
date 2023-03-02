@@ -15,22 +15,25 @@ class DBWidget(QWidget):
     """Widget for showing a database.
 
     Attributes:
+        name: A file name of the database.
+        path: An absolute path of the database.
         nameLabel: A label for showing the file name.
         pathLabel: A label for showing the absolue path.
         removeButton: A button for removing (disconnecting) the database.
     """
-    def __init__(self, name, path):
+    def __init__(self, name, path, parent=None):
         """
         Args:
             name: A file name of the database.
             path: An absolute path of the database.
+            parent: A parent widget.
         """
-        super().__init__()
+        super().__init__(parent=parent)
         self.name = name
         self.path = path
-        self.init_widget()
+        self._initWidget()
 
-    def init_widget(self):
+    def _initWidget(self):
         """Initializes widgets in the item."""
         self.nameLabel = QLabel(self.name, self)
         self.pathLabel = QLabel(self.path, self)
@@ -41,6 +44,7 @@ class DBWidget(QWidget):
         layout.addWidget(self.pathLabel)
         layout.addWidget(self.removeButton)
 
+
 class ManagerFrame(QWidget):
     """Frame for managing available databases.
 
@@ -50,11 +54,15 @@ class ManagerFrame(QWidget):
           when removeButton (of each item) clicked.
         addButton: A button for adding (actually connecting) a database.
     """
-    def __init__(self):
-        super().__init__()
-        self.init_widget()
+    def __init__(self, parent=None):
+        """
+        Args:
+            parent: A parent widget.
+        """
+        super().__init__(parent=parent)
+        self._initWidget()
 
-    def init_widget(self):
+    def _initWidget(self):
         """Initializes widgets in the frame."""
         self.dbListWidget = QListWidget(self)
         self.addButton = QPushButton("add", self)
@@ -62,19 +70,6 @@ class ManagerFrame(QWidget):
         layout = QVBoxLayout(self)
         layout.addWidget(self.dbListWidget)
         layout.addWidget(self.addButton)
-
-    def add_db(self, name, path):
-        """Adds a database to dbListWidget.
-        
-        Args:
-            name: A file name of the database.
-            path: An absolute path of the database.
-        """
-        widget = DBWidget(name, path)
-        item = QListWidgetItem(self.dbListWidget)
-        item.setSizeHint(widget.sizeHint())
-        self.dbListWidget.addItem(item)
-        self.dbListWidget.setItemWidget(item, widget)
 
 
 class DBMgrApp(BaseApp):
@@ -84,7 +79,9 @@ class DBMgrApp(BaseApp):
     Send an updated database information to database bus.
 
     Protocol:
-        A broadcastRequested signal is a json object converted to string using json.dumps().
+        A broadcastRequested signal is emitted 
+          when the available databases are changed (added or removed).
+        It is a json object converted to string using json.dumps().
         On the receiving end, it can be interpreted using json.loads().
 
         The json object has one key; db. In db, there is a list of databases.  
@@ -93,14 +90,14 @@ class DBMgrApp(BaseApp):
           path: An absolute path of the database.
 
     Attributes:
-        db_list: A list for storing available databases.
-          Each element of which type is tuple represents a database.
+        dbList: A list for storing available databases.
+          Each element is a tuple which represents a database.
           It has two elements; file name and absolute path.
         managerFrame: A frame that manages and shows available databases.
     """
     def __init__(self, name: str):
         super().__init__(name)
-        self.db_list = []
+        self.dbList = []
         self.managerFrame = ManagerFrame()
         # connect signals to slots
         self.managerFrame.addButton.clicked.connect(self.addDB)
@@ -115,32 +112,34 @@ class DBMgrApp(BaseApp):
 
     @pyqtSlot()
     def addDB(self):
-        """Selects a database and adds to db_list.
+        """Selects a database and adds to dbList.
         
         Show the database at dbListWidget in ManagerFrame.
         Emit a broadcastRequested signal containing an added database information.
         """
-        db_path, _ = QFileDialog.getOpenFileName(
+        dbPath, _ = QFileDialog.getOpenFileName(
             self.managerFrame,
             "Select a database file",
             "./"
         )
-        name, path = reversed(os.path.split(db_path))
-        self.db_list.append((name, path))
+        if not dbPath:
+            return
+        name, path = reversed(os.path.split(dbPath))
+        self.dbList.append((name, path))
         # create a database widget
-        widget = DBWidget(name, path)
+        widget = DBWidget(name, path, self.managerFrame.dbListWidget)
         widget.removeButton.clicked.connect(self.removeDB)
         item = QListWidgetItem(self.managerFrame.dbListWidget)
         item.setSizeHint(widget.sizeHint())
         self.managerFrame.dbListWidget.addItem(item)
         self.managerFrame.dbListWidget.setItemWidget(item, widget)
         # emit a broadcastRequested signal
-        msg = {"db": [{"name": db[0], "path": db[1]} for db in self.db_list]}
+        msg = {"db": [{"name": db[0], "path": db[1]} for db in self.dbList]}
         self.broadcastRequested.emit("dbbus", json.dumps(msg))
 
     @pyqtSlot()
     def removeDB(self):
-        """Selects a database and removes from db_list.
+        """Selects a database and removes from dbList.
         
         Show the database at dbListWidget in ManagerFrame.
         Emit a broadcastRequested signal containing an added database information.
@@ -151,8 +150,8 @@ class DBMgrApp(BaseApp):
         lp = self.managerFrame.dbListWidget.viewport().mapFromGlobal(gp)
         row = self.managerFrame.dbListWidget.row(self.managerFrame.dbListWidget.itemAt(lp))
         # remove the database widget
-        del self.db_list[row]
+        del self.dbList[row]
         self.managerFrame.dbListWidget.takeItem(row)
         # emit a broadcastRequested signal
-        msg = {"db": [{"name": db[0], "path": db[1]} for db in self.db_list]}
+        msg = {"db": [{"name": db[0], "path": db[1]} for db in self.dbList]}
         self.broadcastRequested.emit("dbbus", json.dumps(msg))
