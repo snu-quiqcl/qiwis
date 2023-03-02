@@ -3,10 +3,19 @@
         "numgen": {
             "module": "apps.numgen",
             "class": "NumGenApp",
-            "show": true,
+            "show": false,
             "pos": "left",
+            "bus": []
+        },
+        "dbmgr": {
+            "module": "apps.dbmgr",
+            "class": "DBMgrApp",
+            "show": true,
+            "pos": "right",
             "bus": []
         }
     },
-    "bus": {}
+    "bus": {
+        "dbbus": {}
+    }
 }

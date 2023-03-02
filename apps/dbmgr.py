@@ -5,14 +5,14 @@ App module for adding and removing available databases.
 import os
 import json
 
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import QPoint, pyqtSlot
 from PyQt5.QtWidgets import (QWidget, QLabel, QPushButton, QFileDialog,
                              QHBoxLayout, QVBoxLayout, QListWidget, QListWidgetItem)
 
 from swift.app import BaseApp
 
-class DBItem(QWidget):
-    """Item widget for showing a database.
+class DBWidget(QWidget):
+    """Widget for showing a database.
 
     Attributes:
         nameLabel: A label for showing the file name.
@@ -70,11 +70,11 @@ class ManagerFrame(QWidget):
             name: A file name of the database.
             path: An absolute path of the database.
         """
-        item = DBItem(name, path)
-        listWidgetItem = QListWidgetItem(self.dbListWidget)
-        listWidgetItem.setSizeHint(item.sizeHint())
-        self.dbListWidget.addItem(listWidgetItem)
-        self.dbListWidget.setItemWidget(listWidgetItem, item)
+        widget = DBWidget(name, path)
+        item = QListWidgetItem(self.dbListWidget)
+        item.setSizeHint(widget.sizeHint())
+        self.dbListWidget.addItem(item)
+        self.dbListWidget.setItemWidget(item, widget)
 
 
 class DBMgrApp(BaseApp):
@@ -93,7 +93,7 @@ class DBMgrApp(BaseApp):
           path: An absolute path of the database.
 
     Attributes:
-        dbList: A list for storing available databases.
+        db_list: A list for storing available databases.
           Each element of which type is tuple represents a database.
           It has two elements; file name and absolute path.
         managerFrame: A frame that manages and shows available databases.
@@ -115,7 +115,7 @@ class DBMgrApp(BaseApp):
 
     @pyqtSlot()
     def addDB(self):
-        """Selects a database and adds to dbList.
+        """Selects a database and adds to db_list.
         
         Show the database at dbListWidget in ManagerFrame.
         Emit a broadcastRequested signal containing an added database information.
@@ -127,7 +127,32 @@ class DBMgrApp(BaseApp):
         )
         name, path = reversed(os.path.split(db_path))
         self.db_list.append((name, path))
-        self.managerFrame.add_db(name, path)
+        # create a database widget
+        widget = DBWidget(name, path)
+        widget.removeButton.clicked.connect(self.removeDB)
+        item = QListWidgetItem(self.managerFrame.dbListWidget)
+        item.setSizeHint(widget.sizeHint())
+        self.managerFrame.dbListWidget.addItem(item)
+        self.managerFrame.dbListWidget.setItemWidget(item, widget)
+        # emit a broadcastRequested signal
+        msg = {"db": [{"name": db[0], "path": db[1]} for db in self.db_list]}
+        self.broadcastRequested.emit("dbbus", json.dumps(msg))
+
+    @pyqtSlot()
+    def removeDB(self):
+        """Selects a database and removes from db_list.
+        
+        Show the database at dbListWidget in ManagerFrame.
+        Emit a broadcastRequested signal containing an added database information.
+        """
+        # find the selected database
+        widget = self.sender().parent()
+        gp = widget.mapToGlobal(QPoint())
+        lp = self.managerFrame.dbListWidget.viewport().mapFromGlobal(gp)
+        row = self.managerFrame.dbListWidget.row(self.managerFrame.dbListWidget.itemAt(lp))
+        # remove the database widget
+        del self.db_list[row]
+        self.managerFrame.dbListWidget.takeItem(row)
         # emit a broadcastRequested signal
         msg = {"db": [{"name": db[0], "path": db[1]} for db in self.db_list]}
         self.broadcastRequested.emit("dbbus", json.dumps(msg))
