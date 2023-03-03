@@ -4,6 +4,7 @@ App module for adding and removing available databases.
 
 import os
 import json
+from collections import namedtuple
 
 from PyQt5.QtCore import QPoint, pyqtSlot
 from PyQt5.QtWidgets import (QWidget, QLabel, QPushButton, QFileDialog,
@@ -91,12 +92,13 @@ class DBMgrApp(BaseApp):
 
     Attributes:
         dbList: A list for storing available databases.
-          Each element is a tuple which represents a database.
+          Each element is a namedtuple which represents a database.
           It has two elements; file name and absolute path.
         managerFrame: A frame that manages and shows available databases.
     """
     def __init__(self, name: str):
         super().__init__(name)
+        self.DB = namedtuple("DB", ["path", "name"])
         self.dbList = []
         self.managerFrame = ManagerFrame()
         # connect signals to slots
@@ -124,17 +126,17 @@ class DBMgrApp(BaseApp):
         )
         if not dbPath:
             return
-        name, path = reversed(os.path.split(dbPath))
-        self.dbList.append((name, path))
+        db = self.DB._make(os.path.split(dbPath))
+        self.dbList.append(db)
         # create a database widget
-        widget = DBWidget(name, path, self.managerFrame.dbListWidget)
+        widget = DBWidget(db.name, db.path, self.managerFrame.dbListWidget)
         widget.removeButton.clicked.connect(self.removeDB)
         item = QListWidgetItem(self.managerFrame.dbListWidget)
         item.setSizeHint(widget.sizeHint())
         self.managerFrame.dbListWidget.addItem(item)
         self.managerFrame.dbListWidget.setItemWidget(item, widget)
         # emit a broadcastRequested signal
-        msg = {"db": [{"name": db[0], "path": db[1]} for db in self.dbList]}
+        msg = {"db": [db._asdict() for db in self.dbList]}
         self.broadcastRequested.emit("dbbus", json.dumps(msg))
 
     @pyqtSlot()
@@ -146,12 +148,11 @@ class DBMgrApp(BaseApp):
         """
         # find the selected database
         widget = self.sender().parent()
-        gp = widget.mapToGlobal(QPoint())
-        lp = self.managerFrame.dbListWidget.viewport().mapFromGlobal(gp)
-        row = self.managerFrame.dbListWidget.row(self.managerFrame.dbListWidget.itemAt(lp))
+        db = self.DB(name=widget.name, path=widget.path)
+        row = self.dbList.index(db)
         # remove the database widget
         del self.dbList[row]
         self.managerFrame.dbListWidget.takeItem(row)
         # emit a broadcastRequested signal
-        msg = {"db": [{"name": db[0], "path": db[1]} for db in self.dbList]}
+        msg = {"db": [db._asdict() for db in self.dbList]}
         self.broadcastRequested.emit("dbbus", json.dumps(msg))
