@@ -96,7 +96,7 @@ class DBMgrApp(BaseApp):
           It has two elements; file name and absolute path.
         managerFrame: A frame that manages and shows available databases.
     """
-    DB = namedtuple("Db", ["path", "name"])
+    DB = namedtuple("DB", ["path", "name"])
 
     def __init__(self, name: str):
         super().__init__(name)
