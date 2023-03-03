@@ -6,7 +6,7 @@ import os
 import json
 from collections import namedtuple
 
-from PyQt5.QtCore import QPoint, pyqtSlot
+from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import (QWidget, QLabel, QPushButton, QFileDialog,
                              QHBoxLayout, QVBoxLayout, QListWidget, QListWidgetItem)
 
@@ -96,9 +96,10 @@ class DBMgrApp(BaseApp):
           It has two elements; file name and absolute path.
         managerFrame: A frame that manages and shows available databases.
     """
+    DB = namedtuple("Db", ["path", "name"])
+
     def __init__(self, name: str):
         super().__init__(name)
-        self.DB = namedtuple("DB", ["path", "name"])
         self.dbList = []
         self.managerFrame = ManagerFrame()
         # connect signals to slots
@@ -126,7 +127,7 @@ class DBMgrApp(BaseApp):
         )
         if not dbPath:
             return
-        db = self.DB._make(os.path.split(dbPath))
+        db = DBMgrApp.DB._make(os.path.split(dbPath))
         self.dbList.append(db)
         # create a database widget
         widget = DBWidget(db.name, db.path, self.managerFrame.dbListWidget)
@@ -148,7 +149,7 @@ class DBMgrApp(BaseApp):
         """
         # find the selected database
         widget = self.sender().parent()
-        db = self.DB(name=widget.name, path=widget.path)
+        db = DBMgrApp.DB(name=widget.name, path=widget.path)
         row = self.dbList.index(db)
         # remove the database widget
         del self.dbList[row]
