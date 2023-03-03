@@ -5,8 +5,8 @@ App module for generating and showing a random number.
 """
 
 import sys
+import os
 import json
-from collections import namedtuple
 
 from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QDockWidget, QWidget,
@@ -29,11 +29,6 @@ class GeneratorFrame(QWidget):
             parent: A parent widget.
         """
         super().__init__(parent=parent)
-        # TODO(BECATRUE): Remove mock_db when connecting to real databases is implemented.
-        # For testing whether dbBox works correctly, I added a definite path temporarily.
-        # Later, It will have to be implemented as below.
-        # - When this frame is created, dbList is created as ["None"]
-        # - When this app receives a global signal from database bus, dbList is updated.
         self._initWidget()
 
     def _initWidget(self):
@@ -79,13 +74,17 @@ class NumGenApp(BaseApp):
     Communicate with the backend.
 
     Attributes:
+        dbList: A list for storing available databases.
+          Each element is a dictionary which represents a database.
+          It has two elements; file name and absolute path.
+        dbName: A name of the selected database.
         generatorFrame: A frame that requests generating a random number.
         viewerFrame: A frame that shows the generated number.
     """
     def __init__(self, name: str):
         super().__init__(name)
-        self.dbList = []
-        self.dbPath = ""
+        self.dbList = [{"path": "", "name": ""}]
+        self.dbName = ""
         self.generatorFrame = GeneratorFrame()
         self.viewerFrame = ViewerFrame()
         # connect signals to slots
@@ -123,7 +122,7 @@ class NumGenApp(BaseApp):
     @pyqtSlot()
     def setDB(self):
         """Sets the database to store the number."""
-        self.dbPath = self.generatorFrame.dbBox.currentText()
+        self.dbName = self.generatorFrame.dbBox.currentText()
         self.viewerFrame.statusLabel.setText("database updated")
 
     @pyqtSlot()
@@ -133,7 +132,8 @@ class NumGenApp(BaseApp):
         num = generate()
         self.viewerFrame.numberLabel.setText(f"generated number: {num}")
         # save the generated number
-        is_save_success = write(self.dbPath, "number", num)
+        dbPath = next(db["path"] for db in self.dbList if db["name"] == self.dbName)
+        is_save_success = write(os.path.join(dbPath, self.dbName), "number", num)
         if is_save_success:
             self.viewerFrame.statusLabel.setText("number saved successfully")
         else:
