@@ -5,6 +5,8 @@ App module for generating and showing a random number.
 """
 
 import sys
+import json
+from collections import namedtuple
 
 from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QDockWidget, QWidget,
@@ -32,14 +34,11 @@ class GeneratorFrame(QWidget):
         # Later, It will have to be implemented as below.
         # - When this frame is created, dbList is created as ["None"]
         # - When this app receives a global signal from database bus, dbList is updated.
-        self.dbList = ["None", "./db.sqlite"]
         self._initWidget()
 
     def _initWidget(self):
         """Initializes widgets in the frame."""
         self.dbBox = QComboBox(self)
-        for dbPath in self.dbList:
-            self.dbBox.addItem(dbPath)
         self.generateButton = QPushButton("generate number", self)
         # set layout
         layout = QVBoxLayout(self)
@@ -85,11 +84,13 @@ class NumGenApp(BaseApp):
     """
     def __init__(self, name: str):
         super().__init__(name)
-        self.dbPath = "None"
+        self.dbList = []
+        self.dbPath = ""
         self.generatorFrame = GeneratorFrame()
         self.viewerFrame = ViewerFrame()
         # connect signals to slots
-        self.generatorFrame.dbBox.currentIndexChanged.connect(self.setDatabase)
+        self.received.connect(self.updateDB)
+        self.generatorFrame.dbBox.currentIndexChanged.connect(self.setDB)
         self.generatorFrame.generateButton.clicked.connect(self.generateNumber)
 
     def frames(self):
@@ -99,9 +100,28 @@ class NumGenApp(BaseApp):
             A tuple containing frames for showing.
         """
         return (self.generatorFrame, self.viewerFrame)
+    
+    @pyqtSlot(str, str)
+    def updateDB(self, bus_name: str, msg: str):
+        """Updates the database list using the transferred message.
+
+        This is a slot for received signal.
+
+        Args:
+            bus_name: A name of the bus that transfered the signal.
+            msg: An input message to be transferred through the bus.
+        """
+        if bus_name == "dbbus":
+            msg = json.loads(msg)
+            self.dbList = [{"path": "", "name": ""}]
+            self.generatorFrame.dbBox.clear()
+            self.generatorFrame.dbBox.addItem("")
+            for db in msg["db"]:
+                self.dbList.append(db)
+                self.generatorFrame.dbBox.addItem(db["name"])
 
     @pyqtSlot()
-    def setDatabase(self):
+    def setDB(self):
         """Sets the database to store the number."""
         self.dbPath = self.generatorFrame.dbBox.currentText()
         self.viewerFrame.statusLabel.setText("database updated")
