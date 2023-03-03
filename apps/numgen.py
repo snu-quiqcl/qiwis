@@ -21,17 +21,21 @@ class GeneratorFrame(QWidget):
           into which the generated number is saved.
         generateButton: A button for generating a new number.
     """
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent=None):
+        """
+        Args:
+            parent: A parent widget.
+        """
+        super().__init__(parent=parent)
         # TODO(BECATRUE): Remove mock_db when connecting to real databases is implemented.
         # For testing whether dbBox works correctly, I added a definite path temporarily.
         # Later, It will have to be implemented as below.
         # - When this frame is created, dbList is created as ["None"]
         # - When this app receives a global signal from database bus, dbList is updated.
         self.dbList = ["None", "./db.sqlite"]
-        self.init_widget()
+        self._initWidget()
 
-    def init_widget(self):
+    def _initWidget(self):
         """Initializes widgets in the frame."""
         self.dbBox = QComboBox(self)
         for dbPath in self.dbList:
@@ -51,11 +55,15 @@ class ViewerFrame(QWidget):
           (database updated, random number generated, etc.)
         numberLabel: A label for showing the recently generated number.
     """
-    def __init__(self):
-        super().__init__()
-        self.init_widget()
+    def __init__(self, parent=None):
+        """
+        Args:
+            parent: A parent widget.
+        """
+        super().__init__(parent=parent)
+        self._initWidget()
 
-    def init_widget(self):
+    def _initWidget(self):
         """Initializes widgets in the frame."""
         self.statusLabel = QLabel("initialized", self)
         self.numberLabel = QLabel("not generated", self)
