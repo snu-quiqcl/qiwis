@@ -99,7 +99,7 @@ class NumGenApp(BaseApp):
             A tuple containing frames for showing.
         """
         return (self.generatorFrame, self.viewerFrame)
-    
+
     @pyqtSlot(str, str)
     def updateDB(self, bus_name: str, msg: str):
         """Updates the database list using the transferred message.
