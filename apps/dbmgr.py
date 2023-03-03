@@ -112,7 +112,7 @@ class DBMgrApp(BaseApp):
             A tuple containing frames for showing.
         """
         return (self.managerFrame,)
-    
+
     def sendDB(self):
         """Emits a broadcastRequested signal with the database list."""
         msg = {"db": [db._asdict() for db in self.dbList]}
@@ -156,8 +156,9 @@ class DBMgrApp(BaseApp):
         db = DBMgrApp.DB(name=widget.name, path=widget.path)
         row = self.dbList.index(db)
         # remove the database widget
-        del self.dbList[row]
         item = self.managerFrame.dbListWidget.takeItem(row)
-        item.deleteLater()
+        del self.dbList[row]
+        del item
+        widget.deleteLater()
         # send the database list
         self.sendDB()
