@@ -112,6 +112,11 @@ class DBMgrApp(BaseApp):
             A tuple containing frames for showing.
         """
         return (self.managerFrame,)
+    
+    def sendDB(self):
+        """Emits a broadcastRequested signal with the database list."""
+        msg = {"db": [db._asdict() for db in self.dbList]}
+        self.broadcastRequested.emit("dbbus", json.dumps(msg))
 
     @pyqtSlot()
     def addDB(self):
@@ -136,9 +141,8 @@ class DBMgrApp(BaseApp):
         item.setSizeHint(widget.sizeHint())
         self.managerFrame.dbListWidget.addItem(item)
         self.managerFrame.dbListWidget.setItemWidget(item, widget)
-        # emit a broadcastRequested signal
-        msg = {"db": [db._asdict() for db in self.dbList]}
-        self.broadcastRequested.emit("dbbus", json.dumps(msg))
+        # send the database list
+        self.sendDB()
 
     @pyqtSlot()
     def removeDB(self):
@@ -153,7 +157,7 @@ class DBMgrApp(BaseApp):
         row = self.dbList.index(db)
         # remove the database widget
         del self.dbList[row]
-        self.managerFrame.dbListWidget.takeItem(row)
-        # emit a broadcastRequested signal
-        msg = {"db": [db._asdict() for db in self.dbList]}
-        self.broadcastRequested.emit("dbbus", json.dumps(msg))
+        item = self.managerFrame.dbListWidget.takeItem(row)
+        item.deleteLater()
+        # send the database list
+        self.sendDB()
