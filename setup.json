@@ -5,7 +5,10 @@
             "class": "NumGenApp",
             "show": true,
             "pos": "left",
-            "bus": ["dbbus"]
+            "bus": ["dbbus"],
+            "args": {
+                "table": "number"
+            }
         },
         "dbmgr": {
             "module": "apps.dbmgr",

@@ -81,8 +81,13 @@ class NumGenApp(BaseApp):
         generatorFrame: A frame that requests generating a random number.
         viewerFrame: A frame that shows the generated number.
     """
-    def __init__(self, name: str):
+    def __init__(self, name: str, table: str="number"):
+        """
+        Args:
+            table: A name of table to store the generated number.
+        """
         super().__init__(name)
+        self.table = table
         self.dbs = {"": ""}
         self.dbName = ""
         self.generatorFrame = GeneratorFrame()
@@ -144,7 +149,7 @@ class NumGenApp(BaseApp):
         self.viewerFrame.numberLabel.setText(f"generated number: {num}")
         # save the generated number
         dbPath = self.dbs[self.dbName]
-        is_save_success = write(os.path.join(dbPath, self.dbName), "number", num)
+        is_save_success = write(os.path.join(dbPath, self.dbName), self.table, num)
         if is_save_success:
             self.viewerFrame.statusLabel.setText("number saved successfully")
         else:
