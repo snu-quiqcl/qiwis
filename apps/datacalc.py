@@ -2,6 +2,7 @@
 App module for showing the sum of two values from selected databases.
 """
 
+import os
 import json
 
 from PyQt5.QtCore import pyqtSlot
@@ -41,7 +42,21 @@ class ViewerFrame(QWidget):
 
 
 class DataCalcApp(BaseApp):
-    def __init__(self, name: str, tables: list=["A", "B"]):
+    """App for showing the sum of two values from selected databases.
+
+    Manage a viewer frame.
+    Communicate with the backend.
+
+    Attributes:
+        tables: A dictionary containing table names of databases for using calculation.
+          It is offered as the constructor argument.
+        dbs: A dictionary for storing available databases.
+          Each element represents a database.
+          A key is a file name and its value is an absolute path.
+        dbNames: A dictionary for storing names of the selected databases.
+        viewerFrame: A frame that selects databases and shows the calculated number.
+    """
+    def __init__(self, name: str, tables: dict = {"A": "A", "B": "B"}):
         super().__init__(name)
         self.tables = tables
         self.dbs = {"": ""}
@@ -108,3 +123,18 @@ class DataCalcApp(BaseApp):
     @pyqtSlot()
     def calculateSum(self):
         """Calculates and shows the sum of two values when the button is clicked."""
+        result = 0
+        for name, dbName in self.dbNames.items():
+            dbPath = self.dbs[dbName]
+            table = self.tables[name]
+            value = read(os.path.join(dbPath, dbName), table)
+            if value is None:
+                self.viewerFrame.numberLabel.setText(f"failed to fetch number from {name}")
+                break
+            if type(value) != int:
+                self.viewerFrame.numberLabel.setText(f"The type of value from {name} "
+                                                     f"should be an integer")
+                break
+            result += value
+        else:
+            self.viewerFrame.numberLabel.setText(f"sum: {result}")

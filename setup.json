@@ -24,7 +24,10 @@
             "pos": "top",
             "bus": ["dbbus"],
             "args": {
-                "tables": ["A", "B"]
+                "tables": {
+                    "A": "number",
+                    "B": "B"
+                }
             }
         }
     },
