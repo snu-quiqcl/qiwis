@@ -2,6 +2,8 @@
 App module for showing the sum of two values from selected databases.
 """
 
+import json
+
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QComboBox, QPushButton, QLabel
 
@@ -39,9 +41,13 @@ class ViewerFrame(QWidget):
 
 
 class DataCalcApp(BaseApp):
-    def __init__(self, name: str):
+    def __init__(self, name: str, tables: list=["A", "B"]):
         super().__init__(name)
+        self.tables = tables
+        self.dbs = {"": ""}
         self.viewerFrame = ViewerFrame()
+        # connect signals to slots
+        self.received.connect(self.updateDB)
 
     def frames(self):
         """Gets frames for which are managed by the app.
@@ -50,3 +56,35 @@ class DataCalcApp(BaseApp):
             A tuple containing frames for showing.
         """
         return (self.viewerFrame,)
+    
+    @pyqtSlot(str, str)
+    def updateDB(self, busName: str, msg: str):
+        """Updates the database list using the transferred message.
+
+        This is a slot for received signal.
+
+        Args:
+            busName: A name of the bus that transfered the signal.
+            msg: An input message to be transferred through the bus.
+              The structure follows the message protocol of DBMgrApp.
+        """
+        if busName == "dbbus":
+            try:
+                msg = json.loads(msg)
+            except json.JSONDecodeError as e:
+                print(f"apps.datacalc.updateDB(): {e!r}")
+            else:
+                self.dbs = {"": ""}
+                for dbBox in self.viewerFrame.dbBoxes.values():
+                    dbBox.clear()
+                    dbBox.addItem("")
+                for db in msg.get("db", ()):
+                    if all(key in db for key in ("name", "path")):
+                        name, path = db["name"], db["path"]
+                        self.dbs[name] = path
+                        for dbBox in self.viewerFrame.dbBoxes.values():
+                            dbBox.addItem(name)
+                    else:
+                        print("The database has no such key; name or path.")
+        else:
+            print("The message is ignored.")
