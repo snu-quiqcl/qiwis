@@ -74,16 +74,16 @@ class NumGenApp(BaseApp):
     Communicate with the backend.
 
     Attributes:
-        dbList: A list for storing available databases.
-          Each element is a dictionary which represents a database.
-          It has two elements; file name and absolute path.
+        dbDict: A dictionary for storing available databases.
+          Each element represents a database.
+          A key is a file name and its value is an absolute path.
         dbName: A name of the selected database.
         generatorFrame: A frame that requests generating a random number.
         viewerFrame: A frame that shows the generated number.
     """
     def __init__(self, name: str):
         super().__init__(name)
-        self.dbList = [{"path": "", "name": ""}]
+        self.dbs = {"": ""}
         self.dbName = ""
         self.generatorFrame = GeneratorFrame()
         self.viewerFrame = ViewerFrame()
@@ -117,12 +117,18 @@ class NumGenApp(BaseApp):
             except json.JSONDecodeError as e:
                 print(f"apps.numgen.updateDB(): {e!r}")
             else:
-                self.dbList = [{"path": "", "name": ""}]
+                self.dbs = {"": ""}
                 self.generatorFrame.dbBox.clear()
                 self.generatorFrame.dbBox.addItem("")
-                for db in msg["db"]:
-                    self.dbList.append(db)
-                    self.generatorFrame.dbBox.addItem(db["name"])
+                for db in msg.get("db", ()):
+                    if all(key in db for key in ("name", "path")):
+                        name, path = db["name"], db["path"]
+                        self.dbs[name] = path
+                        self.generatorFrame.dbBox.addItem(name)
+                    else:
+                        print("The database has no such key; name or path.")
+        else:
+            print("The message is ignored.")
 
     @pyqtSlot()
     def setDB(self):
@@ -137,7 +143,7 @@ class NumGenApp(BaseApp):
         num = generate()
         self.viewerFrame.numberLabel.setText(f"generated number: {num}")
         # save the generated number
-        dbPath = next(db["path"] for db in self.dbList if db["name"] == self.dbName)
+        dbPath = self.dbs[self.dbName]
         is_save_success = write(os.path.join(dbPath, self.dbName), "number", num)
         if is_save_success:
             self.viewerFrame.statusLabel.setText("number saved successfully")
