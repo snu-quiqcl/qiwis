@@ -101,23 +101,28 @@ class NumGenApp(BaseApp):
         return (self.generatorFrame, self.viewerFrame)
 
     @pyqtSlot(str, str)
-    def updateDB(self, bus_name: str, msg: str):
+    def updateDB(self, busName: str, msg: str):
         """Updates the database list using the transferred message.
 
         This is a slot for received signal.
 
         Args:
-            bus_name: A name of the bus that transfered the signal.
+            busName: A name of the bus that transfered the signal.
             msg: An input message to be transferred through the bus.
+              The structure follows the message protocol of DBMgrApp.
         """
-        if bus_name == "dbbus":
-            msg = json.loads(msg)
-            self.dbList = [{"path": "", "name": ""}]
-            self.generatorFrame.dbBox.clear()
-            self.generatorFrame.dbBox.addItem("")
-            for db in msg["db"]:
-                self.dbList.append(db)
-                self.generatorFrame.dbBox.addItem(db["name"])
+        if busName == "dbbus":
+            try:
+                msg = json.loads(msg)
+            except json.JSONDecodeError as e:
+                print(f"apps.numgen.updateDB(): {e!r}")
+            else:
+                self.dbList = [{"path": "", "name": ""}]
+                self.generatorFrame.dbBox.clear()
+                self.generatorFrame.dbBox.addItem("")
+                for db in msg["db"]:
+                    self.dbList.append(db)
+                    self.generatorFrame.dbBox.addItem(db["name"])
 
     @pyqtSlot()
     def setDB(self):
