@@ -5,6 +5,8 @@ App module for generating and showing a random number.
 """
 
 import sys
+import os
+import json
 
 from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QDockWidget, QWidget,
@@ -21,21 +23,17 @@ class GeneratorFrame(QWidget):
           into which the generated number is saved.
         generateButton: A button for generating a new number.
     """
-    def __init__(self):
-        super().__init__()
-        # TODO(BECATRUE): Remove mock_db when connecting to real databases is implemented.
-        # For testing whether dbBox works correctly, I added a definite path temporarily.
-        # Later, It will have to be implemented as below.
-        # - When this frame is created, dbList is created as ["None"]
-        # - When this app receives a global signal from database bus, dbList is updated.
-        self.dbList = ["None", "./db.sqlite"]
-        self.init_widget()
+    def __init__(self, parent=None):
+        """
+        Args:
+            parent: A parent widget.
+        """
+        super().__init__(parent=parent)
+        self._initWidget()
 
-    def init_widget(self):
+    def _initWidget(self):
         """Initializes widgets in the frame."""
         self.dbBox = QComboBox(self)
-        for dbPath in self.dbList:
-            self.dbBox.addItem(dbPath)
         self.generateButton = QPushButton("generate number", self)
         # set layout
         layout = QVBoxLayout(self)
@@ -51,11 +49,15 @@ class ViewerFrame(QWidget):
           (database updated, random number generated, etc.)
         numberLabel: A label for showing the recently generated number.
     """
-    def __init__(self):
-        super().__init__()
-        self.init_widget()
+    def __init__(self, parent=None):
+        """
+        Args:
+            parent: A parent widget.
+        """
+        super().__init__(parent=parent)
+        self._initWidget()
 
-    def init_widget(self):
+    def _initWidget(self):
         """Initializes widgets in the frame."""
         self.statusLabel = QLabel("initialized", self)
         self.numberLabel = QLabel("not generated", self)
@@ -72,16 +74,27 @@ class NumGenApp(BaseApp):
     Communicate with the backend.
 
     Attributes:
+        dbDict: A dictionary for storing available databases.
+          Each element represents a database.
+          A key is a file name and its value is an absolute path.
+        dbName: A name of the selected database.
         generatorFrame: A frame that requests generating a random number.
         viewerFrame: A frame that shows the generated number.
     """
-    def __init__(self, name: str):
+    def __init__(self, name: str, table: str = "number"):
+        """
+        Args:
+            table: A name of table to store the generated number.
+        """
         super().__init__(name)
-        self.dbPath = "None"
+        self.table = table
+        self.dbs = {"": ""}
+        self.dbName = ""
         self.generatorFrame = GeneratorFrame()
         self.viewerFrame = ViewerFrame()
         # connect signals to slots
-        self.generatorFrame.dbBox.currentIndexChanged.connect(self.setDatabase)
+        self.received.connect(self.updateDB)
+        self.generatorFrame.dbBox.currentIndexChanged.connect(self.setDB)
         self.generatorFrame.generateButton.clicked.connect(self.generateNumber)
 
     def frames(self):
@@ -92,10 +105,45 @@ class NumGenApp(BaseApp):
         """
         return (self.generatorFrame, self.viewerFrame)
 
+    @pyqtSlot(str, str)
+    def updateDB(self, busName: str, msg: str):
+        """Updates the database list using the transferred message.
+
+        This is a slot for received signal.
+
+        Args:
+            busName: A name of the bus that transfered the signal.
+            msg: An input message to be transferred through the bus.
+              The structure follows the message protocol of DBMgrApp.
+        """
+        if busName == "dbbus":
+            try:
+                msg = json.loads(msg)
+            except json.JSONDecodeError as e:
+                print(f"apps.numgen.updateDB(): {e!r}")
+            else:
+                orgDbName = self.dbName
+                self.dbs = {"": ""}
+                self.generatorFrame.dbBox.clear()
+                self.generatorFrame.dbBox.addItem("")
+                for db in msg.get("db", ()):
+                    if all(key in db for key in ("name", "path")):
+                        name, path = db["name"], db["path"]
+                        self.dbs[name] = path
+                        self.generatorFrame.dbBox.addItem(name)
+                    else:
+                        print(f"The message was ignored because "
+                              f"the database {db} has no such key; name or path.")
+                if orgDbName in self.dbs:
+                    self.generatorFrame.dbBox.setCurrentText(orgDbName)
+        else:
+            print(f"The message was ignored because "
+                  f"the treatment for the bus {busName} is not implemented.")
+
     @pyqtSlot()
-    def setDatabase(self):
+    def setDB(self):
         """Sets the database to store the number."""
-        self.dbPath = self.generatorFrame.dbBox.currentText()
+        self.dbName = self.generatorFrame.dbBox.currentText()
         self.viewerFrame.statusLabel.setText("database updated")
 
     @pyqtSlot()
@@ -105,7 +153,8 @@ class NumGenApp(BaseApp):
         num = generate()
         self.viewerFrame.numberLabel.setText(f"generated number: {num}")
         # save the generated number
-        is_save_success = write(self.dbPath, "number", num)
+        dbPath = self.dbs[self.dbName]
+        is_save_success = write(os.path.join(dbPath, self.dbName), self.table, num)
         if is_save_success:
             self.viewerFrame.statusLabel.setText("number saved successfully")
         else:

@@ -3,9 +3,12 @@
         "numgen": {
             "module": "apps.numgen",
             "class": "NumGenApp",
-            "show": false,
+            "show": true,
             "pos": "left",
-            "bus": []
+            "bus": ["dbbus"],
+            "args": {
+                "table": "number"
+            }
         },
         "dbmgr": {
             "module": "apps.dbmgr",

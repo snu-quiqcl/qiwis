@@ -30,13 +30,13 @@ def read(db_path: str, table: str):
 
     Args:
         db_path: A path of database file.
-          It will be "None" if the user does not select a specific database. 
+          It will be an empty string if the user does not select a specific database. 
         table: A name of table to read.
 
     Returns:
         The read value if reading is successful, otherwise None.
     """
-    if db_path == "None":
+    if db_path == "":
         return None
     con = sqlite3.connect(db_path)
     try:
@@ -68,14 +68,14 @@ def write(db_path: str, table: str, value) -> bool:
 
     Args:
         db_path: A path of database file.
-          It will be None if the user does not select a specific database.
+          It will be an empty string if the user does not select a specific database.
         table: A name of table to write down.
         value: A value to write to the given location.
 
     Returns:
         True if writing is successful, otherwise False.
     """
-    if db_path == "None":
+    if db_path == "":
         return False
     con = sqlite3.connect(db_path)
     try:
