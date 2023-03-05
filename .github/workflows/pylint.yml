@@ -24,6 +24,7 @@ jobs:
         printf "[MASTER]\n" > ~/.pylintrc
         printf "extension-pkg-whitelist=PyQt5\n" >> ~/.pylintrc
         printf "[BASIC]\n" >> ~/.pylintrc
+        printf "argument-rgx=_?_?(?:(?:[a-z0-9]+(?:_[a-z0-9]+)*_?_?)|(?:[a-z0-9]+(?:[A-Z][a-z0-9]*)*))$\n" >> ~/.pylintrc
         printf "attr-rgx=_?_?(?:(?:[a-z0-9]+(?:_[a-z0-9]+)*_?_?)|(?:[a-z0-9]+(?:[A-Z][a-z0-9]*)*))$\n" >> ~/.pylintrc
         printf "method-rgx=_?_?(?:(?:[a-z0-9]+(?:_[a-z0-9]+)*_?_?)|(?:[a-z0-9]+(?:[A-Z][a-z0-9]*)*))$\n" >> ~/.pylintrc
         printf "variable-rgx=_?_?(?:(?:[a-z0-9]+(?:_[a-z0-9]+)*_?_?)|(?:[a-z0-9]+(?:[A-Z][a-z0-9]*)*))$\n" >> ~/.pylintrc
