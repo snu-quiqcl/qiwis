@@ -1,0 +1,3 @@
+"""
+App module for logging.
+"""
