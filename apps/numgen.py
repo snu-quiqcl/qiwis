@@ -132,14 +132,13 @@ class NumGenApp(BaseApp):
                         self.dbs[name] = path
                         self.generatorFrame.dbBox.addItem(name)
                     else:
-                        print(f"""The message was ignored because
-                        the database {db} has no such key; name or path.""")
-                        print("And also the message is ignored.")
+                        print(f"The message was ignored because "
+                              f"the database {db} has no such key; name or path.")
                 if orgDbName in self.dbs:
                     self.generatorFrame.dbBox.setCurrentText(orgDbName)
         else:
-            print(f"""The message was ignored because
-            the treatment for the bus {busName} is not implemented.""")
+            print(f"The message was ignored because "
+                  f"the treatment for the bus {busName} is not implemented.")
 
     @pyqtSlot()
     def setDB(self):
