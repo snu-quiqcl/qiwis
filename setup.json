@@ -22,7 +22,10 @@
             "class": "DataCalcApp",
             "show": true,
             "pos": "top",
-            "bus": ["dbbus"]
+            "bus": ["dbbus"],
+            "args": {
+                "tables": ["A", "B"]
+            }
         }
     },
     "bus": {
