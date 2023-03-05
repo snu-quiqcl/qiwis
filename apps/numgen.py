@@ -81,7 +81,7 @@ class NumGenApp(BaseApp):
         generatorFrame: A frame that requests generating a random number.
         viewerFrame: A frame that shows the generated number.
     """
-    def __init__(self, name: str, table: str="number"):
+    def __init__(self, name: str, table: str = "number"):
         """
         Args:
             table: A name of table to store the generated number.
@@ -122,6 +122,7 @@ class NumGenApp(BaseApp):
             except json.JSONDecodeError as e:
                 print(f"apps.numgen.updateDB(): {e!r}")
             else:
+                orgDbName = self.dbName
                 self.dbs = {"": ""}
                 self.generatorFrame.dbBox.clear()
                 self.generatorFrame.dbBox.addItem("")
@@ -131,9 +132,14 @@ class NumGenApp(BaseApp):
                         self.dbs[name] = path
                         self.generatorFrame.dbBox.addItem(name)
                     else:
-                        print("The database has no such key; name or path.")
+                        print(f"""The message was ignored because
+                        the database {db} has no such key; name or path.""")
+                        print("And also the message is ignored.")
+                if orgDbName in self.dbs:
+                    self.generatorFrame.dbBox.setCurrentText(orgDbName)
         else:
-            print("The message is ignored.")
+            print(f"""The message was ignored because
+            the treatment for the bus {busName} is not implemented.""")
 
     @pyqtSlot()
     def setDB(self):
