@@ -78,6 +78,7 @@ class DataCalcApp(BaseApp):
             except json.JSONDecodeError as e:
                 print(f"apps.datacalc.updateDB(): {e!r}")
             else:
+                orgDbNames = self.dbNames.copy()
                 self.dbs = {"": ""}
                 for dbBox in self.viewerFrame.dbBoxes.values():
                     dbBox.clear()
@@ -89,9 +90,14 @@ class DataCalcApp(BaseApp):
                         for dbBox in self.viewerFrame.dbBoxes.values():
                             dbBox.addItem(name)
                     else:
-                        print("The database has no such key; name or path.")
+                        print(f"The message was ignored because "
+                              f"the database {db} has no such key; name or path.")
+                for name, orgDbName in orgDbNames.items():
+                    if orgDbName in self.dbs:
+                        self.viewerFrame.dbBoxes[name].setCurrentText(orgDbName)
         else:
-            print("The message is ignored.")
+            print(f"The message was ignored because "
+                  f"the treatment for the bus {busName} is not implemented.")
 
     @pyqtSlot()
     def setDB(self):
