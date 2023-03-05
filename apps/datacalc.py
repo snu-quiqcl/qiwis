@@ -56,7 +56,7 @@ class DataCalcApp(BaseApp):
         dbNames: A dictionary for storing names of the selected databases.
         viewerFrame: A frame that selects databases and shows the calculated number.
     """
-    def __init__(self, name: str, tables: dict = {"A": "A", "B": "B"}):
+    def __init__(self, name: str, tables: dict):
         super().__init__(name)
         self.tables = tables
         self.dbs = {"": ""}
@@ -75,7 +75,7 @@ class DataCalcApp(BaseApp):
             A tuple containing frames for showing.
         """
         return (self.viewerFrame,)
-    
+
     @pyqtSlot(str, str)
     def updateDB(self, busName: str, msg: str):
         """Updates the database list using the transferred message.
@@ -131,7 +131,7 @@ class DataCalcApp(BaseApp):
             if value is None:
                 self.viewerFrame.numberLabel.setText(f"failed to fetch number from {name}")
                 break
-            if type(value) != int:
+            if not isinstance(value, int):
                 self.viewerFrame.numberLabel.setText(f"The type of value from {name} "
                                                      f"should be an integer")
                 break
