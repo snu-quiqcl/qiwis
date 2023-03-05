@@ -45,9 +45,13 @@ class DataCalcApp(BaseApp):
         super().__init__(name)
         self.tables = tables
         self.dbs = {"": ""}
+        self.dbNames = {"A": "", "B": ""}
         self.viewerFrame = ViewerFrame()
         # connect signals to slots
         self.received.connect(self.updateDB)
+        for dbBox in self.viewerFrame.dbBoxes.values():
+            dbBox.currentIndexChanged.connect(self.setDB)
+        self.viewerFrame.calculateButton.clicked.connect(self.calculateSum)
 
     def frames(self):
         """Gets frames for which are managed by the app.
@@ -88,3 +92,13 @@ class DataCalcApp(BaseApp):
                         print("The database has no such key; name or path.")
         else:
             print("The message is ignored.")
+
+    @pyqtSlot()
+    def setDB(self):
+        """Sets the databases to fetch the numbers."""
+        for name, dbBox in self.viewerFrame.dbBoxes.items():
+            self.dbNames[name] = dbBox.currentText()
+
+    @pyqtSlot()
+    def calculateSum(self):
+        """Calculates and shows the sum of two values when the button is clicked."""
