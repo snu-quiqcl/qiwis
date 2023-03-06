@@ -4,10 +4,11 @@ App module for polling a number and saving it into the selected database.
 
 import json
 
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import pyqtSlot, QTimer
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QComboBox, QSpinBox, QLabel
 
 from swift.app import BaseApp
+from apps.backend import poller
 
 class ViewerFrame(QWidget):
     """Frame of for polling a number and saving it into the selected database.
@@ -53,6 +54,10 @@ class PollerApp(BaseApp):
         self.viewerFrame = ViewerFrame()
         # connect signals to slots
         self.received.connect(self.updateDB)
+        # start timer
+        self.timer = QTimer(self)
+        self.timer.start(1000 * self.viewerFrame.periodBox.value())
+        self.timer.timeout.connect(self.poll)
 
     def frames(self):
         """Gets frames for which are managed by the app.
@@ -96,3 +101,8 @@ class PollerApp(BaseApp):
         else:
             print(f"The message was ignored because "
                   f"the treatment for the bus {busName} is not implemented.")
+            
+    @pyqtSlot()
+    def poll(self):
+        num = poller()
+        print(num)
