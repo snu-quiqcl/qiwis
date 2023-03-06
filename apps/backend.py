@@ -3,6 +3,7 @@ Backend module for offering various functions.
 """
 
 import random
+import time
 import sqlite3
 
 def generate() -> int:
@@ -12,6 +13,15 @@ def generate() -> int:
         Generated number.
     """
     return random.randrange(0, 100)
+
+
+def poller() -> int:
+    """Generates a predictable number.
+    
+    Returns:
+        Generated number.
+    """
+    return time.time() % 100
 
 
 def read(db_path: str, table: str):
