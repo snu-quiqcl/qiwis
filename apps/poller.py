@@ -12,7 +12,7 @@ from swift.app import BaseApp
 from apps.backend import poller, write
 
 class ViewerFrame(QWidget):
-    """Frame of for polling a number and saving it into the selected database.
+    """Frame of for selecting a database and period, and showing the polled number.
     
     Attributes:
         dbBox: A combobox for selecting a database into which the polled number is saved.
@@ -43,10 +43,25 @@ class ViewerFrame(QWidget):
 
 
 class PollerApp(BaseApp):
+    """App for polling a number and saving it into the selected database.
+
+    Manage a viewer frame.
+    Communicate with the backend.
+
+    Attributes:
+        table: A name of table to store the polled number.
+        dbs: A dictionary for storing available databases.
+          Each element represents a database.
+          A key is a file name and its value is an absolute path.
+        dbName: A name of the selected database.
+        viewerFrame: A frame that selects a database and period, and shows the polled number.
+        count: The polled count. It starts from 0.
+        timer: A QTimer object for polling. The initial interval is a second.
+    """
     def __init__(self, name: str, table: str = "B"):
         """
         Args:
-            table: A name of table to store the polled number.
+            table: See PollerApp.table.
         """
         super().__init__(name)
         self.table = table
