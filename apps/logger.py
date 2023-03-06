@@ -21,7 +21,7 @@ class LoggerFrame(QWidget):
         super().__init__(parent=parent)
         self.logEdit = QTextEdit(self)
         self.clearButton = QPushButton(self)
-        
+
         layout = QVBoxLayout(self)
         layout.addWidget(self.logEdit)
         layout.addWidget(self.clearButton)
