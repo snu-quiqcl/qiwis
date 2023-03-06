@@ -49,6 +49,8 @@ class DataCalcApp(BaseApp):
 
     Attributes:
         tables: A dictionary containing table names of databases for using calculation.
+          It has two elements which represent tables.
+          A key is "A" or "B" and its value is a table name of each database.
           It is offered as the constructor argument.
         dbs: A dictionary for storing available databases.
           Each element represents a database.
@@ -57,6 +59,12 @@ class DataCalcApp(BaseApp):
         viewerFrame: A frame that selects databases and shows the calculated number.
     """
     def __init__(self, name: str, tables: dict):
+        """
+        Args:
+            tables: A dictionary containing table names of databases for using calculation.
+              It has two elements which represent tables.
+              A key is "A" or "B" and its value is a table name of each database.
+        """
         super().__init__(name)
         self.tables = tables
         self.dbs = {"": ""}
