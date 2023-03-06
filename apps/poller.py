@@ -56,6 +56,7 @@ class PollerApp(BaseApp):
         # connect signals to slots
         self.received.connect(self.updateDB)
         self.viewerFrame.dbBox.currentIndexChanged.connect(self.setDB)
+        self.viewerFrame.periodBox.valueChanged.connect(self.setPeriod)
         # start timer
         self.count = 0
         self.timer = QTimer(self)
@@ -104,7 +105,12 @@ class PollerApp(BaseApp):
         else:
             print(f"The message was ignored because "
                   f"the treatment for the bus {busName} is not implemented.")
-            
+
+    @pyqtSlot()
+    def setPeriod(self):
+        """Sets the polling period."""
+        self.timer.start(1000 * self.viewerFrame.periodBox.value())
+
     @pyqtSlot()
     def setDB(self):
         """Sets the database to store the polled number."""
@@ -112,6 +118,7 @@ class PollerApp(BaseApp):
             
     @pyqtSlot()
     def poll(self):
+        """Polls and store a number with the selected period."""
         num = poller()
         self.count += 1
         self.viewerFrame.countLabel.setText(f"polled count: {self.count}")
