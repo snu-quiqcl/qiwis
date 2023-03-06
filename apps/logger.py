@@ -6,10 +6,9 @@ import sys
 
 from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QDockWidget, QWidget,
-                             QVBoxLayout, QComboBox, QPushButton, QLabel, QTextEdit)
+                             QVBoxLayout, QPushButton, QTextEdit)
 
 from swift.app import BaseApp
-from apps.backend import generate, write
 
 class LoggerFrame(QWidget):
     """Frame for logging.

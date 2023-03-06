@@ -38,6 +38,13 @@
             "bus": ["dbbus"],
             "args": {
                 "table": "B"
+            },
+        "logger": {
+            "module": "apps.logger",
+            "class": "LoggerApp",
+            "show": true,
+            "pos": "bottom",
+            "bus": []
             }
         }
     },
