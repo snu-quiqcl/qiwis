@@ -61,9 +61,7 @@ class DataCalcApp(BaseApp):
     def __init__(self, name: str, tables: dict):
         """
         Args:
-            tables: A dictionary containing table names of databases for using calculation.
-              It has two elements which represent tables.
-              A key is "A" or "B" and its value is a table name of each database.
+            tables: See DataCalcApp.tables.
         """
         super().__init__(name)
         self.tables = tables
