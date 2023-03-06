@@ -2,13 +2,14 @@
 App module for polling a number and saving it into the selected database.
 """
 
+import os
 import json
 
 from PyQt5.QtCore import pyqtSlot, QTimer
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QComboBox, QSpinBox, QLabel
 
 from swift.app import BaseApp
-from apps.backend import poller
+from apps.backend import poller, write
 
 class ViewerFrame(QWidget):
     """Frame of for polling a number and saving it into the selected database.
@@ -54,7 +55,9 @@ class PollerApp(BaseApp):
         self.viewerFrame = ViewerFrame()
         # connect signals to slots
         self.received.connect(self.updateDB)
+        self.viewerFrame.dbBox.currentIndexChanged.connect(self.setDB)
         # start timer
+        self.count = 0
         self.timer = QTimer(self)
         self.timer.start(1000 * self.viewerFrame.periodBox.value())
         self.timer.timeout.connect(self.poll)
@@ -103,6 +106,16 @@ class PollerApp(BaseApp):
                   f"the treatment for the bus {busName} is not implemented.")
             
     @pyqtSlot()
+    def setDB(self):
+        """Sets the database to store the polled number."""
+        self.dbName = self.viewerFrame.dbBox.currentText()
+            
+    @pyqtSlot()
     def poll(self):
         num = poller()
-        print(num)
+        self.count += 1
+        self.viewerFrame.countLabel.setText(f"polled count: {self.count}")
+        self.viewerFrame.numberLabel.setText(f"polled number: {num}")
+        # save the polled number
+        dbPath = self.dbs[self.dbName]
+        write(os.path.join(dbPath, self.dbName), self.table, num)

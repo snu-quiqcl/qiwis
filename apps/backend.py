@@ -21,7 +21,7 @@ def poller() -> int:
     Returns:
         Generated number.
     """
-    return time.time() % 100
+    return int(time.time()) % 100
 
 
 def read(db_path: str, table: str):
