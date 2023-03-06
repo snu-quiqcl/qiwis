@@ -16,6 +16,19 @@
             "show": true,
             "pos": "right",
             "bus": []
+        },
+        "datacalc": {
+            "module": "apps.datacalc",
+            "class": "DataCalcApp",
+            "show": true,
+            "pos": "top",
+            "bus": ["dbbus"],
+            "args": {
+                "tables": {
+                    "A": "number",
+                    "B": "B"
+                }
+            }
         }
     },
     "bus": {
