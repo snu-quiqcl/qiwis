@@ -130,7 +130,7 @@ class PollerApp(BaseApp):
     def setDB(self):
         """Sets the database to store the polled number."""
         self.dbName = self.viewerFrame.dbBox.currentText()
-            
+
     @pyqtSlot()
     def poll(self):
         """Polls and store a number with the selected period."""
