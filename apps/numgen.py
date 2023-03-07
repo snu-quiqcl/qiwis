@@ -66,7 +66,8 @@ class NumGenApp(BaseApp):
     Communicate with the backend.
 
     Attributes:
-        dbDict: A dictionary for storing available databases.
+        table: A name of table to store the generated number.
+        dbs: A dictionary for storing available databases.
           Each element represents a database.
           A key is a file name and its value is an absolute path.
         dbName: A name of the selected database.
