@@ -66,7 +66,7 @@ class ConfirmClearingFrame(QWidget):
 class LoggerApp(BaseApp):
     """App for logging.
 
-    Manage a logger frame.
+    Manages a logger frame.
 
     Attributes:
         loggerFrame: A frame that shows the logs.
@@ -94,20 +94,20 @@ class LoggerApp(BaseApp):
         """Adds a bus name and log message.
 
         Args:
-            busName (str): the name of bus
-            msg (str): log message
+            busName : the name of bus
+            msg : log message
         """
         self.loggerFrame.logEdit.insertPlainText(
             f"{time.strftime('%c', time.localtime(time.time()))}[{busName}]: {msg}\n")
 
     @pyqtSlot()
     def checkToClear(self):
-        """Show a confirmation frame for log clearing.
+        """Shows a confirmation frame for log clearing.
         """
         self.confirmFrame.show()
 
     @pyqtSlot()
     def clearLog(self):
-        """Clear the log text edit
+        """Clears the log text edit
         """
         self.loggerFrame.logEdit.clear()
