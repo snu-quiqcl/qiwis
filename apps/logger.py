@@ -17,6 +17,7 @@ class LoggerFrame(QWidget):
         clearButton: A button for clearing all logs.
     """
     def __init__(self, parent=None):
+        """Extended."""
         super().__init__(parent=parent)
         # widgets
         self.logEdit = QTextEdit(self)
@@ -37,20 +38,18 @@ class ConfirmClearingFrame(QWidget):
 
     def __init__(self, parent=None):
         """
+        Extended.
         Initializes confirmation frame
         """
         super().__init__(parent=parent)
-
         # widgets
         self.label = QLabel("Are you sure to clear?")
         self.buttonBox = QDialogButtonBox()
         self.buttonBox.addButton("OK", QDialogButtonBox.AcceptRole)
         self.buttonBox.addButton("Cancel", QDialogButtonBox.RejectRole)
-
         # connect signals
         self.buttonBox.accepted.connect(self.buttonOKClicked)
         self.buttonBox.rejected.connect(self.buttonCancelClicked)
-
         # layouts
         layout = QVBoxLayout()
         self.setLayout(layout)
@@ -63,7 +62,7 @@ class ConfirmClearingFrame(QWidget):
         self.close()
 
     def buttonCancelClicked(self):
-        """Clicks Cancel not to clear log"""
+        """Clicks Cancel not to clear log."""
         self.close()
 
 
@@ -76,9 +75,13 @@ class LoggerApp(BaseApp):
         loggerFrame: A frame that shows the logs.
     """
     def __init__(self, name: str):
+        """Extended.
+
+        Args:
+            name: Name of the App
+        """
         super().__init__(name)
         self.loggerFrame = LoggerFrame()
-
         # connect signals to slots
         self.received.connect(self.addLog)
         self.loggerFrame.clearButton.clicked.connect(self.checkToClear)
@@ -98,8 +101,8 @@ class LoggerApp(BaseApp):
         """Adds a bus name and log message.
 
         Args:
-            busName: the name of bus
-            msg: log message
+            busName: The name of bus
+            msg: Log message
         """
         timeString = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
         self.loggerFrame.logEdit.insertPlainText(f"{timeString}:[{busName}], {msg}\n")
