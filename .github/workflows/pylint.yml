@@ -28,6 +28,8 @@ jobs:
         printf "attr-rgx=_?_?(?:(?:[a-z0-9]+(?:_[a-z0-9]+)*_?_?)|(?:[a-z0-9]+(?:[A-Z][a-z0-9]*)*))$\n" >> ~/.pylintrc
         printf "method-rgx=_?_?(?:(?:[a-z0-9]+(?:_[a-z0-9]+)*_?_?)|(?:[a-z0-9]+(?:[A-Z][a-z0-9]*)*))$\n" >> ~/.pylintrc
         printf "variable-rgx=_?_?(?:(?:[a-z0-9]+(?:_[a-z0-9]+)*_?_?)|(?:[a-z0-9]+(?:[A-Z][a-z0-9]*)*))$\n" >> ~/.pylintrc
+        printf "[SIMILARITIES]\n" >> ~/.pylintrc
+        printf "min-similarity-lines=20\n" >> ~/.pylintrc
     - name: Analyze the code with pylint
       run: |
         pylint $(git ls-files '*.py')
