@@ -33,7 +33,7 @@ class Swift(QObject):
         3. Show frames of each app.
     """
 
-    def __init__(self, setup_env: dict):
+    def __init__(self, setup_env: dict, parent=None):
         """
         Args:
             setup_env: A dictionary containing set-up environment about app and bus.
@@ -45,8 +45,9 @@ class Swift(QObject):
                 "timeout".
 
               For details, see setup.json.
+            parent: A parent object.
         """
-        super().__init__()
+        super().__init__(parent=parent)
         self.mainWindow = QMainWindow()
         self._buses = {}
         self._apps = {}
@@ -90,7 +91,7 @@ class Swift(QObject):
             # create an app
             cls = getattr(module, cls_name)
             args = info.get("args", {})
-            app = cls(name, **args)
+            app = cls(name, self, **args)
             # set a slot of broadcast signal to router
             app.broadcastRequested.connect(self._route_to_bus)
             # add the app to the list of subscribers on each bus
