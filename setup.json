@@ -30,15 +30,6 @@
                 }
             }
         },
-        "poller": {
-            "module": "apps.poller",
-            "class": "PollerApp",
-            "show": true,
-            "pos": "bottom",
-            "bus": ["dbbus"],
-            "args": {
-                "table": "B"
-            },
         "logger": {
             "module": "apps.logger",
             "class": "LoggerApp",
