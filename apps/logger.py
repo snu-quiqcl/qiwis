@@ -5,7 +5,7 @@ App module for logging.
 import time
 
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
-from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QPushButton, QTextEdit, QLabel, QDialogButtonBox)
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QTextEdit, QLabel, QDialogButtonBox
 
 from swift.app import BaseApp
 
@@ -23,7 +23,6 @@ class LoggerFrame(QWidget):
         self.logEdit = QTextEdit(self)
         self.logEdit.setReadOnly(True)
         self.clearButton = QPushButton("Clear")
-
         # layout
         layout = QVBoxLayout(self)
         layout.addWidget(self.logEdit)
@@ -88,11 +87,7 @@ class LoggerApp(BaseApp):
         self.confirmFrame.confirmed.connect(self.clearLog)
 
     def frames(self):
-        """Gets frames for which are managed by the app.
-
-        Returns:
-            A tuple containing frames for showing.
-        """
+        """Overridden."""
         return (self.loggerFrame,)
 
     @pyqtSlot(str, str)
@@ -103,7 +98,7 @@ class LoggerApp(BaseApp):
             busName: The name of bus
             msg: Log message
         """
-        timeString = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+        timeString = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         self.loggerFrame.logEdit.insertPlainText(f"{timeString}:[{busName}], {msg}\n")
 
     @pyqtSlot()
