@@ -45,10 +45,12 @@
             "show": true,
             "pos": "bottom",
             "bus": []
-            }
+            },
+            "bus": ["logbus"]
         }
     },
     "bus": {
-        "dbbus": {}
+        "dbbus": {},
+        "logbus": {}
     }
 }
