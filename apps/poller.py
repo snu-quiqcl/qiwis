@@ -9,17 +9,17 @@ from PyQt5.QtCore import pyqtSlot, QTimer
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QComboBox, QSpinBox, QLabel
 
 from swift.app import BaseApp
-from apps.backend import poller, write
+from apps.backend import poll, write
 
 class ViewerFrame(QWidget):
-    """Frame of for selecting a database and period, and showing the polled number.
+    """Frame for selecting a database and period, and showing the polled number.
     
     Attributes:
         dbBox: A combobox for selecting a database into which the polled number is saved.
         periodBox: A spinbox for adjusting the polling period.
-        countLabel: A label for showing the polled count. (how many numbers have been polled)
-          This will confidently show when the polling occurs
-        numberLabel: A label for showing the recently polled number
+        countLabel: A label for showing the polled count (how many numbers have been polled).
+          This will confidently show when the polling occurs.
+        numberLabel: A label for showing the recently polled number.
     """
     def __init__(self, parent=None):
         """
@@ -134,7 +134,7 @@ class PollerApp(BaseApp):
     @pyqtSlot()
     def poll(self):
         """Polls and store a number with the selected period."""
-        num = poller()
+        num = poll()
         self.count += 1
         self.viewerFrame.countLabel.setText(f"polled count: {self.count}")
         self.viewerFrame.numberLabel.setText(f"polled number: {num}")

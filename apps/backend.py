@@ -15,7 +15,7 @@ def generate() -> int:
     return random.randrange(0, 100)
 
 
-def poller() -> int:
+def poll() -> int:
     """Generates a predictable number.
     
     Returns:
