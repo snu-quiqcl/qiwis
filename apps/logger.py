@@ -39,7 +39,6 @@ class ConfirmClearingFrame(QWidget):
     def __init__(self, parent=None):
         """
         Extended.
-        Initializes confirmation frame
         """
         super().__init__(parent=parent)
         # widgets
@@ -74,13 +73,13 @@ class LoggerApp(BaseApp):
     Attributes:
         loggerFrame: A frame that shows the logs.
     """
-    def __init__(self, name: str):
+    def __init__(self, name: str, parent=None):
         """Extended.
 
         Args:
             name: Name of the App
         """
-        super().__init__(name)
+        super().__init__(name, parent=parent)
         self.loggerFrame = LoggerFrame()
         # connect signals to slots
         self.received.connect(self.addLog)
