@@ -4,13 +4,11 @@
 App module for generating and showing a random number.
 """
 
-import sys
 import os
 import json
 
-from PyQt5.QtCore import Qt, pyqtSlot
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QDockWidget, QWidget,
-                             QVBoxLayout, QComboBox, QPushButton, QLabel)
+from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtWidgets import QWidget, QComboBox, QPushButton, QLabel, QVBoxLayout
 
 from swift.app import BaseApp
 from apps.backend import generate, write
@@ -159,22 +157,3 @@ class NumGenApp(BaseApp):
             self.viewerFrame.statusLabel.setText("number saved successfully")
         else:
             self.viewerFrame.statusLabel.setText("failed to save number")
-
-
-def main():
-    """Main function that runs when numgen module is executed rather than imported."""
-    _app = QApplication(sys.argv)
-    mainWindow = QMainWindow()
-    # create an app
-    app = NumGenApp("numgen")
-    # get frames from the app and add them as dock widgets
-    for frame in app.frames():
-        dockWidget = QDockWidget("random number generator", mainWindow)
-        dockWidget.setWidget(frame)
-        mainWindow.addDockWidget(Qt.LeftDockWidgetArea, dockWidget)
-    mainWindow.show()
-    _app.exec_()
-
-
-if __name__ == "__main__":
-    main()
