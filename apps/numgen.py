@@ -4,13 +4,11 @@
 App module for generating and showing a random number.
 """
 
-import sys
 import os
 import json
 
-from PyQt5.QtCore import Qt, pyqtSlot
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QDockWidget, QWidget,
-                             QVBoxLayout, QComboBox, QPushButton, QLabel)
+from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtWidgets import QWidget, QComboBox, QPushButton, QLabel, QVBoxLayout
 
 from swift.app import BaseApp
 from apps.backend import generate, write
