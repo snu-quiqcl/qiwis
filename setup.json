@@ -39,9 +39,17 @@
             "args": {
                 "table": "B"
             }
+        },
+        "logger": {
+            "module": "apps.logger",
+            "class": "LoggerApp",
+            "show": true,
+            "pos": "bottom",
+            "bus": ["logbus"]
         }
     },
     "bus": {
-        "dbbus": {}
+        "dbbus": {},
+        "logbus": {}
     }
 }
