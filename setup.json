@@ -29,6 +29,16 @@
                     "B": "B"
                 }
             }
+        },
+        "poller": {
+            "module": "apps.poller",
+            "class": "PollerApp",
+            "show": true,
+            "pos": "bottom",
+            "bus": ["dbbus"],
+            "args": {
+                "table": "B"
+            }
         }
     },
     "bus": {
