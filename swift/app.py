@@ -19,12 +19,13 @@ class BaseApp(QObject):
     broadcastRequested = pyqtSignal(str, str)
     received = pyqtSignal(str, str)
 
-    def __init__(self, name: str):
+    def __init__(self, name: str, parent=None):
         """
         Args:
             name: A string that indicates the name of App.
+            parent: A parent object.
         """
-        super().__init__()
+        super().__init__(parent=parent)
         self.name = name
 
     def frames(self):
