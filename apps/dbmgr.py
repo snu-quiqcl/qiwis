@@ -57,13 +57,10 @@ class ManagerFrame(QWidget):
     def __init__(self, parent=None):
         """Extended."""
         super().__init__(parent=parent)
-        self._initWidget()
-
-    def _initWidget(self):
-        """Initializes widgets in the frame."""
+        # widgets
         self.dbListWidget = QListWidget(self)
         self.addButton = QPushButton("add", self)
-        # set layout
+        # layout
         layout = QVBoxLayout(self)
         layout.addWidget(self.dbListWidget)
         layout.addWidget(self.addButton)

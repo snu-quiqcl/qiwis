@@ -24,13 +24,10 @@ class GeneratorFrame(QWidget):
     def __init__(self, parent=None):
         """Extended."""
         super().__init__(parent=parent)
-        self._initWidget()
-
-    def _initWidget(self):
-        """Initializes widgets in the frame."""
+        # widgets
         self.dbBox = QComboBox(self)
         self.generateButton = QPushButton("generate number", self)
-        # set layout
+        # layout
         layout = QVBoxLayout(self)
         layout.addWidget(self.dbBox)
         layout.addWidget(self.generateButton)
@@ -47,13 +44,10 @@ class ViewerFrame(QWidget):
     def __init__(self, parent=None):
         """Extended."""
         super().__init__(parent=parent)
-        self._initWidget()
-
-    def _initWidget(self):
-        """Initializes widgets in the frame."""
+        # widgets
         self.statusLabel = QLabel("initialized", self)
         self.numberLabel = QLabel("not generated", self)
-        # set layout
+        # layout
         layout = QVBoxLayout(self)
         layout.addWidget(self.statusLabel)
         layout.addWidget(self.numberLabel)
