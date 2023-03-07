@@ -22,10 +22,7 @@ class GeneratorFrame(QWidget):
         generateButton: A button for generating a new number.
     """
     def __init__(self, parent=None):
-        """
-        Args:
-            parent: A parent widget.
-        """
+        """Extended."""
         super().__init__(parent=parent)
         self._initWidget()
 
@@ -48,10 +45,7 @@ class ViewerFrame(QWidget):
         numberLabel: A label for showing the recently generated number.
     """
     def __init__(self, parent=None):
-        """
-        Args:
-            parent: A parent widget.
-        """
+        """Extended."""
         super().__init__(parent=parent)
         self._initWidget()
 
@@ -79,12 +73,13 @@ class NumGenApp(BaseApp):
         generatorFrame: A frame that requests generating a random number.
         viewerFrame: A frame that shows the generated number.
     """
-    def __init__(self, name: str, table: str = "number"):
-        """
+    def __init__(self, name: str, table: str = "number", parent=None):
+        """Extended.
+
         Args:
             table: A name of table to store the generated number.
         """
-        super().__init__(name)
+        super().__init__(name, parent)
         self.table = table
         self.dbs = {"": ""}
         self.dbName = ""
@@ -96,11 +91,7 @@ class NumGenApp(BaseApp):
         self.generatorFrame.generateButton.clicked.connect(self.generateNumber)
 
     def frames(self):
-        """Gets frames for which are managed by the app.
-
-        Returns:
-            A tuple containing frames for showing.
-        """
+        """Overridden."""
         return (self.generatorFrame, self.viewerFrame)
 
     @pyqtSlot(str, str)

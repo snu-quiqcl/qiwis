@@ -21,10 +21,7 @@ class ViewerFrame(QWidget):
         numberLabel: A label showing the sum, or an error message if something goes wrong.
     """
     def __init__(self, parent=None):
-        """
-        Args:
-            parent: A parent widget.
-        """
+        """Extended."""
         super().__init__(parent=parent)
         # widgets
         self.dbBoxes = {
@@ -58,12 +55,13 @@ class DataCalcApp(BaseApp):
         dbNames: A dictionary for storing names of the selected databases.
         viewerFrame: A frame that selects databases and shows the calculated number.
     """
-    def __init__(self, name: str, tables: dict):
-        """
+    def __init__(self, name: str, tables: dict, parent=None):
+        """Extended.
+
         Args:
             tables: See DataCalcApp.tables.
         """
-        super().__init__(name)
+        super().__init__(name, parent)
         self.tables = tables
         self.dbs = {"": ""}
         self.dbNames = {"A": "", "B": ""}
@@ -75,11 +73,7 @@ class DataCalcApp(BaseApp):
         self.viewerFrame.calculateButton.clicked.connect(self.calculateSum)
 
     def frames(self):
-        """Gets frames for which are managed by the app.
-
-        Returns:
-            A tuple containing frames for showing.
-        """
+        """Overridden."""
         return (self.viewerFrame,)
 
     @pyqtSlot(str, str)

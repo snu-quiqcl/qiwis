@@ -23,11 +23,10 @@ class DBWidget(QWidget):
         removeButton: A button for removing (disconnecting) the database.
     """
     def __init__(self, name, path, parent=None):
-        """
+        """"Extended.
+
         Args:
-            name: A file name of the database.
             path: An absolute path of the database.
-            parent: A parent widget.
         """
         super().__init__(parent=parent)
         self.name = name
@@ -56,10 +55,7 @@ class ManagerFrame(QWidget):
         addButton: A button for adding (actually connecting) a database.
     """
     def __init__(self, parent=None):
-        """
-        Args:
-            parent: A parent widget.
-        """
+        """Extended."""
         super().__init__(parent=parent)
         self._initWidget()
 
@@ -98,19 +94,16 @@ class DBMgrApp(BaseApp):
     """
     DB = namedtuple("DB", ["path", "name"])
 
-    def __init__(self, name: str):
-        super().__init__(name)
+    def __init__(self, name: str, parent=None):
+        """Extended."""
+        super().__init__(name, parent)
         self.dbList = []
         self.managerFrame = ManagerFrame()
         # connect signals to slots
         self.managerFrame.addButton.clicked.connect(self.addDB)
 
     def frames(self):
-        """Gets frames for which are managed by the app.
-
-        Returns:
-            A tuple containing frames for showing.
-        """
+        """Overridden."""
         return (self.managerFrame,)
 
     def sendDB(self):

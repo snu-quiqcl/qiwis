@@ -22,10 +22,7 @@ class ViewerFrame(QWidget):
         numberLabel: A label for showing the recently polled number.
     """
     def __init__(self, parent=None):
-        """
-        Args:
-            parent: A parent widget.
-        """
+        """Extended."""
         super().__init__(parent=parent)
         # widgets
         self.dbBox = QComboBox(self)
@@ -58,12 +55,13 @@ class PollerApp(BaseApp):
         count: The polled count. It starts from 0.
         timer: A QTimer object for polling. The initial interval is a second.
     """
-    def __init__(self, name: str, table: str = "B"):
-        """
+    def __init__(self, name: str, table: str = "B", parent=None):
+        """Extended.
+
         Args:
             table: See PollerApp.table.
         """
-        super().__init__(name)
+        super().__init__(name, parent)
         self.table = table
         self.dbs = {"": ""}
         self.dbName = ""
@@ -79,11 +77,7 @@ class PollerApp(BaseApp):
         self.timer.timeout.connect(self.poll)
 
     def frames(self):
-        """Gets frames for which are managed by the app.
-
-        Returns:
-            A tuple containing frames for showing.
-        """
+        """Overridden."""
         return (self.viewerFrame,)
 
     @pyqtSlot(str, str)
