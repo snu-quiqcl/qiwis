@@ -5,7 +5,7 @@ App module for logging.
 import time
 
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
-from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QPushButton, QTextEdit, QLabel)
+from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QPushButton, QTextEdit, QLabel, QDialogButtonBox)
 
 from swift.app import BaseApp
 
@@ -18,10 +18,12 @@ class LoggerFrame(QWidget):
     """
     def __init__(self, parent=None):
         super().__init__(parent=parent)
+        # widgets
         self.logEdit = QTextEdit(self)
         self.logEdit.setReadOnly(True)
         self.clearButton = QPushButton("Clear")
 
+        # layout
         layout = QVBoxLayout(self)
         layout.addWidget(self.logEdit)
         layout.addWidget(self.clearButton)
@@ -33,33 +35,35 @@ class ConfirmClearingFrame(QWidget):
     """
     confirmed = pyqtSignal()
 
-    def __init__(self):
+    def __init__(self, parent=None):
         """
         Initializes confirmation frame
         """
-        super().__init__()
+        super().__init__(parent=parent)
+
+        # widgets
+        self.label = QLabel("Are you sure to clear?")
+        self.buttonBox = QDialogButtonBox()
+        self.buttonBox.addButton("OK", QDialogButtonBox.AcceptRole)
+        self.buttonBox.addButton("Cancel", QDialogButtonBox.RejectRole)
+
+        # connect signals
+        self.buttonBox.accepted.connect(self.buttonOKClicked)
+        self.buttonBox.rejected.connect(self.buttonCancelClicked)
+
+        # layouts
         layout = QVBoxLayout()
         self.setLayout(layout)
-
-        self.label = QLabel("Are you sure to clear?")
-        self.buttonOK = QPushButton("OK")
-        self.buttonCancel = QPushButton("Cancel")
         layout.addWidget(self.label)
-        layout.addWidget(self.buttonOK)
-        layout.addWidget(self.buttonCancel)
-
-        self.buttonOK.clicked.connect(self.buttonOKClicked)
-        self.buttonCancel.clicked.connect(self.buttonCancelClicked)
+        layout.addWidget(self.buttonBox)
 
     def buttonOKClicked(self):
-        """Clicks OK to clear log.
-        """
+        """Clicks OK to clear log."""
         self.confirmed.emit()
         self.close()
 
     def buttonCancelClicked(self):
-        """Clicks Cancel not to clear log
-        """
+        """Clicks Cancel not to clear log"""
         self.close()
 
 
@@ -94,20 +98,19 @@ class LoggerApp(BaseApp):
         """Adds a bus name and log message.
 
         Args:
-            busName : the name of bus
-            msg : log message
+            busName: the name of bus
+            msg: log message
         """
-        self.loggerFrame.logEdit.insertPlainText(
-            f"{time.strftime('%c', time.localtime(time.time()))}[{busName}]: {msg}\n")
+        timeString = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+        self.loggerFrame.logEdit.insertPlainText(f"{timeString}:[{busName}], {msg}\n")
 
     @pyqtSlot()
     def checkToClear(self):
-        """Shows a confirmation frame for log clearing.
-        """
+        """Shows a confirmation frame for log clearing."""
+        self.broadcastRequested.emit("logbus", "Clicked to clear logs")
         self.confirmFrame.show()
 
     @pyqtSlot()
     def clearLog(self):
-        """Clears the log text edit
-        """
+        """Clears the log text edit."""
         self.loggerFrame.logEdit.clear()
