@@ -159,22 +159,3 @@ class NumGenApp(BaseApp):
             self.viewerFrame.statusLabel.setText("number saved successfully")
         else:
             self.viewerFrame.statusLabel.setText("failed to save number")
-
-
-def main():
-    """Main function that runs when numgen module is executed rather than imported."""
-    _app = QApplication(sys.argv)
-    mainWindow = QMainWindow()
-    # create an app
-    app = NumGenApp("numgen")
-    # get frames from the app and add them as dock widgets
-    for frame in app.frames():
-        dockWidget = QDockWidget("random number generator", mainWindow)
-        dockWidget.setWidget(frame)
-        mainWindow.addDockWidget(Qt.LeftDockWidgetArea, dockWidget)
-    mainWindow.show()
-    _app.exec_()
-
-
-if __name__ == "__main__":
-    main()
