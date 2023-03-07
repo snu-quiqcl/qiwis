@@ -55,7 +55,7 @@ class DataCalcApp(BaseApp):
         dbNames: A dictionary for storing names of the selected databases.
         viewerFrame: A frame that selects databases and shows the calculated number.
     """
-    def __init__(self, name: str, tables: dict, parent=None):
+    def __init__(self, name: str, parent=None, tables: dict=None):
         """Extended.
 
         Args:

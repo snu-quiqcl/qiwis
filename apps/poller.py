@@ -55,7 +55,7 @@ class PollerApp(BaseApp):
         count: The polled count. It starts from 0.
         timer: A QTimer object for polling. The initial interval is a second.
     """
-    def __init__(self, name: str, table: str = "B", parent=None):
+    def __init__(self, name: str, parent=None, table: str = "B"):
         """Extended.
 
         Args:
