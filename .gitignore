@@ -1,3 +1,10 @@
-*.pyc
+# Byte-compiled
 __pycache__/
+*.pyc
+
+# Distribution / packaging
+build/
+*.egg-info/
+
+# Database
 *.sqlite
