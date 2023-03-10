@@ -39,6 +39,9 @@ class Swift(QObject):
         _apps: A dictionary for storing apps.
           Each element represents an app.
           A key is an app name and its value is an App object.
+        _subscribers: A dictionary for storing subscribers.
+          Each element represents subscribers of each bus.
+          A key is a bus name and its value is a set containing its subscribers.
     """
 
     def __init__(self, setupEnv: dict, parent=None):
@@ -46,37 +49,42 @@ class Swift(QObject):
         Args:
             setupEnv: A dictionary containing set-up environment about app and bus.
               It has two keys; "app" and "bus".
-              In "app", there may be keys below; 
-                "path", "module", "class", "show", "pos", "bus", and "args".
-              In "bus", there may be keys below;
-                "timeout".
+              In "app", there are apps containing keys as below; 
+                "path" (optional), "module", "class", "show", "pos", "bus", and "args" (optional).
+              In "bus", there are buses containing keys as below;
+                "timeout" (optional).
               For details, see setup.json.
             parent: A parent object.
         """
         super().__init__(parent=parent)
         self.mainWindow = QMainWindow()
-        self._setupEnv = setupEnv
         self._buses = {}
         self._apps = {}
         self._subscribers = {}
-        self.load()
-
-    def load(self):
-        """Initializes swift system and loads the apps and buses."""
-        for name in self._setupEnv["bus"]:
-            self.createBus(name)
-        for name, info in self._setupEnv["app"].items():
-            self.createApp(name, info["show"], info["pos"])
+        self.load(setupEnv["app"], setupEnv["bus"])
         self.mainWindow.show()
 
-    def createBus(self, name: str):
+    def load(self, appInfos: dict, busInfos: dict):
+        """Initializes swift system and loads the apps and buses.
+        
+        Args:
+            appInfos: See "app" part of setupEnv in self.__init__().
+            busInfos: See "bus" part of setupEnv in self.__init__().
+        """
+        for name, info in busInfos.items():
+            self.createBus(name, info)
+        for name, info in appInfos.items():
+            self.createApp(name, info)
+
+    def createBus(self, name: str, info: dict):
         """Creates a global bus using set-up environment.
         
         Args:
-            name: A string that indicates the name of the bus.
-              It should be defined in the set-up file.
+            name: A name of the bus.
+            info: A dictionary containing bus info. Each element is like below:
+              timeout: Desired timeout for blocking queue reading, in seconds.
+                If you want to set as default, set None.
         """
-        info = self._setupEnv["bus"][name]
         # create a bus
         if "timeout" in info:
             bus = Bus(name, info["timeout"])
@@ -89,34 +97,40 @@ class Swift(QObject):
         self._buses[name] = bus
         self._subscribers.setdefault(name, set())
 
-    def createApp(self, name: str, show: str = True, pos: str = ""):
+    def createApp(self, name: str, info: dict):
         """Creates an app and shows their frames using set-up environment.
         
         Args:
-            name: A string that indicates the name of the app.
-              It should be defined in the set-up file.
-            show: True if you want to show the frames, otherwise False.
-            pos: A string that indicates the position of the frames.
-              It should be one of "left", "right", "top", or "bottom"; and is case-sensitive.
-              Otherwise, it will be regarded as default (AllDockWidgetAreas).
+            name: A name of app.
+            info: A dictionary containing app info. Each element is like below:
+              path: A path desired to be added for importing app.
+              module: A name of app module.
+              class: A name of app class.
+              show: Whether its frames is shown at the beginning.
+                True if you want to show the frames, otherwise False.
+              pos: A string that indicates the position of the frames.
+                It should be one of "left", "right", "top", or "bottom"; and is case-sensitive.
+                Otherwise, it will be regarded as default (AllDockWidgetAreas).
+              bus: A list of buses which app subscribes to.
+              args: Additional arguments for custom.
+                If there is no additional arguments, set None.
         """
-        info = self._setupEnv["app"][name]
         # import the app module
-        path = info.get("path", ".")
-        mod_name, cls_name = info["module"], info["class"]
-        with _add_to_path(os.path.dirname(path)):
-            module = importlib.import_module(mod_name)
+        with _add_to_path(os.path.dirname(info.get("path", ""))):
+            module = importlib.import_module(info["module"])
         # create an app
-        cls = getattr(module, cls_name)
-        args = info.get("args", {})
-        app = cls(name, self, **args)
+        cls = getattr(module, info["class"])
+        if "args" in info:
+            app = cls(name, self, **info["args"])
+        else:
+            app = cls(name, self)
         # set a slot of broadcast signal to router
         app.broadcastRequested.connect(self._routeToBus)
         # add the app to the list of subscribers on each bus
         for bus_name in info["bus"]:
             self._subscribers[bus_name].add(app)
         # show frames if the "show" option is true
-        if show:
+        if info["show"]:
             for frame in app.frames():
                 dockWidget = QDockWidget(name, self.mainWindow)
                 dockWidget.setWidget(frame)
@@ -125,10 +139,26 @@ class Swift(QObject):
                     "right": Qt.RightDockWidgetArea,
                     "top": Qt.TopDockWidgetArea,
                     "bottom": Qt.BottomDockWidgetArea
-                }.get(pos, Qt.AllDockWidgetAreas)
+                }.get(info["pos"], Qt.AllDockWidgetAreas)
                 self.mainWindow.addDockWidget(area, dockWidget)
         # store the app
         self._apps[name] = app
+
+    def destroyBus(self, name: str):
+        """Destroys a global bus.
+        
+        Args:
+            name: A name of the bus to destroy.
+        """
+        self._buses[name].deleteLater()
+
+    def destroyApp(self, name: str):
+        """Destroys an app.
+        
+        Args:
+            name: A name of the app to destroy.
+        """
+        self._apps[name].deleteLater()
 
     @pyqtSlot(str, str)
     def _routeToBus(self, busName: str, msg: str):
