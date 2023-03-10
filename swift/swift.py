@@ -57,6 +57,12 @@ class Swift(QObject):
         self._show_frame(setup_env["app"])
 
     def createBus(self, name: str):
+        """Creates a global bus using set-up environment.
+        
+        Args:
+            name: A string that indicates the name of the bus.
+              It should be defined in the set-up file.
+        """
         info = self.setup_bus[name]
         # create a bus
         if "timeout" in info:
@@ -69,6 +75,37 @@ class Swift(QObject):
         # store the bus
         self._buses[name] = bus
         self._subscribers[name] = []
+
+    def createApp(self, name: str, show: str = True, pos: str = "", args: dict = None):
+        info = self.setup_app[name]
+        # import the app module
+        path = info.get("path", ".")
+        mod_name, cls_name = info["module"], info["class"]
+        with _add_to_path(os.path.dirname(path)):
+            module = importlib.import_module(mod_name)
+        # create an app
+        cls = getattr(module, cls_name)
+        args = info.get("args", {})
+        app = cls(name, self, **args)
+        # set a slot of broadcast signal to router
+        app.broadcastRequested.connect(self._routeToBus)
+        # add the app to the list of subscribers on each bus
+        for bus_name in info["bus"]:
+            self._subscribers[bus_name].append(app)
+        # show frames if the "show" option is true
+        if info["show"]:
+            for frame in app.frames():
+                dockWidget = QDockWidget(name, self.mainWindow)
+                dockWidget.setWidget(frame)
+                area = {
+                    "left": Qt.LeftDockWidgetArea,
+                    "right": Qt.RightDockWidgetArea,
+                    "top": Qt.TopDockWidgetArea,
+                    "bottom": Qt.BottomDockWidgetArea
+                }.get(info["pos"], Qt.AllDockWidgetAreas)
+                self.mainWindow.addDockWidget(area, dockWidget)
+        # store the app
+        self._apps[name] = app
 
     def _init_bus(self, setup_bus: dict):
         """Initializes global buses using set-up environment.
@@ -150,7 +187,7 @@ class Swift(QObject):
         bus.write(msg)
 
     @pyqtSlot(str)
-    def _route_to_app(self, msg: str):
+    def _routeToApp(self, msg: str):
         """Routes a signal from a bus to the apps that subscribe to it.
 
         This is a slot for the received signal of each bus.
