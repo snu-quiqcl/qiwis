@@ -56,6 +56,9 @@ class Swift(QObject):
         self._init_app(setup_env["app"])
         self._show_frame(setup_env["app"])
 
+    def load(self, appInfos: dict, busInfos: dict):
+        pass
+
     def createBus(self, name: str):
         """Creates a global bus using set-up environment.
         
@@ -76,7 +79,7 @@ class Swift(QObject):
         self._buses[name] = bus
         self._subscribers[name] = []
 
-    def createApp(self, name: str, show: str = True, pos: str = "", args: dict = None):
+    def createApp(self, name: str, show: str = True, pos: str = ""):
         info = self.setup_app[name]
         # import the app module
         path = info.get("path", ".")
@@ -93,7 +96,7 @@ class Swift(QObject):
         for bus_name in info["bus"]:
             self._subscribers[bus_name].append(app)
         # show frames if the "show" option is true
-        if info["show"]:
+        if show:
             for frame in app.frames():
                 dockWidget = QDockWidget(name, self.mainWindow)
                 dockWidget.setWidget(frame)
@@ -102,7 +105,7 @@ class Swift(QObject):
                     "right": Qt.RightDockWidgetArea,
                     "top": Qt.TopDockWidgetArea,
                     "bottom": Qt.BottomDockWidgetArea
-                }.get(info["pos"], Qt.AllDockWidgetAreas)
+                }.get(pos, Qt.AllDockWidgetAreas)
                 self.mainWindow.addDockWidget(area, dockWidget)
         # store the app
         self._apps[name] = app
