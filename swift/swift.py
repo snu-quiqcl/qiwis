@@ -3,7 +3,7 @@
 """
 Swift is a main manager for swift system.
 
-Using a set-up file created by an user, it sets up apps and buses.
+Using a set-up file written by an user, it sets up apps and buses.
 
 Usage:
     python -m swift.swift (-s <SETUP_PATH>)
@@ -28,9 +28,9 @@ class Swift(QObject):
     Note that QApplication instance must be created before instantiating Swift object.
 
     Brief procedure:
-        1. Create buses.
-        2. Create apps.
-        3. Show frames of each app.
+        1. Load setup environment.
+        2. Create buses.
+        3. Create apps and show their frames.
     """
 
     def __init__(self, setup_env: dict, parent=None):
@@ -55,6 +55,20 @@ class Swift(QObject):
         self._init_bus(setup_env["bus"])
         self._init_app(setup_env["app"])
         self._show_frame(setup_env["app"])
+
+    def createBus(self, name: str):
+        info = self.setup_bus[name]
+        # create a bus
+        if "timeout" in info:
+            bus = Bus(name, info["timeout"])
+        else:
+            bus = Bus(name)
+        # set a slot of received signal to router
+        bus.received.connect(self._routeToApp)
+        bus.start()
+        # store the bus
+        self._buses[name] = bus
+        self._subscribers[name] = []
 
     def _init_bus(self, setup_bus: dict):
         """Initializes global buses using set-up environment.
@@ -123,7 +137,7 @@ class Swift(QObject):
         self.mainWindow.show()
 
     @pyqtSlot(str, str)
-    def _route_to_bus(self, bus_name: str, msg: str):
+    def _routeToBus(self, bus_name: str, msg: str):
         """Routes a signal from an app to the desired bus.
 
         This is a slot for the broadcast signal of each app.
