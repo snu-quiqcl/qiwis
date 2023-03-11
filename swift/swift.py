@@ -16,11 +16,40 @@ import json
 import importlib
 import importlib.util
 from contextlib import contextmanager
+from dataclasses import dataclass
+from typing import Any, Iterable, Mapping
 
 from PyQt5.QtCore import QObject, pyqtSlot, Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QDockWidget
 
 from swift.bus import Bus
+
+@dataclass
+class AppInfo:
+    """Information required to create an app.
+    
+    Fields:
+        module: Module name in which the app class resides.
+        class_: App class name.
+        path: System path for module importing. None if it is not necessary.
+        show: Whether to show the app frames on creation.
+        pos: Position on the main window; refer to Qt.DockWidgetArea enum.
+          Should be one of "left", "right", "top", or "bottom", case-sensitive.
+          Otherwise, defaults to Qt.AllDockWidgetAreas.
+        bus: Buses which the app subscribes to.
+        args: Keyword argument dictionary of the app class constructor.
+          It must exclude name and parent arguments. Even if they exist, they will be ignored.
+          None for initializing the app with default values,
+          where only name and parent arguments will be passed.
+    """
+    module: str
+    class_: str
+    path: str | None = None
+    show: bool = True
+    pos: str = ""
+    bus: Iterable[str] = ()
+    args: Mapping[str, Any] | None = None
+
 
 class Swift(QObject):
     """Actual manager for swift system.
