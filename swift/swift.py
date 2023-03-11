@@ -51,6 +51,16 @@ class AppInfo:
     args: Mapping[str, Any] | None = None
 
 
+@dataclass
+class BusInfo:
+    """Information required to create a bus.
+    
+    Fields:
+        timeout: See bus.Bus.__init__(). None for the default value of __init__().
+    """
+    timeout: float | None = None
+
+
 class Swift(QObject):
     """Actual manager for swift system.
 
