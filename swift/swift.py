@@ -31,17 +31,6 @@ class Swift(QObject):
         1. Load setup environment.
         2. Create buses.
         3. Create apps and show their frames.
-
-    Attributes:
-        _buses: A dictionary for storing buses.
-          Each element represents a bus.
-          A key is a bus name and its value is a Bus object.
-        _apps: A dictionary for storing apps.
-          Each element represents an app.
-          A key is an app name and its value is an App object.
-        _subscribers: A dictionary for storing subscribers.
-          Each element represents subscribers of each bus.
-          A key is a bus name and its value is a set containing its subscribers.
     """
 
     def __init__(self, setupEnv: dict, parent=None):
@@ -106,29 +95,29 @@ class Swift(QObject):
               path: A path desired to be added for importing app.
               module: A name of app module.
               class: A name of app class.
-              show: Whether its frames is shown at the beginning.
+              show: Whether its frames are shown at the beginning.
                 True if you want to show the frames, otherwise False.
               pos: A string that indicates the position of the frames.
                 It should be one of "left", "right", "top", or "bottom"; and is case-sensitive.
                 Otherwise, it will be regarded as default (AllDockWidgetAreas).
-              bus: A list of buses which app subscribes to.
-              args: Additional arguments for custom.
+              bus: A list of buses which the app subscribes to.
+              args: Additional arguments for app class constructor.
                 If there is no additional arguments, set None.
         """
         # import the app module
-        with _add_to_path(os.path.dirname(info.get("path", ""))):
+        with _add_to_path(os.path.dirname(info.get("path", "."))):
             module = importlib.import_module(info["module"])
         # create an app
         cls = getattr(module, info["class"])
         if "args" in info:
-            app = cls(name, self, **info["args"])
+            app = cls(name, parent=self, **info["args"])
         else:
             app = cls(name, self)
         # set a slot of broadcast signal to router
         app.broadcastRequested.connect(self._routeToBus)
         # add the app to the list of subscribers on each bus
-        for bus_name in info["bus"]:
-            self._subscribers[bus_name].add(app)
+        for busName in info["bus"]:
+            self._subscribers[busName].add(app)
         # show frames if the "show" option is true
         if info["show"]:
             for frame in app.frames():
@@ -151,6 +140,7 @@ class Swift(QObject):
             name: A name of the bus to destroy.
         """
         self._buses[name].deleteLater()
+        self._buses.pop(name).stop()
 
     def destroyApp(self, name: str):
         """Destroys an app.
@@ -159,6 +149,9 @@ class Swift(QObject):
             name: A name of the app to destroy.
         """
         self._apps[name].deleteLater()
+        app = self._apps.pop(name)
+        for apps in self._subscribers.values():
+            apps.discard(app)
 
     @pyqtSlot(str, str)
     def _routeToBus(self, busName: str, msg: str):
