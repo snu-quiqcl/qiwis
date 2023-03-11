@@ -110,7 +110,7 @@ class Swift(QObject):
         # create an app
         cls = getattr(module, info["class"])
         if "args" in info:
-            app = cls(name, parent=self, **info["args"])
+            app = cls(name, **info["args"], parent=self)
         else:
             app = cls(name, self)
         # set a slot of broadcast signal to router
@@ -139,8 +139,9 @@ class Swift(QObject):
         Args:
             name: A name of the bus to destroy.
         """
-        self._buses[name].deleteLater()
-        self._buses.pop(name).stop()
+        bus = self._buses.pop(name)
+        bus.stop()
+        bus.deleteLater()
 
     def destroyApp(self, name: str):
         """Destroys an app.
@@ -148,10 +149,10 @@ class Swift(QObject):
         Args:
             name: A name of the app to destroy.
         """
-        self._apps[name].deleteLater()
         app = self._apps.pop(name)
         for apps in self._subscribers.values():
             apps.discard(app)
+        app.deleteLater()
 
     @pyqtSlot(str, str)
     def _routeToBus(self, busName: str, msg: str):
