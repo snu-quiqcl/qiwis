@@ -16,7 +16,7 @@ import json
 import importlib
 import importlib.util
 from contextlib import contextmanager
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from typing import Any, Iterable, Mapping
 
 from PyQt5.QtCore import QObject, pyqtSlot, Qt
@@ -59,6 +59,17 @@ class BusInfo:
         timeout: See bus.Bus.__init__(). None for the default value of __init__().
     """
     timeout: float | None = None
+
+
+def strinfo(info: AppInfo | BusInfo) -> str:
+    """Returns a JSON string converted from the given info.
+
+    This is just a convenience function for users not to import dataclasses and json.
+    
+    Args:
+        info: Dataclass object to convert to a JSON string.
+    """
+    return json.dumps(asdict(info))
 
 
 class Swift(QObject):
