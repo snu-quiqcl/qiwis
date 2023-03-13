@@ -83,7 +83,7 @@ class Swift(QObject):
         3. Create apps and show their frames.
     """
 
-    def __init__(self, setupEnv: dict, parent=None):
+    def __init__(self, setupEnv: dict, parent: QObject | None = None):
         """
         Args:
             setupEnv: A dictionary containing set-up environment about app and bus.
