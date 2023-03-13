@@ -31,7 +31,7 @@ class AppInfo:
     Fields:
         module: Module name in which the app class resides.
         class_: App class name.
-        path: System path for module importing. None if it is not necessary.
+        path: System path for module importing.
         show: Whether to show the app frames on creation.
         pos: Position on the main window; refer to Qt.DockWidgetArea enum.
           Should be one of "left", "right", "top", or "bottom", case-sensitive.
@@ -44,7 +44,7 @@ class AppInfo:
     """
     module: str
     class_: str
-    path: str | None = None
+    path: str = "."
     show: bool = True
     pos: str = ""
     bus: Iterable[str] = ()
