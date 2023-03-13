@@ -53,10 +53,6 @@ class AppInfo:
     @classmethod
     def parse(cls, info: str) -> Self:
         """Constructs an AppInfo object from a JSON string.
-
-        This does not catch JSONDecodeErrors since it clearly requires the JSON string
-        for the input.
-        Care must be taken not to input a non-JSON formatted string.
         
         Args:
             info: A JSON string of a dictionary that contains the information of an app.
