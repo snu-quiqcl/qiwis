@@ -180,21 +180,16 @@ class Swift(QObject):
             name: A name of app.
             info: An AppInfo object describing the app.
         """
-        # import the app module
         with _add_to_path(os.path.dirname(info.path)):
             module = importlib.import_module(info.module)
-        # create an app
         cls = getattr(module, info.class_)
         if info.args is not None:
             app = cls(name, parent=self, **info.args)
         else:
             app = cls(name, parent=self)
-        # set a slot of broadcast signal to router
         app.broadcastRequested.connect(self._routeToBus)
-        # add the app to the list of subscribers on each bus
         for busName in info.bus:
             self._subscribers[busName].add(app)
-        # show frames if the "show" option is true
         if info.show:
             for frame in app.frames():
                 dockWidget = QDockWidget(name, self.mainWindow)
@@ -206,7 +201,6 @@ class Swift(QObject):
                     "bottom": Qt.BottomDockWidgetArea
                 }.get(info.pos, Qt.AllDockWidgetAreas)
                 self.mainWindow.addDockWidget(area, dockWidget)
-        # store the app
         self._apps[name] = app
 
     def destroyBus(self, name: str):
