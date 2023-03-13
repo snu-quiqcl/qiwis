@@ -140,12 +140,16 @@ class Swift(QObject):
         self.load(setupEnv["app"], setupEnv["bus"])
         self.mainWindow.show()
 
-    def load(self, appInfos: Mapping[str, Mapping], busInfos: Mapping[str, Mapping]):
+    def load(self, appInfos: Mapping[str, AppInfo], busInfos: Mapping[str, BusInfo]):
         """Initializes swift system and loads the apps and buses.
         
         Args:
-            appInfos: See "app" part of setupEnv in self.__init__().
-            busInfos: See "bus" part of setupEnv in self.__init__().
+            appInfos: A dictionary whose keys are app names and the values are
+              corresponding AppInfo objects. All the apps in the dictionary
+              will be created and shown if the show field is True.
+            busInfos: A dictionary whose keys are bus names and the values are
+              corresponding BusInfo objects. All the buses in the dictionary
+              will be created and started.
         """
         for name, info in busInfos.items():
             self.createBus(name, info)
