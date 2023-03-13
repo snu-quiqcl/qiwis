@@ -332,9 +332,9 @@ def main():
     # read set-up information
     app_infos, bus_infos = _read_setup_file(args.setup_path)
     # start GUI
-    app = QApplication(sys.argv)
+    qapp = QApplication(sys.argv)
     _swift = Swift(app_infos, bus_infos)
-    app.exec_()
+    qapp.exec_()
 
 
 if __name__ == "__main__":
