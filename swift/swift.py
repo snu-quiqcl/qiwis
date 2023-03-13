@@ -291,29 +291,49 @@ def _get_argparser() -> argparse.ArgumentParser:
     return parser
 
 
-def _read_setup_file(setup_path: str) -> dict[str, dict]:
-    """Reads set-up information about app and bus from set-up file.
+def _read_setup_file(setup_path: str) -> tuple[Mapping[str, AppInfo], Mapping[str, BusInfo]]:
+    """Reads set-up information about app and bus from a JSON file.
 
+    The JSON file content should have the following structure:
+
+      {
+        "app": {
+          "app_name_0": {app_info_0},
+          ...
+        },
+        "bus": {
+          "bus_name_0": {bus_info_0},
+          ...
+        }
+      }
+
+    See AppInfo and its parse() for app_info_* structure.
+    See BusInfo and its parse() for bus_info_* structure.
+      
     Args:
         setup_path: A path of set-up file.
 
     Returns:
-        A dictionary containing set-up environment about app and bus.
-          For details, see Swift.__init__().
+        (app_infos, bus_infos): Dictionaries of set-up information about app and bus.
+          See appInfos and busInfos in Swift.load() for more details.
     """
     with open(setup_path, encoding="utf-8") as setup_file:
-        setup_data = json.load(setup_file)
-    return {key: setup_data[key] for key in ("app", "bus")}
+        setup_data: dict[str, dict] = json.load(setup_file)
+    app_dict = setup_data.get("app", {})
+    bus_dict = setup_data.get("bus", {})
+    app_infos = {name: AppInfo(**info) for (name, info) in app_dict.items()}
+    bus_infos = {name: BusInfo(**info) for (name, info) in bus_dict.items()}
+    return app_infos, bus_infos
 
 
 def main():
     """Main function that runs when swift module is executed rather than imported."""
     args = _get_argparser().parse_args()
     # read set-up information
-    setupEnv = _read_setup_file(args.setup_path)
+    app_infos, bus_infos = _read_setup_file(args.setup_path)
     # start GUI
     app = QApplication(sys.argv)
-    _swift = Swift(setupEnv)
+    _swift = Swift(app_infos, bus_infos)
     app.exec_()
 
 
