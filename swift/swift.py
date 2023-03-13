@@ -317,8 +317,8 @@ def _read_setup_file(setup_path: str) -> tuple[Mapping[str, AppInfo], Mapping[st
         setup_data: dict[str, dict] = json.load(setup_file)
     app_dict = setup_data.get("app", {})
     bus_dict = setup_data.get("bus", {})
-    app_infos = {name: AppInfo(**info) for (name, info) in app_dict.items()}
-    bus_infos = {name: BusInfo(**info) for (name, info) in bus_dict.items()}
+    app_infos = {name: AppInfo.parse(json.dumps(info)) for (name, info) in app_dict.items()}
+    bus_infos = {name: BusInfo.parse(json.dumps(info)) for (name, info) in bus_dict.items()}
     return app_infos, bus_infos
 
 
