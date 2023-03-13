@@ -110,9 +110,9 @@ class Swift(QObject):
         # create an app
         cls = getattr(module, info["class"])
         if "args" in info:
-            app = cls(name, **info["args"], parent=self)
+            app = cls(name, parent=self, **info["args"])
         else:
-            app = cls(name, self)
+            app = cls(name, parent=self)
         # set a slot of broadcast signal to router
         app.broadcastRequested.connect(self._routeToBus)
         # add the app to the list of subscribers on each bus
