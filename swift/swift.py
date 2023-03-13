@@ -275,14 +275,14 @@ def _get_argparser() -> argparse.ArgumentParser:
     return parser
 
 
-def _read_setup_file(setup_path: str):
+def _read_setup_file(setup_path: str) -> dict[str, dict]:
     """Reads set-up information about app and bus from set-up file.
 
     Args:
         setup_path: A path of set-up file.
 
     Returns:
-        dict: A dictionary containing set-up environment about app and bus.
+        A dictionary containing set-up environment about app and bus.
           For details, see Swift.__init__().
     """
     with open(setup_path, encoding="utf-8") as setup_file:
