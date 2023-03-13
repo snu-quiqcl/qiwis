@@ -116,16 +116,15 @@ class Swift(QObject):
         3. Create apps and show their frames.
     """
 
-    def __init__(self, setupEnv: Mapping[str, Mapping], parent: QObject | None = None):
+    def __init__(
+        self,
+        appInfos: Mapping[str, AppInfo] | None = None,
+        busInfos: Mapping[str, BusInfo] | None = None,
+        parent: QObject | None = None):
         """
         Args:
-            setupEnv: A dictionary containing set-up environment about app and bus.
-              It has two keys; "app" and "bus".
-              In "app", there are apps containing keys as below; 
-                "path" (optional), "module", "class", "show", "pos", "bus", and "args" (optional).
-              In "bus", there are buses containing keys as below;
-                "timeout" (optional).
-              For details, see setup.json.
+            appInfos: See Swift.load(). None or an empty dictionary for loading no apps.
+            busInfos: See Swift.load(). None or an empty dictionary for loading no buses.
             parent: A parent object.
         """
         super().__init__(parent=parent)
@@ -133,7 +132,9 @@ class Swift(QObject):
         self._buses = {}
         self._apps = {}
         self._subscribers = {}
-        self.load(setupEnv["app"], setupEnv["bus"])
+        appInfos = appInfos if appInfos else {}
+        busInfos = busInfos if busInfos else {}
+        self.load(appInfos, busInfos)
         self.mainWindow.show()
 
     def load(self, appInfos: Mapping[str, AppInfo], busInfos: Mapping[str, BusInfo]):
