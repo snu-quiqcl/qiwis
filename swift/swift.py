@@ -237,7 +237,7 @@ class Swift(QObject):
 
 
 @contextmanager
-def _add_to_path(path):
+def _add_to_path(path: str):
     """Adds a path temporarily.
 
     Using a 'with' statement, you can import a module without changing sys.path.
