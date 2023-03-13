@@ -83,7 +83,7 @@ class Swift(QObject):
         3. Create apps and show their frames.
     """
 
-    def __init__(self, setupEnv: dict, parent: QObject | None = None):
+    def __init__(self, setupEnv: Mapping[str, Mapping], parent: QObject | None = None):
         """
         Args:
             setupEnv: A dictionary containing set-up environment about app and bus.
@@ -107,7 +107,7 @@ class Swift(QObject):
         self.load(setupEnv["app"], setupEnv["bus"])
         self.mainWindow.show()
 
-    def load(self, appInfos: dict, busInfos: dict):
+    def load(self, appInfos: Mapping[str, Mapping], busInfos: Mapping[str, Mapping]):
         """Initializes swift system and loads the apps and buses.
         
         Args:
@@ -119,7 +119,7 @@ class Swift(QObject):
         for name, info in appInfos.items():
             self.createApp(name, info)
 
-    def createBus(self, name: str, info: dict):
+    def createBus(self, name: str, info: Mapping[str, Any]):
         """Creates a global bus using set-up environment.
         
         Args:
@@ -140,7 +140,7 @@ class Swift(QObject):
         self._buses[name] = bus
         self._subscribers.setdefault(name, set())
 
-    def createApp(self, name: str, info: dict):
+    def createApp(self, name: str, info: Mapping[str, Any]):
         """Creates an app and shows their frames using set-up environment.
         
         Args:
