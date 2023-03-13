@@ -80,6 +80,19 @@ class BusInfo:
     """
     timeout: float | None = None
 
+    @classmethod
+    def parse(cls, info: str) -> Self:
+        """Constructs a BusInfo object from a JSON string.
+        
+        Args:
+            info: A JSON string of a dictionary that contains the information of a bus.
+              Its keys are field names of BusInfo and values are corresponding values.
+        
+        Raises:
+            KeyError: When there is no mandatory fields in info.
+        """
+        return cls(**json.loads(info))
+
 
 def strinfo(info: AppInfo | BusInfo) -> str:
     """Returns a JSON string converted from the given info.
