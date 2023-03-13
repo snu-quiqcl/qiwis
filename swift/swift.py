@@ -253,13 +253,13 @@ def _add_to_path(path: str):
         sys.modules = old_modules
 
 
-def _get_argparser():
-    """Parses command line arguments
+def _get_argparser() -> argparse.ArgumentParser:
+    """Parses command line arguments.
 
     -s, --setup: A path of set-up file.
 
     Returns:
-        argparse.ArgumentParser: A namespace containing arguments
+        A namespace containing arguments.
     """
     parser = argparse.ArgumentParser(
         description="SNU widget integration framework for PyQt"
