@@ -160,15 +160,12 @@ class Swift(QObject):
             name: A name of the bus.
             info: A BusInfo object describing the bus.
         """
-        # create a bus
         if info.timeout is not None:
             bus = Bus(name, info.timeout)
         else:
             bus = Bus(name)
-        # set a slot of received signal to router
         bus.received.connect(self._routeToApp)
         bus.start()
-        # store the bus
         self._buses[name] = bus
         self._subscribers.setdefault(name, set())
 
