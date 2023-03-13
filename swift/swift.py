@@ -167,40 +167,29 @@ class Swift(QObject):
         self._buses[name] = bus
         self._subscribers.setdefault(name, set())
 
-    def createApp(self, name: str, info: Mapping[str, Any]):
+    def createApp(self, name: str, info: AppInfo):
         """Creates an app and shows their frames using set-up environment.
         
         Args:
             name: A name of app.
-            info: A dictionary containing app info. Each element is like below:
-              path: A path desired to be added for importing app.
-              module: A name of app module.
-              class: A name of app class.
-              show: Whether its frames are shown at the beginning.
-                True if you want to show the frames, otherwise False.
-              pos: A string that indicates the position of the frames.
-                It should be one of "left", "right", "top", or "bottom"; and is case-sensitive.
-                Otherwise, it will be regarded as default (AllDockWidgetAreas).
-              bus: A list of buses which the app subscribes to.
-              args: Additional arguments for app class constructor.
-                If there is no additional arguments, set None.
+            info: An AppInfo object describing the app.
         """
         # import the app module
-        with _add_to_path(os.path.dirname(info.get("path", "."))):
-            module = importlib.import_module(info["module"])
+        with _add_to_path(os.path.dirname(info.path)):
+            module = importlib.import_module(info.module)
         # create an app
-        cls = getattr(module, info["class"])
-        if "args" in info:
-            app = cls(name, parent=self, **info["args"])
+        cls = getattr(module, info.class_)
+        if info.args is not None:
+            app = cls(name, parent=self, **info.args)
         else:
             app = cls(name, parent=self)
         # set a slot of broadcast signal to router
         app.broadcastRequested.connect(self._routeToBus)
         # add the app to the list of subscribers on each bus
-        for busName in info["bus"]:
+        for busName in info.bus:
             self._subscribers[busName].add(app)
         # show frames if the "show" option is true
-        if info["show"]:
+        if info.show:
             for frame in app.frames():
                 dockWidget = QDockWidget(name, self.mainWindow)
                 dockWidget.setWidget(frame)
@@ -209,7 +198,7 @@ class Swift(QObject):
                     "right": Qt.RightDockWidgetArea,
                     "top": Qt.TopDockWidgetArea,
                     "bottom": Qt.BottomDockWidgetArea
-                }.get(info["pos"], Qt.AllDockWidgetAreas)
+                }.get(info.pos, Qt.AllDockWidgetAreas)
                 self.mainWindow.addDockWidget(area, dockWidget)
         # store the app
         self._apps[name] = app
