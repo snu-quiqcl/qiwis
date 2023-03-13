@@ -152,18 +152,16 @@ class Swift(QObject):
         for name, info in appInfos.items():
             self.createApp(name, info)
 
-    def createBus(self, name: str, info: Mapping[str, Any]):
-        """Creates a global bus using set-up environment.
+    def createBus(self, name: str, info: BusInfo):
+        """Creates a bus from the given information.
         
         Args:
             name: A name of the bus.
-            info: A dictionary containing bus info. Each element is like below:
-              timeout: Desired timeout for blocking queue reading, in seconds.
-                If you want to set as default, set None.
+            info: A BusInfo object describing the bus.
         """
         # create a bus
-        if "timeout" in info:
-            bus = Bus(name, info["timeout"])
+        if info.timeout is not None:
+            bus = Bus(name, info.timeout)
         else:
             bus = Bus(name)
         # set a slot of received signal to router
