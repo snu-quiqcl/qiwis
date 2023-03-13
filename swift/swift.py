@@ -17,7 +17,7 @@ import importlib
 import importlib.util
 from contextlib import contextmanager
 from dataclasses import dataclass, asdict
-from typing import Any, Iterable, Mapping
+from typing import Any, Iterable, Mapping, Self
 
 from PyQt5.QtCore import QObject, pyqtSlot, Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QDockWidget
@@ -49,6 +49,30 @@ class AppInfo:
     pos: str = ""
     bus: Iterable[str] = ()
     args: Mapping[str, Any] | None = None
+
+    @classmethod
+    def parse(cls, info: str) -> Self:
+        """Constructs an AppInfo object from a JSON string.
+
+        This does not catch JSONDecodeErrors since it clearly requires the JSON string
+        for the input.
+        Care must be taken not to input a non-JSON formatted string.
+        
+        Args:
+            info: A JSON string of a dictionary that contains the information of an app.
+              Its keys are field names of AppInfo and values are corresponding values.
+              Exceptionally for "class_" field, "class" is also accepted.
+              If both "class_" and "class" exist, then "class" is ignored.
+              If both does not exist, a KeyError("class_") is raised.
+        
+        Raises:
+            KeyError: When there is no mandatory fields in info.
+        """
+        info: dict[str, Any] = json.loads(info)
+        class_ = info.pop("class", None)
+        if info.setdefault("class_", class_) is None:
+            raise KeyError("class_")
+        return cls(**info)
 
 
 @dataclass
