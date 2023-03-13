@@ -3,7 +3,7 @@
 """
 Swift is a main manager for swift system.
 
-Using a set-up file created by an user, it sets up apps and buses.
+Using a set-up file written by an user, it sets up apps and buses.
 
 Usage:
     python -m swift.swift (-s <SETUP_PATH>)
@@ -28,22 +28,20 @@ class Swift(QObject):
     Note that QApplication instance must be created before instantiating Swift object.
 
     Brief procedure:
-        1. Create buses.
-        2. Create apps.
-        3. Show frames of each app.
+        1. Load setup environment.
+        2. Create buses.
+        3. Create apps and show their frames.
     """
 
-    def __init__(self, setup_env: dict, parent=None):
+    def __init__(self, setupEnv: dict, parent=None):
         """
         Args:
-            setup_env: A dictionary containing set-up environment about app and bus.
+            setupEnv: A dictionary containing set-up environment about app and bus.
               It has two keys; "app" and "bus".
-
-              In "app", there may be keys below; 
-                "path", "module", "class", "show", "pos", "bus", and "args".
-              In "bus", there may be keys below;
-                "timeout".
-
+              In "app", there are apps containing keys as below; 
+                "path" (optional), "module", "class", "show", "pos", "bus", and "args" (optional).
+              In "bus", there are buses containing keys as below;
+                "timeout" (optional).
               For details, see setup.json.
             parent: A parent object.
         """
@@ -52,91 +50,125 @@ class Swift(QObject):
         self._buses = {}
         self._apps = {}
         self._subscribers = {}
-        self._init_bus(setup_env["bus"])
-        self._init_app(setup_env["app"])
-        self._show_frame(setup_env["app"])
-
-    def _init_bus(self, setup_bus: dict):
-        """Initializes global buses using set-up environment.
-        
-        Args:
-            setup_bus: Set-up environment about bus.
-        """
-        for name, info in setup_bus.items():
-            # create a bus
-            if "timeout" in info:
-                timeout = info["timeout"]
-                bus = Bus(name, timeout)
-            else:
-                bus = Bus(name)
-            # set a slot of received signal to router
-            bus.received.connect(self._route_to_app)
-            bus.start()
-            # store the bus
-            self._buses[name] = bus
-            self._subscribers[name] = []
-
-    def _init_app(self, setup_app: dict):
-        """Initializes apps using set-up environment.
-        
-        Args:
-            setup_app: Set-up environment about app.
-        """
-        for name, info in setup_app.items():
-            # import the app module
-            path = info.get("path", ".")
-            mod_name, cls_name = info["module"], info["class"]
-            with _add_to_path(os.path.dirname(path)):
-                module = importlib.import_module(mod_name)
-            # create an app
-            cls = getattr(module, cls_name)
-            args = info.get("args", {})
-            app = cls(name, self, **args)
-            # set a slot of broadcast signal to router
-            app.broadcastRequested.connect(self._route_to_bus)
-            # add the app to the list of subscribers on each bus
-            for bus_name in info["bus"]:
-                self._subscribers[bus_name].append(app)
-            # store the app
-            self._apps[name] = app
-
-    def _show_frame(self, setup_app: dict):
-        """Shows frames of each app.
-        
-        Args:
-            setup_app: Set-up environment about app.
-        """
-        pos_to_area = {
-            "left": Qt.LeftDockWidgetArea,
-            "right": Qt.RightDockWidgetArea,
-            "top": Qt.TopDockWidgetArea,
-            "bottom": Qt.BottomDockWidgetArea
-        }
-        for name, info in setup_app.items():
-            # show frames if the 'show' option is true
-            if info["show"]:
-                for frame in self._apps[name].frames():
-                    dockWidget = QDockWidget(name, self.mainWindow)
-                    dockWidget.setWidget(frame)
-                    area = pos_to_area.get(info["pos"], Qt.AllDockWidgetAreas)
-                    self.mainWindow.addDockWidget(area, dockWidget)
+        self.load(setupEnv["app"], setupEnv["bus"])
         self.mainWindow.show()
 
+    def load(self, appInfos: dict, busInfos: dict):
+        """Initializes swift system and loads the apps and buses.
+        
+        Args:
+            appInfos: See "app" part of setupEnv in self.__init__().
+            busInfos: See "bus" part of setupEnv in self.__init__().
+        """
+        for name, info in busInfos.items():
+            self.createBus(name, info)
+        for name, info in appInfos.items():
+            self.createApp(name, info)
+
+    def createBus(self, name: str, info: dict):
+        """Creates a global bus using set-up environment.
+        
+        Args:
+            name: A name of the bus.
+            info: A dictionary containing bus info. Each element is like below:
+              timeout: Desired timeout for blocking queue reading, in seconds.
+                If you want to set as default, set None.
+        """
+        # create a bus
+        if "timeout" in info:
+            bus = Bus(name, info["timeout"])
+        else:
+            bus = Bus(name)
+        # set a slot of received signal to router
+        bus.received.connect(self._routeToApp)
+        bus.start()
+        # store the bus
+        self._buses[name] = bus
+        self._subscribers.setdefault(name, set())
+
+    def createApp(self, name: str, info: dict):
+        """Creates an app and shows their frames using set-up environment.
+        
+        Args:
+            name: A name of app.
+            info: A dictionary containing app info. Each element is like below:
+              path: A path desired to be added for importing app.
+              module: A name of app module.
+              class: A name of app class.
+              show: Whether its frames are shown at the beginning.
+                True if you want to show the frames, otherwise False.
+              pos: A string that indicates the position of the frames.
+                It should be one of "left", "right", "top", or "bottom"; and is case-sensitive.
+                Otherwise, it will be regarded as default (AllDockWidgetAreas).
+              bus: A list of buses which the app subscribes to.
+              args: Additional arguments for app class constructor.
+                If there is no additional arguments, set None.
+        """
+        # import the app module
+        with _add_to_path(os.path.dirname(info.get("path", "."))):
+            module = importlib.import_module(info["module"])
+        # create an app
+        cls = getattr(module, info["class"])
+        if "args" in info:
+            app = cls(name, parent=self, **info["args"])
+        else:
+            app = cls(name, parent=self)
+        # set a slot of broadcast signal to router
+        app.broadcastRequested.connect(self._routeToBus)
+        # add the app to the list of subscribers on each bus
+        for busName in info["bus"]:
+            self._subscribers[busName].add(app)
+        # show frames if the "show" option is true
+        if info["show"]:
+            for frame in app.frames():
+                dockWidget = QDockWidget(name, self.mainWindow)
+                dockWidget.setWidget(frame)
+                area = {
+                    "left": Qt.LeftDockWidgetArea,
+                    "right": Qt.RightDockWidgetArea,
+                    "top": Qt.TopDockWidgetArea,
+                    "bottom": Qt.BottomDockWidgetArea
+                }.get(info["pos"], Qt.AllDockWidgetAreas)
+                self.mainWindow.addDockWidget(area, dockWidget)
+        # store the app
+        self._apps[name] = app
+
+    def destroyBus(self, name: str):
+        """Destroys a global bus.
+        
+        Args:
+            name: A name of the bus to destroy.
+        """
+        bus = self._buses.pop(name)
+        bus.stop()
+        bus.deleteLater()
+
+    def destroyApp(self, name: str):
+        """Destroys an app.
+        
+        Args:
+            name: A name of the app to destroy.
+        """
+        app = self._apps.pop(name)
+        for apps in self._subscribers.values():
+            apps.discard(app)
+        app.deleteLater()
+
     @pyqtSlot(str, str)
-    def _route_to_bus(self, bus_name: str, msg: str):
+    def _routeToBus(self, busName: str, msg: str):
         """Routes a signal from an app to the desired bus.
 
         This is a slot for the broadcast signal of each app.
 
         Args:
-            bus_name: A name of the desired bus that will transfer the signal.
+            busName: A name of the desired bus that will transfer the signal.
             msg: An input message to be transferred through the bus.
         """
-        bus = self._buses[bus_name]
+        bus = self._buses[busName]
         bus.write(msg)
 
     @pyqtSlot(str)
-    def _route_to_app(self, msg: str):
+    def _routeToApp(self, msg: str):
         """Routes a signal from a bus to the apps that subscribe to it.
 
         This is a slot for the received signal of each bus.
@@ -144,10 +176,10 @@ class Swift(QObject):
         Args:
             msg: An input message transferred through the bus.
         """
-        bus_name = self.sender().name
+        busName = self.sender().name
         # emit a signal of all apps that subscribe to the bus
-        for app in self._subscribers[bus_name]:
-            app.received.emit(bus_name, msg)
+        for app in self._subscribers[busName]:
+            app.received.emit(busName, msg)
 
 
 @contextmanager
@@ -208,10 +240,10 @@ def main():
     """Main function that runs when swift module is executed rather than imported."""
     args = _get_argparser().parse_args()
     # read set-up information
-    setup_env = _read_setup_file(args.setup_path)
-
+    setupEnv = _read_setup_file(args.setup_path)
+    # start GUI
     app = QApplication(sys.argv)
-    _swift = Swift(setup_env)
+    _swift = Swift(setupEnv)
     app.exec_()
 
 
