@@ -30,7 +30,7 @@ class AppInfo:
     
     Fields:
         module: Module name in which the app class resides.
-        class_: App class name.
+        cls: App class name.
         path: System path for module importing.
         show: Whether to show the app frames on creation.
         pos: Position on the main window; refer to Qt.DockWidgetArea enum.
@@ -43,7 +43,7 @@ class AppInfo:
           where only name and parent arguments will be passed.
     """
     module: str
-    class_: str
+    cls: str
     path: str = "."
     show: bool = True
     pos: str = ""
@@ -57,17 +57,17 @@ class AppInfo:
         Args:
             info: A JSON string of a dictionary that contains the information of an app.
               Its keys are field names of AppInfo and values are corresponding values.
-              Exceptionally for "class_" field, "class" is also accepted.
-              If both "class_" and "class" exist, then "class" is ignored.
-              If both does not exist, a KeyError("class_") is raised.
+              Exceptionally for "cls" field, "class" is also accepted.
+              If both "cls" and "class" exist, then "class" is ignored.
+              If both does not exist, a KeyError("cls") is raised.
         
         Raises:
             KeyError: When there is no mandatory fields in info.
         """
         info: dict[str, Any] = json.loads(info)
-        class_ = info.pop("class", None)
-        if info.setdefault("class_", class_) is None:
-            raise KeyError("class_")
+        info_cls = info.pop("class", None)
+        if info.setdefault("cls", info_cls) is None:
+            raise KeyError("cls")
         return cls(**info)
 
 
@@ -182,7 +182,7 @@ class Swift(QObject):
         """
         with _add_to_path(os.path.dirname(info.path)):
             module = importlib.import_module(info.module)
-        cls = getattr(module, info.class_)
+        cls = getattr(module, info.cls)
         if info.args is not None:
             app = cls(name, parent=self, **info.args)
         else:
