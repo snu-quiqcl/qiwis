@@ -114,7 +114,8 @@ class DBMgrApp(BaseApp):
         self.broadcastRequested.emit("dbbus", json.dumps(msg))
         self.broadcastRequested.emit(
             "logbus",
-            f"Database {name} is " +  "added" if isAdded else "removed" + "."
+            f"Database {name} is added." if isAdded
+            else f"Database {name} is removed."
         )
 
     @pyqtSlot()
