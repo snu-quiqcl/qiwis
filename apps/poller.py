@@ -118,12 +118,19 @@ class PollerApp(BaseApp):
     @pyqtSlot()
     def setPeriod(self):
         """Sets the polling period."""
-        self.timer.start(1000 * self.viewerFrame.periodBox.value())
+        period = self.viewerFrame.periodBox.value()
+        self.timer.start(1000 * period)
+        self.broadcastRequested.emit("logbus", f"Period is set as {period}s.")
 
     @pyqtSlot()
     def setDB(self):
         """Sets the database to store the polled number."""
         self.dbName = self.viewerFrame.dbBox.currentText()
+        self.broadcastRequested.emit(
+            "logbus", 
+            f"Polled database is set as {self.dbName}." if self.dbName
+            else f"Polled database is not selected."
+        )
 
     @pyqtSlot()
     def poll(self):
@@ -132,6 +139,8 @@ class PollerApp(BaseApp):
         self.count += 1
         self.viewerFrame.countLabel.setText(f"polled count: {self.count}")
         self.viewerFrame.numberLabel.setText(f"polled number: {num}")
+        self.broadcastRequested.emit("logbus", f"Poll a number: {num}.")
         # save the polled number
         dbPath = self.dbs[self.dbName]
-        write(os.path.join(dbPath, self.dbName), self.table, num)
+        if write(os.path.join(dbPath, self.dbName), self.table, num):
+            self.broadcastRequested.emit("logbus", f"Save the polled number: {num}.")
