@@ -129,7 +129,7 @@ class PollerApp(BaseApp):
         self.broadcastRequested.emit(
             "logbus", 
             f"Polled database is set as {self.dbName}." if self.dbName
-            else f"Polled database is not selected."
+            else "Polled database is not selected."
         )
 
     @pyqtSlot()
