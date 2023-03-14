@@ -132,7 +132,7 @@ class NumGenApp(BaseApp):
         self.broadcastRequested.emit(
             "logbus", 
             f"Database to store is set as {self.dbName}." if self.dbName
-            else f"Database to store is not selected."
+            else "Database to store is not selected."
         )
 
     @pyqtSlot()
