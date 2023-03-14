@@ -143,7 +143,8 @@ class Swift(QObject):
         Args:
             appInfos: A dictionary whose keys are app names and the values are
               corresponding AppInfo objects. All the apps in the dictionary
-              will be created and shown if the show field is True.
+              will be created, and if the show field is True, its frames will
+              be shown.
             busInfos: A dictionary whose keys are bus names and the values are
               corresponding BusInfo objects. All the buses in the dictionary
               will be created and started.
