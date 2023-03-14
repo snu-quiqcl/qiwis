@@ -103,10 +103,19 @@ class DBMgrApp(BaseApp):
         """Overridden."""
         return (self.managerFrame,)
 
-    def sendDB(self):
-        """Emits a broadcastRequested signal with the database list."""
+    def sendDB(self, isAdded: bool, name: str):
+        """Emits a broadcastRequested signal with the database list and a logging message.
+        
+        Args:
+            isAdded: True if a database is added, otherwise False.
+            name: A file name of the updated database.
+        """
         msg = {"db": [db._asdict() for db in self.dbList]}
         self.broadcastRequested.emit("dbbus", json.dumps(msg))
+        self.broadcastRequested.emit(
+            "logbus",
+            f"Database {name} is " +  "added" if isAdded else "removed" + "."
+        )
 
     @pyqtSlot()
     def addDB(self):
@@ -131,8 +140,8 @@ class DBMgrApp(BaseApp):
         item.setSizeHint(widget.sizeHint())
         self.managerFrame.dbListWidget.addItem(item)
         self.managerFrame.dbListWidget.setItemWidget(item, widget)
-        # send the database list
-        self.sendDB()
+        # send the database list and a logging message
+        self.sendDB(True, db.name)
 
     @pyqtSlot()
     def removeDB(self):
@@ -150,5 +159,5 @@ class DBMgrApp(BaseApp):
         del self.dbList[row]
         del item
         widget.deleteLater()
-        # send the database list
-        self.sendDB()
+        # send the database list and a logging message
+        self.sendDB(False, db.name)
