@@ -311,7 +311,7 @@ def _read_setup_file(setup_path: str) -> tuple[Mapping[str, AppInfo], Mapping[st
         setup_path: A path of set-up file.
 
     Returns:
-        (app_infos, bus_infos): Dictionaries of set-up information about app and bus.
+        A tuple of two dictionaries of set-up information about app and bus.
           See appInfos and busInfos in Swift.load() for more details.
     """
     with open(setup_path, encoding="utf-8") as setup_file:
