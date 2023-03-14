@@ -119,6 +119,11 @@ class DataCalcApp(BaseApp):
         """Sets the databases to fetch the numbers."""
         for name, dbBox in self.viewerFrame.dbBoxes.items():
             self.dbNames[name] = dbBox.currentText()
+            self.broadcastRequested.emit(
+                "logbus", 
+                f"Database {name} is set as {self.dbNames[name]}." if self.dbNames[name]
+                else f"Database {name} is not selected."
+            )
 
     @pyqtSlot()
     def calculateSum(self):
@@ -138,3 +143,4 @@ class DataCalcApp(BaseApp):
             result += value
         else:
             self.viewerFrame.numberLabel.setText(f"sum: {result}")
+            self.broadcastRequested.emit("logbus", f"Calculate the sum: {result}.")
