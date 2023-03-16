@@ -17,7 +17,7 @@ import importlib
 import importlib.util
 from contextlib import contextmanager
 from dataclasses import dataclass, asdict
-from typing import Any, Iterable, Mapping, Self
+from typing import Any, Iterable, Mapping
 
 from PyQt5.QtCore import QObject, pyqtSlot, Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QDockWidget
@@ -51,7 +51,7 @@ class AppInfo:
     args: Mapping[str, Any] | None = None
 
     @classmethod
-    def parse(cls, info: str) -> Self:
+    def parse(cls, info: str) -> "AppInfo":
         """Constructs an AppInfo object from a JSON string.
         
         Args:
@@ -81,7 +81,7 @@ class BusInfo:
     timeout: float | None = None
 
     @classmethod
-    def parse(cls, info: str) -> Self:
+    def parse(cls, info: str) -> "BusInfo":
         """Constructs a BusInfo object from a JSON string.
         
         Args:
