@@ -3,7 +3,7 @@
 """
 Swift is a main manager for swift system.
 
-Using a set-up file written by an user, it sets up apps and buses.
+Using a set-up file written by a user, it sets up apps and buses.
 
 Usage:
     python -m swift.swift (-s <SETUP_PATH>)

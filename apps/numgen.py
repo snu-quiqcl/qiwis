@@ -141,12 +141,12 @@ class NumGenApp(BaseApp):
         # generate a random number
         num = generate()
         self.viewerFrame.numberLabel.setText(f"generated number: {num}")
-        self.broadcastRequested.emit("logbus", f"Generate a random number: {num}.")
+        self.broadcastRequested.emit("logbus", f"Generated number: {num}.")
         # save the generated number
         dbPath = self.dbs[self.dbName]
         is_save_success = write(os.path.join(dbPath, self.dbName), self.table, num)
         if is_save_success:
             self.viewerFrame.statusLabel.setText("number saved successfully")
-            self.broadcastRequested.emit("logbus", f"Save the generated number: {num}.")
+            self.broadcastRequested.emit("logbus", f"Generated number saved.")
         else:
             self.viewerFrame.statusLabel.setText("failed to save number")
