@@ -48,6 +48,8 @@ class Swift(QObject):
         super().__init__(parent=parent)
         self.mainWindow = QMainWindow()
         self.centralWidget = QLabel("Swift")
+        self.centralWidget.setAlignment(Qt.AlignCenter)
+        self.centralWidget.setStyleSheet("background-color: gray;")
         self.mainWindow.setCentralWidget(self.centralWidget)
         self._buses = {}
         self._apps = {}
