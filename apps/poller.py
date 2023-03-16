@@ -143,4 +143,4 @@ class PollerApp(BaseApp):
         # save the polled number
         dbPath = self.dbs[self.dbName]
         if write(os.path.join(dbPath, self.dbName), self.table, num):
-            self.broadcastRequested.emit("logbus", f"Polled number saved.")
+            self.broadcastRequested.emit("logbus", "Polled number saved.")
