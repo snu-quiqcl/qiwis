@@ -18,7 +18,7 @@ import importlib.util
 from contextlib import contextmanager
 
 from PyQt5.QtCore import QObject, pyqtSlot, Qt
-from PyQt5.QtWidgets import QApplication, QMainWindow, QDockWidget
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QDockWidget
 
 from swift.bus import Bus
 
@@ -47,6 +47,10 @@ class Swift(QObject):
         """
         super().__init__(parent=parent)
         self.mainWindow = QMainWindow()
+        self.centralWidget = QLabel("Swift")
+        self.centralWidget.setAlignment(Qt.AlignCenter)
+        self.centralWidget.setStyleSheet("background-color: gray;")
+        self.mainWindow.setCentralWidget(self.centralWidget)
         self._buses = {}
         self._apps = {}
         self._subscribers = {}
