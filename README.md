@@ -12,9 +12,6 @@ One of the below:
 1. `git clone ${url}`
 2. In the repository, `pip install -e .`
 
-For convenience, you may download test databases:
-- [database.zip](https://github.com/snu-quiqcl/swift/files/10907031/database.zip)
-
 ## How to use
 In the repository, just do like as below:
 
