@@ -147,6 +147,6 @@ class NumGenApp(BaseApp):
         is_save_success = write(os.path.join(dbPath, self.dbName), self.table, num)
         if is_save_success:
             self.viewerFrame.statusLabel.setText("number saved successfully")
-            self.broadcastRequested.emit("logbus", f"Generated number saved.")
+            self.broadcastRequested.emit("logbus", "Generated number saved.")
         else:
             self.viewerFrame.statusLabel.setText("failed to save number")
