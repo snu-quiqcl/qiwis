@@ -17,7 +17,7 @@ import importlib
 import importlib.util
 from contextlib import contextmanager
 from dataclasses import dataclass, asdict
-from typing import Dict, Tuple, Any, Iterable, Mapping
+from typing import Dict, Tuple, Any, Iterable, Mapping, Optional
 
 from PyQt5.QtCore import QObject, pyqtSlot, Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QDockWidget
@@ -48,7 +48,7 @@ class AppInfo:
     show: bool = True
     pos: str = ""
     bus: Iterable[str] = ()
-    args: Mapping[str, Any] | None = None
+    args: Optional[Mapping[str, Any]] = None
 
     @classmethod
     def parse(cls, info: str) -> "AppInfo":
@@ -78,7 +78,7 @@ class BusInfo:
     Fields:
         timeout: See bus.Bus.__init__(). None for the default value of __init__().
     """
-    timeout: float | None = None
+    timeout: Optional[float] = None
 
     @classmethod
     def parse(cls, info: str) -> "BusInfo":
@@ -118,9 +118,9 @@ class Swift(QObject):
 
     def __init__(
         self,
-        appInfos: Mapping[str, AppInfo] | None = None,
-        busInfos: Mapping[str, BusInfo] | None = None,
-        parent: QObject | None = None):
+        appInfos: Optional[Mapping[str, AppInfo]] = None,
+        busInfos: Optional[Mapping[str, BusInfo]] = None,
+        parent: Optional[QObject] = None):
         """
         Args:
             appInfos: See Swift.load(). None or an empty dictionary for loading no apps.
