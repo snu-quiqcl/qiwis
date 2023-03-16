@@ -17,7 +17,7 @@ import importlib
 import importlib.util
 from contextlib import contextmanager
 from dataclasses import dataclass, asdict
-from typing import Dict, Tuple, Any, Iterable, Mapping, Optional
+from typing import Dict, Tuple, Any, Iterable, Mapping, Optional, Union
 
 from PyQt5.QtCore import QObject, pyqtSlot, Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QDockWidget
@@ -94,7 +94,7 @@ class BusInfo:
         return cls(**json.loads(info))
 
 
-def strinfo(info: AppInfo | BusInfo) -> str:
+def strinfo(info: Union[AppInfo, BusInfo]) -> str:
     """Returns a JSON string converted from the given info.
 
     This is just a convenience function for users not to import dataclasses and json.
