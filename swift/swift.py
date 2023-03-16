@@ -52,7 +52,7 @@ class AppInfo:
 
     @classmethod
     def parse(cls, info: str) -> "AppInfo":
-        """Constructs an AppInfo object from a JSON string.
+        """Returns an AppInfo object from a JSON string.
         
         Args:
             info: A JSON string of a dictionary that contains the information of an app.
