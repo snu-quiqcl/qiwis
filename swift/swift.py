@@ -17,7 +17,7 @@ import importlib
 import importlib.util
 from contextlib import contextmanager
 from dataclasses import dataclass, asdict
-from typing import Any, Iterable, Mapping
+from typing import Dict, Tuple, Any, Iterable, Mapping
 
 from PyQt5.QtCore import QObject, pyqtSlot, Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QDockWidget
@@ -64,7 +64,7 @@ class AppInfo:
         Raises:
             KeyError: When there is no mandatory fields in info.
         """
-        info: dict[str, Any] = json.loads(info)
+        info: Dict[str, Any] = json.loads(info)
         info_cls = info.pop("class", None)
         if info.setdefault("cls", info_cls) is None:
             raise KeyError("cls")
@@ -288,7 +288,7 @@ def _get_argparser() -> argparse.ArgumentParser:
     return parser
 
 
-def _read_setup_file(setup_path: str) -> tuple[Mapping[str, AppInfo], Mapping[str, BusInfo]]:
+def _read_setup_file(setup_path: str) -> Tuple[Mapping[str, AppInfo], Mapping[str, BusInfo]]:
     """Reads set-up information about app and bus from a JSON file.
 
     The JSON file content should have the following structure:
@@ -315,7 +315,7 @@ def _read_setup_file(setup_path: str) -> tuple[Mapping[str, AppInfo], Mapping[st
           See appInfos and busInfos in Swift.load() for more details.
     """
     with open(setup_path, encoding="utf-8") as setup_file:
-        setup_data: dict[str, dict] = json.load(setup_file)
+        setup_data: Dict[str, dict] = json.load(setup_file)
     app_dict = setup_data.get("app", {})
     bus_dict = setup_data.get("bus", {})
     app_infos = {name: AppInfo.parse(json.dumps(info)) for (name, info) in app_dict.items()}
