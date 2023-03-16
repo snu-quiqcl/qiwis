@@ -107,7 +107,7 @@ class DBMgrApp(BaseApp):
         """Emits a broadcastRequested signal with the database list and a logging message.
         
         Args:
-            isAdded: True if a database is added, otherwise False.
+            isAdded: True if a database is added, and False if a databse is removed.
             name: A file name of the updated database.
         """
         msg = {"db": [db._asdict() for db in self.dbList]}

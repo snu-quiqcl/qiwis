@@ -139,8 +139,8 @@ class PollerApp(BaseApp):
         self.count += 1
         self.viewerFrame.countLabel.setText(f"polled count: {self.count}")
         self.viewerFrame.numberLabel.setText(f"polled number: {num}")
-        self.broadcastRequested.emit("logbus", f"Poll a number: {num}.")
+        self.broadcastRequested.emit("logbus", f"Polled number: {num}.")
         # save the polled number
         dbPath = self.dbs[self.dbName]
         if write(os.path.join(dbPath, self.dbName), self.table, num):
-            self.broadcastRequested.emit("logbus", f"Save the polled number: {num}.")
+            self.broadcastRequested.emit("logbus", f"Polled number saved.")

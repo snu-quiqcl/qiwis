@@ -121,7 +121,8 @@ class DataCalcApp(BaseApp):
             self.dbNames[name] = dbBox.currentText()
             self.broadcastRequested.emit(
                 "logbus", 
-                f"Database {name} is set as {self.dbNames[name]}." if self.dbNames[name]
+                f"Database {name} is set as {self.dbNames[name]}."
+                if self.dbNames[name]
                 else f"Database {name} is not selected."
             )
 
@@ -143,4 +144,4 @@ class DataCalcApp(BaseApp):
             result += value
         else:
             self.viewerFrame.numberLabel.setText(f"sum: {result}")
-            self.broadcastRequested.emit("logbus", f"Calculate the sum: {result}.")
+            self.broadcastRequested.emit("logbus", f"Sum: {result}.")
