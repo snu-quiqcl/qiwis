@@ -17,12 +17,18 @@ import importlib
 import importlib.util
 from contextlib import contextmanager
 from dataclasses import dataclass, asdict
-from typing import Dict, Tuple, Any, Iterable, Mapping, Optional, Union
+from typing import (
+    Dict, Tuple, Any, Iterable, Mapping, Optional, Union, TypeVar, Type
+)
 
 from PyQt5.QtCore import QObject, pyqtSlot, Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QDockWidget
 
 from swift.bus import Bus
+
+
+T = TypeVar("T")
+
 
 @dataclass
 class AppInfo:
@@ -85,7 +91,7 @@ class BusInfo:
         return cls(**json.loads(info))
 
 
-def parse(cls, kwargs: str):
+def parse(cls: Type[T], kwargs: str) -> T:
     """Returns a new cls instance from a JSON string.
 
     This is a convenience function for just unpacking the JSON string and gives them
