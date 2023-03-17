@@ -2,7 +2,7 @@
     "app": {
         "numgen": {
             "module": "apps.numgen",
-            "class": "NumGenApp",
+            "cls": "NumGenApp",
             "show": true,
             "pos": "left",
             "bus": ["dbbus"],
@@ -12,14 +12,14 @@
         },
         "dbmgr": {
             "module": "apps.dbmgr",
-            "class": "DBMgrApp",
+            "cls": "DBMgrApp",
             "show": true,
             "pos": "right",
             "bus": []
         },
         "datacalc": {
             "module": "apps.datacalc",
-            "class": "DataCalcApp",
+            "cls": "DataCalcApp",
             "show": true,
             "pos": "top",
             "bus": ["dbbus"],
@@ -32,7 +32,7 @@
         },
         "poller": {
             "module": "apps.poller",
-            "class": "PollerApp",
+            "cls": "PollerApp",
             "show": true,
             "pos": "bottom",
             "bus": ["dbbus"],
@@ -42,7 +42,7 @@
         },
         "logger": {
             "module": "apps.logger",
-            "class": "LoggerApp",
+            "cls": "LoggerApp",
             "show": true,
             "pos": "bottom",
             "bus": ["logbus"]
