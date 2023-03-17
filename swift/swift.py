@@ -317,8 +317,8 @@ def _read_setup_file(setup_path: str) -> Tuple[Mapping[str, AppInfo], Mapping[st
         }
       }
 
-    See AppInfo and its parse() for app_info_* structure.
-    See BusInfo and its parse() for bus_info_* structure.
+    See AppInfo for app_info_* structure.
+    See BusInfo for bus_info_* structure.
       
     Args:
         setup_path: A path of set-up file.
@@ -331,8 +331,8 @@ def _read_setup_file(setup_path: str) -> Tuple[Mapping[str, AppInfo], Mapping[st
         setup_data: Dict[str, dict] = json.load(setup_file)
     app_dict = setup_data.get("app", {})
     bus_dict = setup_data.get("bus", {})
-    app_infos = {name: AppInfo.parse(json.dumps(info)) for (name, info) in app_dict.items()}
-    bus_infos = {name: BusInfo.parse(json.dumps(info)) for (name, info) in bus_dict.items()}
+    app_infos = {name: AppInfo(**info) for (name, info) in app_dict.items()}
+    bus_infos = {name: BusInfo(**info) for (name, info) in bus_dict.items()}
     return app_infos, bus_infos
 
 
