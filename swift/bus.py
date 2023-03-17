@@ -56,6 +56,7 @@ class Bus(QObject):
         self._thread.started.connect(self._consumer.run)
         self._thread.finished.connect(self._thread.deleteLater)
         self._consumer.finished.connect(self._thread.quit)
+        self._consumer.finished.connect(self._thread.wait)
         self._consumer.finished.connect(self._consumer.deleteLater)
         self._consumer.finished.connect(self._clean_up)
         self._consumer.consumed.connect(self.received)
