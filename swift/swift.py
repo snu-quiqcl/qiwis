@@ -56,18 +56,6 @@ class AppInfo:
     bus: Iterable[str] = ()
     args: Optional[Mapping[str, Any]] = None
 
-    @classmethod
-    def parse(cls, info: str) -> "AppInfo":
-        """Returns an AppInfo object from a JSON string.
-        
-        Args:
-            info: A JSON string of a dictionary that contains the information of an app.
-              Its keys are field names of AppInfo and values are corresponding values.
-              All the mandatory fields which does not have the default values must be given,
-              and any other fields that do not exist in AppInfo must not be given.
-        """
-        return cls(**json.loads(info))
-
 
 @dataclass
 class BusInfo:
@@ -77,18 +65,6 @@ class BusInfo:
         timeout: See bus.Bus.__init__(). None for the default value of __init__().
     """
     timeout: Optional[float] = None
-
-    @classmethod
-    def parse(cls, info: str) -> "BusInfo":
-        """Constructs a BusInfo object from a JSON string.
-        
-        Args:
-            info: A JSON string of a dictionary that contains the information of a bus.
-              Its keys are field names of BusInfo and values are corresponding values.
-              All the mandatory fields which does not have the default values must be given,
-              and any other fields that do not exist in BusInfo must not be given.
-        """
-        return cls(**json.loads(info))
 
 
 def parse(cls: Type[T], kwargs: str) -> T:
