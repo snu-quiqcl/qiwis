@@ -57,9 +57,8 @@ class AppInfo:
         Args:
             info: A JSON string of a dictionary that contains the information of an app.
               Its keys are field names of AppInfo and values are corresponding values.
-        
-        Raises:
-            KeyError: When there is no mandatory fields in info.
+              All the mandatory fields which does not have the default values must be given,
+              and any other fields that do not exist in AppInfo must not be given.
         """
         return cls(**json.loads(info))
 
@@ -80,9 +79,8 @@ class BusInfo:
         Args:
             info: A JSON string of a dictionary that contains the information of a bus.
               Its keys are field names of BusInfo and values are corresponding values.
-        
-        Raises:
-            KeyError: When there is no mandatory fields in info.
+              All the mandatory fields which does not have the default values must be given,
+              and any other fields that do not exist in BusInfo must not be given.
         """
         return cls(**json.loads(info))
 
