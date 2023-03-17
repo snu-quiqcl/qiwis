@@ -304,7 +304,7 @@ def _read_setup_file(setup_path: str) -> Tuple[Mapping[str, AppInfo], Mapping[st
           See appInfos and busInfos in Swift.load() for more details.
     """
     with open(setup_path, encoding="utf-8") as setup_file:
-        setup_data: Dict[str, dict] = json.load(setup_file)
+        setup_data: Dict[str, Dict[str, dict]] = json.load(setup_file)
     app_dict = setup_data.get("app", {})
     bus_dict = setup_data.get("bus", {})
     app_infos = {name: AppInfo(**info) for (name, info) in app_dict.items()}
