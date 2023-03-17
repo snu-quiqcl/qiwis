@@ -9,7 +9,7 @@ One of the below:
 1. `pip install git_https://github.com/snu-quiqcl/swift.git@v1.0.1`
 
 - Using git directly
-1. `git clone ${url}`
+1. `git clone ${url}`: The default branch is `develop`, not `main`. There is no guarantee for stability.
 2. In the repository, `pip install -e .`
 
 ## How to use
