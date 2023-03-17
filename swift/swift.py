@@ -57,18 +57,11 @@ class AppInfo:
         Args:
             info: A JSON string of a dictionary that contains the information of an app.
               Its keys are field names of AppInfo and values are corresponding values.
-              Exceptionally for "cls" field, "class" is also accepted.
-              If both "cls" and "class" exist, then "class" is ignored.
-              If both does not exist, a KeyError("cls") is raised.
         
         Raises:
             KeyError: When there is no mandatory fields in info.
         """
-        info: Dict[str, Any] = json.loads(info)
-        info_cls = info.pop("class", None)
-        if info.setdefault("cls", info_cls) is None:
-            raise KeyError("cls")
-        return cls(**info)
+        return cls(**json.loads(info))
 
 
 @dataclass
