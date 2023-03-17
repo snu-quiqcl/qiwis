@@ -85,6 +85,22 @@ class BusInfo:
         return cls(**json.loads(info))
 
 
+def parse(cls, kwargs: str):
+    """Returns a new cls instance from a JSON string.
+
+    This is a convenience function for just unpacking the JSON string and gives them
+    as keyword arguments of the constructor of cls.
+        
+    Args:
+        cls: A class object.
+        kwargs: A JSON string of a dictionary that contains the keyword arguments of cls.
+            Positional arguments should be given with the argument names, just like
+            the other keyword arguments.
+            There must not exist arguments which are not in cls constructor.
+    """
+    return cls(**json.loads(kwargs))
+
+
 def strinfo(info: Union[AppInfo, BusInfo]) -> str:
     """Returns a JSON string converted from the given info.
 
