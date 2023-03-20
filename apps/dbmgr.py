@@ -5,7 +5,7 @@ App module for adding and removing available databases.
 import os
 import json
 from collections import namedtuple
-from typing import Optional
+from typing import Optional, Tuple
 
 from PyQt5.QtCore import QObject, pyqtSlot
 from PyQt5.QtWidgets import (QWidget, QLabel, QPushButton, QFileDialog,
