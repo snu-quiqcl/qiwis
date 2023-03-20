@@ -6,7 +6,7 @@ App module for generating and showing a random number.
 
 import os
 import json
-from typing import Optional
+from typing import Optional, Tuple
 
 from PyQt5.QtCore import QObject, pyqtSlot
 from PyQt5.QtWidgets import QWidget, QComboBox, QPushButton, QLabel, QVBoxLayout
@@ -86,7 +86,7 @@ class NumGenApp(BaseApp):
         self.generatorFrame.dbBox.currentIndexChanged.connect(self.setDB)
         self.generatorFrame.generateButton.clicked.connect(self.generateNumber)
 
-    def frames(self):
+    def frames(self) -> Tuple[GeneratorFrame, ViewerFrame]:
         """Overridden."""
         return (self.generatorFrame, self.viewerFrame)
 
