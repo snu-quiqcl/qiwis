@@ -4,6 +4,8 @@ Base module for App.
 Every App class should be a subclass of BaseApp.
 """
 
+from typing import Optional
+
 from PyQt5.QtCore import QObject, pyqtSignal
 
 class BaseApp(QObject):
@@ -19,7 +21,7 @@ class BaseApp(QObject):
     broadcastRequested = pyqtSignal(str, str)
     received = pyqtSignal(str, str)
 
-    def __init__(self, name: str, parent=None):
+    def __init__(self, name: str, parent: Optional[QObject] = None):
         """
         Args:
             name: A string that indicates the name of App.
