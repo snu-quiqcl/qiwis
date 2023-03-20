@@ -5,8 +5,9 @@ App module for adding and removing available databases.
 import os
 import json
 from collections import namedtuple
+from typing import Optional
 
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import QObject, pyqtSlot
 from PyQt5.QtWidgets import (QWidget, QLabel, QPushButton, QFileDialog,
                              QHBoxLayout, QVBoxLayout, QListWidget, QListWidgetItem)
 
@@ -22,7 +23,7 @@ class DBWidget(QWidget):
         pathLabel: A label for showing the absolue path.
         removeButton: A button for removing (disconnecting) the database.
     """
-    def __init__(self, name, path, parent=None):
+    def __init__(self, name: str, path: str, parent: Optional[QObject] = None):
         """"Extended.
 
         Args:
@@ -54,7 +55,7 @@ class ManagerFrame(QWidget):
           when removeButton (of each item) clicked.
         addButton: A button for adding (actually connecting) a database.
     """
-    def __init__(self, parent=None):
+    def __init__(self, parent: Optional[QObject] = None):
         """Extended."""
         super().__init__(parent=parent)
         # widgets
@@ -91,7 +92,7 @@ class DBMgrApp(BaseApp):
     """
     DB = namedtuple("DB", ["path", "name"])
 
-    def __init__(self, name: str, parent=None):
+    def __init__(self, name: str, parent: Optional[QObject] = None):
         """Extended."""
         super().__init__(name, parent)
         self.dbList = []
