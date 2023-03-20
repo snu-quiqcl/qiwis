@@ -73,7 +73,7 @@ class DataCalcApp(BaseApp):
             dbBox.currentIndexChanged.connect(self.setDB)
         self.viewerFrame.calculateButton.clicked.connect(self.calculateSum)
 
-    def frames(self):
+    def frames(self) -> Tuple[ViewerFrame]:
         """Overridden."""
         return (self.viewerFrame,)
 
