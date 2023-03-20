@@ -9,7 +9,6 @@ from PyQt5.QtCore import QObject
 
 from swift.app import BaseApp
 
-
 class AppTest(unittest.TestCase):
     """Unit test for app.py."""
 
