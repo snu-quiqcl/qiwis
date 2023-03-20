@@ -92,7 +92,7 @@ class LoggerApp(BaseApp):
         return (self.loggerFrame,)
 
     @pyqtSlot(str, str)
-    def addLog(self, busName, msg):
+    def addLog(self, busName: str, msg: str):
         """Adds a bus name and log message.
 
         Args:
