@@ -4,8 +4,9 @@ App module for polling a number and saving it into the selected database.
 
 import os
 import json
+from typing import Optional
 
-from PyQt5.QtCore import pyqtSlot, QTimer
+from PyQt5.QtCore import QObject, pyqtSlot, QTimer
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QComboBox, QSpinBox, QLabel
 
 from swift.app import BaseApp
@@ -21,7 +22,7 @@ class ViewerFrame(QWidget):
           This will confidently show when the polling occurs.
         numberLabel: A label for showing the recently polled number.
     """
-    def __init__(self, parent=None):
+    def __init__(self, parent: Optional[QObject] = None):
         """Extended."""
         super().__init__(parent=parent)
         # widgets
@@ -55,7 +56,7 @@ class PollerApp(BaseApp):
         count: The polled count. It starts from 0.
         timer: A QTimer object for polling. The initial interval is a second.
     """
-    def __init__(self, name: str, parent=None, table: str = "B"):
+    def __init__(self, name: str, parent: Optional[QObject] = None, table: str = "B"):
         """Extended.
 
         Args:
