@@ -63,7 +63,7 @@ def read(db_path: str, table: str) -> Any:
     return value
 
 
-def write(db_path: str, table: str, value) -> bool:
+def write(db_path: str, table: str, value: Any) -> bool:
     """Writes the value to the database.
 
     It can only add the value into the last row in a specific table.
