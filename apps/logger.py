@@ -3,7 +3,7 @@ App module for logging.
 """
 
 import time
-from typing import Optional
+from typing import Optional, Tuple
 
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QTextEdit, QLabel, QDialogButtonBox
@@ -87,7 +87,7 @@ class LoggerApp(BaseApp):
         self.confirmFrame = ConfirmClearingFrame()
         self.confirmFrame.confirmed.connect(self.clearLog)
 
-    def frames(self):
+    def frames(self) -> Tuple[LoggerFrame]:
         """Overridden."""
         return (self.loggerFrame,)
 
