@@ -5,6 +5,7 @@ Backend module for offering various functions.
 import random
 import time
 import sqlite3
+from typing import Any
 
 def generate() -> int:
     """Generates a random number from 0 to 99.
@@ -24,7 +25,7 @@ def poll() -> int:
     return int(time.time()) % 100
 
 
-def read(db_path: str, table: str):
+def read(db_path: str, table: str) -> Any:
     """Reads the value from the database.
 
     It can only read the last row in a specific table.
