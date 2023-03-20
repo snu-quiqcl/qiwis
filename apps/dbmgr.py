@@ -100,7 +100,7 @@ class DBMgrApp(BaseApp):
         # connect signals to slots
         self.managerFrame.addButton.clicked.connect(self.addDB)
 
-    def frames(self):
+    def frames(self) -> Tuple[ManagerFrame]:
         """Overridden."""
         return (self.managerFrame,)
 
