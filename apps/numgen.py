@@ -6,8 +6,9 @@ App module for generating and showing a random number.
 
 import os
 import json
+from typing import Optional
 
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import QObject, pyqtSlot
 from PyQt5.QtWidgets import QWidget, QComboBox, QPushButton, QLabel, QVBoxLayout
 
 from swift.app import BaseApp
@@ -21,7 +22,7 @@ class GeneratorFrame(QWidget):
           into which the generated number is saved.
         generateButton: A button for generating a new number.
     """
-    def __init__(self, parent=None):
+    def __init__(self, parent: Optional[QObject] = None):
         """Extended."""
         super().__init__(parent=parent)
         # widgets
@@ -41,7 +42,7 @@ class ViewerFrame(QWidget):
           (database updated, random number generated, etc.)
         numberLabel: A label for showing the recently generated number.
     """
-    def __init__(self, parent=None):
+    def __init__(self, parent: Optional[QObject] = None):
         """Extended."""
         super().__init__(parent=parent)
         # widgets
@@ -68,7 +69,7 @@ class NumGenApp(BaseApp):
         generatorFrame: A frame that requests generating a random number.
         viewerFrame: A frame that shows the generated number.
     """
-    def __init__(self, name: str, parent=None, table: str = "number"):
+    def __init__(self, name: str, parent: Optional[QObject] = None, table: str = "number"):
         """Extended.
 
         Args:
