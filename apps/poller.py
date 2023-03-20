@@ -4,7 +4,7 @@ App module for polling a number and saving it into the selected database.
 
 import os
 import json
-from typing import Optional
+from typing import Optional, Tuple
 
 from PyQt5.QtCore import QObject, pyqtSlot, QTimer
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QComboBox, QSpinBox, QLabel
@@ -77,7 +77,7 @@ class PollerApp(BaseApp):
         self.timer.start(1000 * self.viewerFrame.periodBox.value())
         self.timer.timeout.connect(self.poll)
 
-    def frames(self):
+    def frames(self) -> Tuple[ViewerFrame]:
         """Overridden."""
         return (self.viewerFrame,)
 
