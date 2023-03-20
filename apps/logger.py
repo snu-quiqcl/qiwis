@@ -3,8 +3,9 @@ App module for logging.
 """
 
 import time
+from typing import Optional
 
-from PyQt5.QtCore import pyqtSlot, pyqtSignal
+from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QTextEdit, QLabel, QDialogButtonBox
 
 from swift.app import BaseApp
@@ -16,7 +17,7 @@ class LoggerFrame(QWidget):
         logEdit: A textEdit which shows all logs.
         clearButton: A button for clearing all logs.
     """
-    def __init__(self, parent=None):
+    def __init__(self, parent: Optional[QObject] = None):
         """Extended."""
         super().__init__(parent=parent)
         # widgets
@@ -35,7 +36,7 @@ class ConfirmClearingFrame(QWidget):
     """
     confirmed = pyqtSignal()
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: Optional[QObject] = None):
         """
         Extended.
         """
@@ -72,7 +73,7 @@ class LoggerApp(BaseApp):
     Attributes:
         loggerFrame: A frame that shows the logs.
     """
-    def __init__(self, name: str, parent=None):
+    def __init__(self, name: str, parent: Optional[QObject] = None):
         """Extended.
 
         Args:
