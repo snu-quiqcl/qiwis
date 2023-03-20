@@ -4,7 +4,7 @@ App module for showing the sum of two values from selected databases.
 
 import os
 import json
-from typing import Optional, Dict
+from typing import Optional, Dict, Tuple
 
 from PyQt5.QtCore import QObject, pyqtSlot
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QComboBox, QPushButton, QLabel
