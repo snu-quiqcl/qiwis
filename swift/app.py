@@ -6,7 +6,8 @@ Every App class should be a subclass of BaseApp.
 
 from typing import Optional, Iterable
 
-from PyQt5.QtCore import QWidget, QObject, pyqtSignal
+from PyQt5.QtCore import QObject, pyqtSignal
+from PyQt5.QtWidgets import QWidget
 
 class BaseApp(QObject):
     """Base App class that all apps should inherit.
