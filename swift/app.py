@@ -4,9 +4,9 @@ Base module for App.
 Every App class should be a subclass of BaseApp.
 """
 
-from typing import Optional
+from typing import Optional, Iterable
 
-from PyQt5.QtCore import QObject, pyqtSignal
+from PyQt5.QtCore import QWidget, QObject, pyqtSignal
 
 class BaseApp(QObject):
     """Base App class that all apps should inherit.
@@ -30,10 +30,10 @@ class BaseApp(QObject):
         super().__init__(parent=parent)
         self.name = name
 
-    def frames(self):
+    def frames(self) -> Iterable[QWidget]:
         """Gets frames for which are managed by the App.
 
         Returns:
-            Iterable: An iterable object of Frame objects for showing.
+            An iterable object of Frame objects for showing.
         """
         return ()
