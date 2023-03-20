@@ -4,7 +4,7 @@ App module for showing the sum of two values from selected databases.
 
 import os
 import json
-from typing import Optional
+from typing import Optional, Dict
 
 from PyQt5.QtCore import QObject, pyqtSlot
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QComboBox, QPushButton, QLabel
@@ -56,7 +56,7 @@ class DataCalcApp(BaseApp):
         dbNames: A dictionary for storing names of the selected databases.
         viewerFrame: A frame that selects databases and shows the calculated number.
     """
-    def __init__(self, name: str, parent: Optional[QObject] = None, tables: dict=None):
+    def __init__(self, name: str, tables: Dict[str, str], parent: Optional[QObject] = None):
         """Extended.
 
         Args:
