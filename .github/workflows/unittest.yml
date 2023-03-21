@@ -24,3 +24,4 @@ jobs:
     - name: Unittest the code with coverage
       run: |
         python -m coverage run -m unittest discover tests
+        python -m coverage report
