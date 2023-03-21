@@ -94,7 +94,7 @@ class DBMgrApp(BaseApp):
 
     def __init__(self, name: str, parent: Optional[QObject] = None):
         """Extended."""
-        super().__init__(name, parent)
+        super().__init__(name, parent=parent)
         self.dbList = []
         self.managerFrame = ManagerFrame()
         # connect signals to slots
