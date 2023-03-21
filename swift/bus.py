@@ -3,6 +3,7 @@ Module for bus features.
 """
 
 from queue import Queue, SimpleQueue, Empty
+from typing import Optional
 
 from PyQt5.QtCore import QObject, QThread, pyqtSignal, pyqtSlot
 
@@ -20,13 +21,14 @@ class Bus(QObject):
 
     received = pyqtSignal(str)
 
-    def __init__(self, name: str, timeout: float = 1):
+    def __init__(self, name: str, timeout: float = 1, parent: Optional[QObject] = None):
         """
         Args:
             name: Name of the bus for identification.
             timeout: See QueueConsumer.__init__().
+            parent: Parent object.
         """
-        super().__init__()
+        super().__init__(parent=parent)
         self.name = name
         self._queue = SimpleQueue()  # message queue
         self._timeout = timeout
@@ -94,14 +96,15 @@ class QueueConsumer(QObject):
     consumed = pyqtSignal(str)
     finished = pyqtSignal()
 
-    def __init__(self, queue_: Queue, timeout: float = 1):
+    def __init__(self, queue_: Queue, timeout: float = 1, parent: Optional[QObject] = None):
         """
         Args:
             queue_: A queue.Queue-like object which implements get() and Empty.
             timeout: Desired timeout for blocking queue reading, in seconds.
               This should not be None in order not to become uniterruptible.
+            parent: Parent object.
         """
-        super().__init__()
+        super().__init__(parent=parent)
         self._queue = queue_
         self._timeout = timeout
         self._running = True
