@@ -61,7 +61,7 @@ class SwiftTest(unittest.TestCase):
     }
 
     def setUp(self):
-        """Create a QApplication and Swift object every time."""
+        """Create a QApplication and a Swift object every time."""
         importlib.import_module = MagicMock()
         for name, appInfo in SwiftTest.appInfos.items():
             importlib.import_module.return_value.setattr(appInfo.cls, BaseApp(name))
