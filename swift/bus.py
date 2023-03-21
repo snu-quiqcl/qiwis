@@ -2,7 +2,7 @@
 Module for bus features.
 """
 
-from queue import SimpleQueue, Empty
+from queue import Queue, SimpleQueue, Empty
 
 from PyQt5.QtCore import QObject, QThread, pyqtSignal, pyqtSlot
 
@@ -94,7 +94,7 @@ class QueueConsumer(QObject):
     consumed = pyqtSignal(str)
     finished = pyqtSignal()
 
-    def __init__(self, queue_, timeout=1):
+    def __init__(self, queue_: Queue, timeout: float = 1):
         """
         Args:
             queue_: A queue.Queue-like object which implements get() and Empty.

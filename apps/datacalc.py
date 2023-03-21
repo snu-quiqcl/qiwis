@@ -4,8 +4,9 @@ App module for showing the sum of two values from selected databases.
 
 import os
 import json
+from typing import Optional, Dict, Tuple
 
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import QObject, pyqtSlot
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QComboBox, QPushButton, QLabel
 
 from swift.app import BaseApp
@@ -20,7 +21,7 @@ class ViewerFrame(QWidget):
         calculateButton: A button for calculating the sum of recently fetched 'A' and 'B'.
         numberLabel: A label showing the sum, or an error message if something goes wrong.
     """
-    def __init__(self, parent=None):
+    def __init__(self, parent: Optional[QObject] = None):
         """Extended."""
         super().__init__(parent=parent)
         # widgets
@@ -55,7 +56,7 @@ class DataCalcApp(BaseApp):
         dbNames: A dictionary for storing names of the selected databases.
         viewerFrame: A frame that selects databases and shows the calculated number.
     """
-    def __init__(self, name: str, parent=None, tables: dict=None):
+    def __init__(self, name: str, tables: Dict[str, str], parent: Optional[QObject] = None):
         """Extended.
 
         Args:
@@ -72,7 +73,7 @@ class DataCalcApp(BaseApp):
             dbBox.currentIndexChanged.connect(self.setDB)
         self.viewerFrame.calculateButton.clicked.connect(self.calculateSum)
 
-    def frames(self):
+    def frames(self) -> Tuple[ViewerFrame]:
         """Overridden."""
         return (self.viewerFrame,)
 
