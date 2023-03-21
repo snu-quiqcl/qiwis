@@ -75,7 +75,7 @@ class NumGenApp(BaseApp):
         Args:
             table: A name of table to store the generated number.
         """
-        super().__init__(name, parent)
+        super().__init__(name, parent=parent)
         self.table = table
         self.dbs = {"": ""}
         self.dbName = ""
