@@ -10,7 +10,7 @@ from PyQt5.QtCore import QObject, pyqtSlot
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QComboBox, QPushButton, QLabel
 
 from swift.app import BaseApp
-from apps.backend import read
+from examples.backend import read
 
 class ViewerFrame(QWidget):
     """Frame of for selecting databases and showing the calculated number.
