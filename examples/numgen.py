@@ -12,7 +12,7 @@ from PyQt5.QtCore import QObject, pyqtSlot
 from PyQt5.QtWidgets import QWidget, QComboBox, QPushButton, QLabel, QVBoxLayout
 
 from swift.app import BaseApp
-from apps.backend import generate, write
+from examples.backend import generate, write
 
 class GeneratorFrame(QWidget):
     """Frame for requesting generating a random number.

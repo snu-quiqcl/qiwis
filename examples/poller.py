@@ -10,7 +10,7 @@ from PyQt5.QtCore import QObject, pyqtSlot, QTimer
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QComboBox, QSpinBox, QLabel
 
 from swift.app import BaseApp
-from apps.backend import poll, write
+from examples.backend import poll, write
 
 class ViewerFrame(QWidget):
     """Frame for selecting a database and period, and showing the polled number.
