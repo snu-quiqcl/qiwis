@@ -23,5 +23,5 @@ jobs:
         pip install pyqt5
     - name: Unittest the code with coverage
       run: |
-        python -m coverage run -m unittest discover tests
-        python -m coverage report
+        coverage run --omit -m unittest discover tests
+        coverage report -m
