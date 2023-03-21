@@ -69,7 +69,7 @@ class NumGenApp(BaseApp):
         generatorFrame: A frame that requests generating a random number.
         viewerFrame: A frame that shows the generated number.
     """
-    def __init__(self, name: str, parent: Optional[QObject] = None, table: str = "number"):
+    def __init__(self, name: str, table: str = "number", parent: Optional[QObject] = None):
         """Extended.
 
         Args:
