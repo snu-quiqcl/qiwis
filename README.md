@@ -1,5 +1,7 @@
 [![Pylint](https://github.com/snu-quiqcl/swift/actions/workflows/pylint.yml/badge.svg)](https://github.com/snu-quiqcl/swift/actions/workflows/pylint.yml)
 
+[![unittest](https://github.com/snu-quiqcl/swift/actions/workflows/unittest.yml/badge.svg)](https://github.com/snu-quiqcl/swift/actions/workflows/unittest.yml)
+
 # swift
 Swift (**S**NU **w**idget **i**ntegration **f**ramework for PyQ**t**) is a framework for integration of PyQt widgets where they can communicate with each other. This project is mainly developed for trapped ion experiment controller GUI in SNU QuIQCL.
 
