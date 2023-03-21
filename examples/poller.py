@@ -62,7 +62,7 @@ class PollerApp(BaseApp):
         Args:
             table: See PollerApp.table.
         """
-        super().__init__(name, parent)
+        super().__init__(name, parent=parent)
         self.table = table
         self.dbs = {"": ""}
         self.dbName = ""
