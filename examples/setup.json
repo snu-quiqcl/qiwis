@@ -1,7 +1,7 @@
 {
     "app": {
         "numgen": {
-            "module": "apps.numgen",
+            "module": "examples.numgen",
             "cls": "NumGenApp",
             "show": true,
             "pos": "left",
@@ -11,14 +11,14 @@
             }
         },
         "dbmgr": {
-            "module": "apps.dbmgr",
+            "module": "examples.dbmgr",
             "cls": "DBMgrApp",
             "show": true,
             "pos": "right",
             "bus": []
         },
         "datacalc": {
-            "module": "apps.datacalc",
+            "module": "examples.datacalc",
             "cls": "DataCalcApp",
             "show": true,
             "pos": "top",
@@ -31,7 +31,7 @@
             }
         },
         "poller": {
-            "module": "apps.poller",
+            "module": "examples.poller",
             "cls": "PollerApp",
             "show": true,
             "pos": "bottom",
@@ -41,7 +41,7 @@
             }
         },
         "logger": {
-            "module": "apps.logger",
+            "module": "examples.logger",
             "cls": "LoggerApp",
             "show": true,
             "pos": "bottom",
