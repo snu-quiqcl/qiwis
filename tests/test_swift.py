@@ -3,7 +3,9 @@ Module for testing swift package.
 """
 
 import unittest
+from unittest.mock import MagicMock
 import sys
+import importlib
 from collections.abc import Iterable
 
 from PyQt5.QtCore import QObject
@@ -60,6 +62,10 @@ class SwiftTest(unittest.TestCase):
 
     def setUp(self):
         """Create a QApplication and Swift object every time."""
+        importlib.import_module = MagicMock()
+        for name, appInfo in SwiftTest.appInfos.items():
+            importlib.import_module.return_value.setattr(appInfo.cls, BaseApp(name))
+        # start GUI 
         self.qapp = QApplication(sys.argv)
         self.swift = Swift(SwiftTest.appInfos, SwiftTest.busInfos)
 
