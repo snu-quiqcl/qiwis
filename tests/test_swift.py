@@ -14,6 +14,52 @@ from PyQt5.QtWidgets import QApplication
 from swift.app import BaseApp
 from swift.swift import Swift, AppInfo, BusInfo, _read_setup_file
 
+APP_INFOS = {
+    "app1": AppInfo(
+        module="module1",
+        cls="cls1",
+        path="path1",
+        show=False,
+        pos="left",
+        bus=["bus1", "bus2"],
+        args={"arg1": "value1"}
+    ),
+    "app2": AppInfo(
+        module="module2",
+        cls="cls2"
+    )
+}
+
+APP_DICTS = {
+    "app1": {
+        "module": "module1",
+        "cls": "cls1",
+        "path": "path1",
+        "show": False,
+        "pos": "left",
+        "bus": ["bus1", "bus2"],
+        "args": {"arg1": "value1"}
+    },
+    "app2": {
+        "module": "module2",
+        "cls": "cls2"
+    }
+}
+
+BUS_INFOS = {
+    "bus1": BusInfo(
+        timeout=5.0
+    ),
+    "bus2": BusInfo()
+}
+
+BUS_DICTS = {
+    "bus1": {
+        "timeout": 5.0
+    },
+    "bus2": {}
+}
+
 class AppTest(unittest.TestCase):
     """Unit test for app.py."""
 
@@ -37,69 +83,23 @@ class AppTest(unittest.TestCase):
 class SwiftTest(unittest.TestCase):
     """Unit test for swift.py"""
 
-    appInfos = {
-        "app1": AppInfo(
-            module="module1",
-            cls="cls1",
-            path="path1",
-            show=False,
-            pos="left",
-            bus=["bus1", "bus2"],
-            args={"arg1": "value1"}
-        ),
-        "app2": AppInfo(
-            module="module2",
-            cls="cls2"
-        )
-    }
-
-    appDicts = {
-        "app1": {
-            "module": "module1",
-            "cls": "cls1",
-            "path": "path1",
-            "show": False,
-            "pos": "left",
-            "bus": ["bus1", "bus2"],
-            "args": {"arg1": "value1"}
-        },
-        "app2": {
-            "module": "module2",
-            "cls": "cls2"
-        }
-    }
-
-    busInfos = {
-        "bus1": BusInfo(
-            timeout=5.0
-        ),
-        "bus2": BusInfo()
-    }
-
-    busDicts = {
-        "bus1": {
-            "timeout": 5.0
-        },
-        "bus2": {}
-    }
-
     def setUp(self):
         """Create a QApplication and a Swift object every time."""
         importlib.import_module = MagicMock()
-        for name, appInfo in SwiftTest.appInfos.items():
+        for name, appInfo in APP_INFOS.items():
             importlib.import_module.return_value.setattr(appInfo.cls, BaseApp(name))
         # start GUI
         self.qapp = QApplication(sys.argv)
-        self.swift = Swift(SwiftTest.appInfos, SwiftTest.busInfos)
+        self.swift = Swift(APP_INFOS, BUS_INFOS)
 
     def test_init(self):
         pass
 
     @patch("builtins.open")
-    @patch("json.load", return_value={"app": appDicts, "bus": busDicts})
+    @patch("json.load", return_value={"app": APP_DICTS, "bus": BUS_DICTS})
     def test_read_setup_file(self, mock_open, mock_load):
         """Test _read_setup_file()."""
-        self.assertEqual(_read_setup_file(""), (SwiftTest.appInfos, SwiftTest.busInfos))
+        self.assertEqual(_read_setup_file(""), (APP_INFOS, BUS_INFOS))
         mock_open.assert_called_once()
         mock_load.assert_called_once()
 
