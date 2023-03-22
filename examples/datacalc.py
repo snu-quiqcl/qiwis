@@ -62,7 +62,7 @@ class DataCalcApp(BaseApp):
         Args:
             tables: See DataCalcApp.tables.
         """
-        super().__init__(name, parent)
+        super().__init__(name, parent=parent)
         self.tables = tables
         self.dbs = {"": ""}
         self.dbNames = {"A": "", "B": ""}
