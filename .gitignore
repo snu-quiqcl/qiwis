@@ -2,6 +2,9 @@
 __pycache__/
 *.pyc
 
+# Setting
+.pylintrc
+
 # Distribution / packaging
 build/
 *.egg-info/
