@@ -5,6 +5,7 @@ Module for testing swift package.
 import unittest
 from unittest.mock import MagicMock, patch
 import sys
+import os
 import importlib
 from collections.abc import Iterable
 
@@ -13,7 +14,7 @@ from PyQt5.QtWidgets import QApplication
 
 from swift.app import BaseApp
 from swift.swift import (
-    Swift, AppInfo, BusInfo, _get_argparser, _read_setup_file, main
+    Swift, AppInfo, BusInfo, _add_to_path, _get_argparser, _read_setup_file, main
 )
 
 APP_INFOS = {
@@ -100,6 +101,13 @@ class SwiftTest(unittest.TestCase):
 
 class SwiftFunctionTest(unittest.TestCase):
     """Unit test for functions in swift.py"""
+
+    def test_add_to_path(self):
+        """Test _add_to_path()."""
+        old_path = sys.path.copy()
+        with _add_to_path(os.path.dirname("test_dir")):
+            self.assertNotEqual(old_path, sys.path)
+        self.assertEqual(old_path, sys.path)
 
     @patch.object(sys, "argv", ["", "-s", "test_setup.json"])
     def test_get_argparser(self):
