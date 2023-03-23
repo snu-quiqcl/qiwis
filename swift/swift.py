@@ -19,7 +19,7 @@ from collections import defaultdict
 from contextlib import contextmanager
 from dataclasses import dataclass, asdict
 from typing import (
-    Dict, Tuple, Any, Iterable, Mapping, Optional, Union, TypeVar, Type
+    Dict, Any, Iterable, Mapping, Optional, TypeVar, Type
 )
 
 from PyQt5.QtCore import QObject, pyqtSlot, Qt
@@ -176,7 +176,7 @@ class Swift(QObject):
         for apps in self._subscribers.values():
             apps.discard(app)
         app.deleteLater()
-    
+
     @pyqtSlot(str, str)
     def _broadcast(self, busName: str, msg: str):
         """Broadcasts the message to the subscriber apps of the bus.
