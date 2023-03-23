@@ -224,7 +224,7 @@ def _get_argparser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "-s", "--setup", dest="setup_path", default="./setup.json",
-        help="a path of set-up file containing the infomation about app and bus"
+        help="a path of set-up file containing the infomation about app"
     )
     return parser
 
