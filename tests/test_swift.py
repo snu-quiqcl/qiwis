@@ -13,7 +13,7 @@ from PyQt5.QtWidgets import QApplication
 
 from swift.app import BaseApp
 from swift.swift import (
-    Swift, AppInfo, BusInfo, _get_argparser, _read_setup_file
+    Swift, AppInfo, BusInfo, _get_argparser, _read_setup_file, main
 )
 
 APP_INFOS = {
@@ -122,6 +122,18 @@ class SwiftFunctionTest(unittest.TestCase):
         self.assertEqual(_read_setup_file(""), (APP_INFOS, BUS_INFOS))
         mock_open.assert_called_once()
         mock_load.assert_called_once()
+
+    @patch("swift.swift._get_argparser")
+    @patch("swift.swift._read_setup_file", return_value=({}, {}))
+    @patch("swift.swift.Swift")
+    @patch("PyQt5.QtWidgets.QApplication.exec_")
+    def test_main(self, mock_get_argparser, mock_read_setup_file, mock_swift, mock_exec_):
+        """Test main()."""
+        main()
+        mock_get_argparser.assert_called_once()
+        mock_read_setup_file.assert_called_once()
+        mock_swift.assert_called_once()
+        mock_exec_.assert_called_once()
 
 
 if __name__ == "__main__":
