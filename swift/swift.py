@@ -82,7 +82,7 @@ def parse(cls: Type[T], kwargs: str) -> T:
     return cls(**json.loads(kwargs))
 
 
-def strinfo(info: Union[AppInfo, BusInfo]) -> str:
+def strinfo(info: AppInfo) -> str:
     """Returns a JSON string converted from the given info.
 
     This is just a convenience function for users not to import dataclasses and json.
