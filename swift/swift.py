@@ -3,7 +3,7 @@
 """
 Swift is a main manager for swift system.
 
-Using a set-up file written by a user, it sets up apps and buses.
+Using a set-up file written by a user, it sets up apps.
 
 Usage:
     python -m swift.swift (-s <SETUP_PATH>)
@@ -242,7 +242,6 @@ def _read_setup_file(setup_path: str) -> Mapping[str, AppInfo]:
       }
 
     See AppInfo for app_info_* structure.
-    See BusInfo for bus_info_* structure.
       
     Args:
         setup_path: A path of set-up file.
