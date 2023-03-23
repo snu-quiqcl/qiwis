@@ -158,8 +158,6 @@ class Swift(QObject):
             bus = Bus(name, info.timeout)
         else:
             bus = Bus(name)
-        bus.received.connect(self._routeToApp)
-        bus.start()
         self._buses[name] = bus
         self._subscribers.setdefault(name, set())
 
@@ -177,7 +175,7 @@ class Swift(QObject):
             app = cls(name, parent=self, **info.args)
         else:
             app = cls(name, parent=self)
-        app.broadcastRequested.connect(self._routeToBus)
+        app.broadcastRequested.connect(self._broadcast, type=Qt.QueuedConnection)
         for busName in info.bus:
             self._subscribers[busName].add(app)
         if info.show:
@@ -213,31 +211,15 @@ class Swift(QObject):
         for apps in self._subscribers.values():
             apps.discard(app)
         app.deleteLater()
-
+    
     @pyqtSlot(str, str)
-    def _routeToBus(self, busName: str, msg: str):
-        """Routes a signal from an app to the desired bus.
-
-        This is a slot for the broadcast signal of each app.
+    def _broadcast(self, busName: str, msg: str):
+        """Broadcasts the message to the subscriber apps of the bus.
 
         Args:
-            busName: A name of the desired bus that will transfer the signal.
-            msg: An input message to be transferred through the bus.
+            busName: Target bus name.
+            msg: Message to be broadcast.
         """
-        bus = self._buses[busName]
-        bus.write(msg)
-
-    @pyqtSlot(str)
-    def _routeToApp(self, msg: str):
-        """Routes a signal from a bus to the apps that subscribe to it.
-
-        This is a slot for the received signal of each bus.
-
-        Args:
-            msg: An input message transferred through the bus.
-        """
-        busName = self.sender().name
-        # emit a signal of all apps that subscribe to the bus
         for app in self._subscribers[busName]:
             app.received.emit(busName, msg)
 
