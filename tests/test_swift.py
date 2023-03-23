@@ -54,7 +54,9 @@ APP_DICTS = {
 APP_JSONS = {
     "app1": ('{"module": "module1", "cls": "cls1", "path": "path1", "show": false, '
              '"pos": "left", "bus": ["bus1", "bus2"], "args": {"arg1": "value1"}}'),
-    "app2": '{"module": "module2", "cls": "cls2"}'
+    "app2": ('{"module": "module2", "cls": "cls2", "path": ".", "show": true, '
+             '"pos": "", "bus": [], "args": null}'),
+    "app2_default": '{"module": "module2", "cls": "cls2"}'
 }
 
 BUS_INFOS = {
@@ -73,7 +75,8 @@ BUS_DICTS = {
 
 BUS_JSONS = {
     "bus1": '{"timeout": 5.0}',
-    "bus2": '{}'
+    "bus2": '{"timeout": null}',
+    "bus2_default": '{}'
 }
 
 class AppTest(unittest.TestCase):
@@ -118,9 +121,16 @@ class SwiftFunctionTest(unittest.TestCase):
     def test_parse(self):
         """Test parse()."""
         self.assertEqual(parse(AppInfo, APP_JSONS["app1"]), APP_INFOS["app1"])
-        self.assertEqual(parse(AppInfo, APP_JSONS["app2"]), APP_INFOS["app2"])
+        self.assertEqual(parse(AppInfo, APP_JSONS["app2_default"]), APP_INFOS["app2"])
         self.assertEqual(parse(BusInfo, BUS_JSONS["bus1"]), BUS_INFOS["bus1"])
-        self.assertEqual(parse(BusInfo, BUS_JSONS["bus2"]), BUS_INFOS["bus2"])
+        self.assertEqual(parse(BusInfo, BUS_JSONS["bus2_default"]), BUS_INFOS["bus2"])
+
+    def test_strinfo(self):
+        """Test strinfo()."""
+        self.assertEqual(strinfo(APP_INFOS["app1"]), APP_JSONS["app1"])
+        self.assertEqual(strinfo(APP_INFOS["app2"]), APP_JSONS["app2"])
+        self.assertEqual(strinfo(BUS_INFOS["bus1"]), BUS_JSONS["bus1"])
+        self.assertEqual(strinfo(BUS_INFOS["bus2"]), BUS_JSONS["bus2"])
 
     def test_add_to_path(self):
         """Test _add_to_path()."""
