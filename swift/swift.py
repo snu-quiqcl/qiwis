@@ -100,8 +100,7 @@ class Swift(QObject):
 
     Brief procedure:
         1. Load setup environment.
-        2. Create buses.
-        3. Create apps and show their frames.
+        2. Create apps and show their frames.
     """
 
     def __init__(
