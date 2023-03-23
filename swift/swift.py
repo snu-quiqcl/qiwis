@@ -125,7 +125,7 @@ class Swift(QObject):
         self.mainWindow.show()
 
     def load(self, appInfos: Mapping[str, AppInfo]):
-        """Initializes swift system and loads the apps and buses.
+        """Initializes swift system and loads the apps.
         
         Args:
             appInfos: A dictionary whose keys are app names and the values are
