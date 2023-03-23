@@ -15,6 +15,7 @@ import argparse
 import json
 import importlib
 import importlib.util
+from collections import defaultdict
 from contextlib import contextmanager
 from dataclasses import dataclass, asdict
 from typing import (
@@ -120,9 +121,8 @@ class Swift(QObject):
         self.centralWidget.setAlignment(Qt.AlignCenter)
         self.centralWidget.setStyleSheet("background-color: gray;")
         self.mainWindow.setCentralWidget(self.centralWidget)
-        self._buses = {}
         self._apps = {}
-        self._subscribers = {}
+        self._subscribers = defaultdict(set)
         appInfos = appInfos if appInfos else {}
         busInfos = busInfos if busInfos else {}
         self.load(appInfos, busInfos)
@@ -140,20 +140,8 @@ class Swift(QObject):
               corresponding BusInfo objects. All the buses in the dictionary
               will be created and started.
         """
-        for name, info in busInfos.items():
-            self.createBus(name, info)
         for name, info in appInfos.items():
             self.createApp(name, info)
-
-    def createBus(self, name: str, info: BusInfo):
-        """Creates a bus from the given information.
-        
-        Args:
-            name: A name of the bus.
-            info: A BusInfo object describing the bus.
-        """
-        self._buses[name] = None
-        self._subscribers.setdefault(name, set())
 
     def createApp(self, name: str, info: AppInfo):
         """Creates an app and shows their frames using set-up environment.
@@ -184,16 +172,6 @@ class Swift(QObject):
                 }.get(info.pos, Qt.AllDockWidgetAreas)
                 self.mainWindow.addDockWidget(area, dockWidget)
         self._apps[name] = app
-
-    def destroyBus(self, name: str):
-        """Destroys a global bus.
-        
-        Args:
-            name: A name of the bus to destroy.
-        """
-        bus = self._buses.pop(name)
-        bus.stop()
-        bus.deleteLater()
 
     def destroyApp(self, name: str):
         """Destroys an app.
