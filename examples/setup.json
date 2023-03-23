@@ -47,9 +47,5 @@
             "pos": "bottom",
             "bus": ["logbus"]
         }
-    },
-    "bus": {
-        "dbbus": {},
-        "logbus": {}
     }
 }
