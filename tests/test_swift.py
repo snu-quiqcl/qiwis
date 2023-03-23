@@ -8,13 +8,15 @@ import sys
 import os
 import importlib
 from collections.abc import Iterable
+import json
 
 from PyQt5.QtCore import QObject
 from PyQt5.QtWidgets import QApplication
 
 from swift.app import BaseApp
 from swift.swift import (
-    Swift, AppInfo, BusInfo, _add_to_path, _get_argparser, _read_setup_file, main
+    Swift, AppInfo, BusInfo, parse, strinfo,
+    _add_to_path, _get_argparser, _read_setup_file, main
 )
 
 APP_INFOS = {
@@ -49,6 +51,12 @@ APP_DICTS = {
     }
 }
 
+APP_JSONS = {
+    "app1": ('{"module": "module1", "cls": "cls1", "path": "path1", "show": false, '
+             '"pos": "left", "bus": ["bus1", "bus2"], "args": {"arg1": "value1"}}'),
+    "app2": '{"module": "module2", "cls": "cls2"}'
+}
+
 BUS_INFOS = {
     "bus1": BusInfo(
         timeout=5.0
@@ -61,6 +69,11 @@ BUS_DICTS = {
         "timeout": 5.0
     },
     "bus2": {}
+}
+
+BUS_JSONS = {
+    "bus1": '{"timeout": 5.0}',
+    "bus2": '{}'
 }
 
 class AppTest(unittest.TestCase):
@@ -101,6 +114,13 @@ class SwiftTest(unittest.TestCase):
 
 class SwiftFunctionTest(unittest.TestCase):
     """Unit test for functions in swift.py"""
+
+    def test_parse(self):
+        """Test parse()."""
+        self.assertEqual(parse(AppInfo, APP_JSONS["app1"]), APP_INFOS["app1"])
+        self.assertEqual(parse(AppInfo, APP_JSONS["app2"]), APP_INFOS["app2"])
+        self.assertEqual(parse(BusInfo, BUS_JSONS["bus1"]), BUS_INFOS["bus1"])
+        self.assertEqual(parse(BusInfo, BUS_JSONS["bus2"]), BUS_INFOS["bus2"])
 
     def test_add_to_path(self):
         """Test _add_to_path()."""
