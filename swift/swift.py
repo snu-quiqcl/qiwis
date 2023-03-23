@@ -107,12 +107,10 @@ class Swift(QObject):
     def __init__(
         self,
         appInfos: Optional[Mapping[str, AppInfo]] = None,
-        busInfos: Optional[Mapping[str, BusInfo]] = None,
         parent: Optional[QObject] = None):
         """
         Args:
             appInfos: See Swift.load(). None or an empty dictionary for loading no apps.
-            busInfos: See Swift.load(). None or an empty dictionary for loading no buses.
             parent: A parent object.
         """
         super().__init__(parent=parent)
@@ -124,11 +122,10 @@ class Swift(QObject):
         self._apps = {}
         self._subscribers = defaultdict(set)
         appInfos = appInfos if appInfos else {}
-        busInfos = busInfos if busInfos else {}
-        self.load(appInfos, busInfos)
+        self.load(appInfos)
         self.mainWindow.show()
 
-    def load(self, appInfos: Mapping[str, AppInfo], busInfos: Mapping[str, BusInfo]):
+    def load(self, appInfos: Mapping[str, AppInfo]):
         """Initializes swift system and loads the apps and buses.
         
         Args:
@@ -136,9 +133,6 @@ class Swift(QObject):
               corresponding AppInfo objects. All the apps in the dictionary
               will be created, and if the show field is True, its frames will
               be shown.
-            busInfos: A dictionary whose keys are bus names and the values are
-              corresponding BusInfo objects. All the buses in the dictionary
-              will be created and started.
         """
         for name, info in appInfos.items():
             self.createApp(name, info)
@@ -235,18 +229,14 @@ def _get_argparser() -> argparse.ArgumentParser:
     return parser
 
 
-def _read_setup_file(setup_path: str) -> Tuple[Mapping[str, AppInfo], Mapping[str, BusInfo]]:
-    """Reads set-up information about app and bus from a JSON file.
+def _read_setup_file(setup_path: str) -> Mapping[str, AppInfo]:
+    """Reads set-up information from a JSON file.
 
     The JSON file content should have the following structure:
 
       {
         "app": {
           "app_name_0": {app_info_0},
-          ...
-        },
-        "bus": {
-          "bus_name_0": {bus_info_0},
           ...
         }
       }
@@ -258,26 +248,23 @@ def _read_setup_file(setup_path: str) -> Tuple[Mapping[str, AppInfo], Mapping[st
         setup_path: A path of set-up file.
 
     Returns:
-        A tuple of two dictionaries of set-up information about app and bus.
-          See appInfos and busInfos in Swift.load() for more details.
+        A dictionary of set-up information about apps. See appInfos in Swift.load().
     """
     with open(setup_path, encoding="utf-8") as setup_file:
         setup_data: Dict[str, Dict[str, dict]] = json.load(setup_file)
     app_dict = setup_data.get("app", {})
-    bus_dict = setup_data.get("bus", {})
     app_infos = {name: AppInfo(**info) for (name, info) in app_dict.items()}
-    bus_infos = {name: BusInfo(**info) for (name, info) in bus_dict.items()}
-    return app_infos, bus_infos
+    return app_infos
 
 
 def main():
     """Main function that runs when swift module is executed rather than imported."""
     args = _get_argparser().parse_args()
     # read set-up information
-    app_infos, bus_infos = _read_setup_file(args.setup_path)
+    app_infos = _read_setup_file(args.setup_path)
     # start GUI
     qapp = QApplication(sys.argv)
-    _swift = Swift(app_infos, bus_infos)
+    _swift = Swift(app_infos)
     qapp.exec_()
 
 
