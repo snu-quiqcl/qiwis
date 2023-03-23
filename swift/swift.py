@@ -56,16 +56,6 @@ class AppInfo:
     args: Optional[Mapping[str, Any]] = None
 
 
-@dataclass
-class BusInfo:
-    """Information required to create a bus.
-    
-    Fields:
-        timeout: See bus.Bus.__init__(). None for the default value of __init__().
-    """
-    timeout: Optional[float] = None
-
-
 def parse(cls: Type[T], kwargs: str) -> T:
     """Returns a new cls instance from a JSON string.
 
