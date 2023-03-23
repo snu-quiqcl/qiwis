@@ -12,7 +12,9 @@ from PyQt5.QtCore import QObject
 from PyQt5.QtWidgets import QApplication
 
 from swift.app import BaseApp
-from swift.swift import Swift, AppInfo, BusInfo, _read_setup_file
+from swift.swift import (
+    Swift, AppInfo, BusInfo, _get_argparser, _read_setup_file
+)
 
 APP_INFOS = {
     "app1": AppInfo(
@@ -81,7 +83,7 @@ class AppTest(unittest.TestCase):
 
 
 class SwiftTest(unittest.TestCase):
-    """Unit test for swift.py"""
+    """Unit test for Swift class in swift.py"""
 
     def setUp(self):
         """Create a QApplication and a Swift object every time."""
@@ -94,6 +96,24 @@ class SwiftTest(unittest.TestCase):
 
     def test_init(self):
         """Test if swift is initialized correctly."""
+
+
+class SwiftFunctionTest(unittest.TestCase):
+    """Unit test for functions in swift.py"""
+
+    @patch.object(sys, "argv", ["", "-s", "test_setup.json"])
+    def test_get_argparser(self):
+        """Test _get_argparser()."""
+        parser = _get_argparser()
+        args = parser.parse_args()
+        self.assertEqual(parser.description, "SNU widget integration framework for PyQt")
+        self.assertEqual(args.setup_path, "test_setup.json")
+
+    @patch.object(sys, "argv", [""])
+    def test_get_argparser_default(self):
+        """Test _get_argparser() with default options."""
+        args = _get_argparser().parse_args()
+        self.assertEqual(args.setup_path, "./setup.json")
 
     @patch("builtins.open")
     @patch("json.load", return_value={"app": APP_DICTS, "bus": BUS_DICTS})
