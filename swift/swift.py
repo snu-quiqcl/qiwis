@@ -24,8 +24,6 @@ from typing import (
 from PyQt5.QtCore import QObject, pyqtSlot, Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QDockWidget
 
-from swift.bus import Bus
-
 
 T = TypeVar("T")
 
@@ -154,11 +152,7 @@ class Swift(QObject):
             name: A name of the bus.
             info: A BusInfo object describing the bus.
         """
-        if info.timeout is not None:
-            bus = Bus(name, info.timeout)
-        else:
-            bus = Bus(name)
-        self._buses[name] = bus
+        self._buses[name] = None
         self._subscribers.setdefault(name, set())
 
     def createApp(self, name: str, info: AppInfo):
