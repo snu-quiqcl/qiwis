@@ -8,7 +8,6 @@ import sys
 import os
 import importlib
 from collections.abc import Iterable
-import json
 
 from PyQt5.QtCore import QObject
 from PyQt5.QtWidgets import QApplication
