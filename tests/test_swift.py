@@ -93,7 +93,7 @@ class SwiftTest(unittest.TestCase):
         self.swift = Swift(APP_INFOS, BUS_INFOS)
 
     def test_init(self):
-        pass
+        """Test if swift is initialized correctly."""
 
     @patch("builtins.open")
     @patch("json.load", return_value={"app": APP_DICTS, "bus": BUS_DICTS})
