@@ -188,8 +188,6 @@ def _add_to_path(path: str):
     Args:
         path: A desired path to be added. 
     """
-    old_modules = sys.modules
-    sys.modules = old_modules.copy()
     old_path = sys.path
     sys.path = old_path.copy()
     sys.path.insert(0, path)
@@ -197,7 +195,6 @@ def _add_to_path(path: str):
         yield
     finally:
         sys.path = old_path
-        sys.modules = old_modules
 
 
 def _get_argparser() -> argparse.ArgumentParser:
