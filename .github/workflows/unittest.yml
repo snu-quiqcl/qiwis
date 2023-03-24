@@ -11,7 +11,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
@@ -21,7 +21,8 @@ jobs:
     - name: Add dependencies about external libraries
       run: |
         pip install pyqt5
+        sudo apt-get install python3-pyqt5
     - name: Unittest the code with coverage
       run: |
-        coverage run -m unittest discover tests
-        coverage report -m
+        xvfb-run `which coverage` run -m unittest discover tests
+        xvfb-run `which coverage` report -m
