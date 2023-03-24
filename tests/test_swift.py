@@ -14,7 +14,7 @@ from PyQt5.QtWidgets import QApplication
 
 from swift.app import BaseApp
 from swift.swift import (
-    Swift, AppInfo, BusInfo, parse, strinfo,
+    Swift, AppInfo, parse, strinfo,
     _add_to_path, _get_argparser, _read_setup_file, main
 )
 
@@ -58,26 +58,6 @@ APP_JSONS = {
     "app2_default": '{"module": "module2", "cls": "cls2"}'
 }
 
-BUS_INFOS = {
-    "bus1": BusInfo(
-        timeout=5.0
-    ),
-    "bus2": BusInfo()
-}
-
-BUS_DICTS = {
-    "bus1": {
-        "timeout": 5.0
-    },
-    "bus2": {}
-}
-
-BUS_JSONS = {
-    "bus1": '{"timeout": 5.0}',
-    "bus2": '{"timeout": null}',
-    "bus2_default": '{}'
-}
-
 class AppTest(unittest.TestCase):
     """Unit test for app.py."""
 
@@ -108,7 +88,7 @@ class SwiftTest(unittest.TestCase):
             importlib.import_module.return_value.setattr(appInfo.cls, BaseApp(name))
         # start GUI
         self.qapp = QApplication(sys.argv)
-        self.swift = Swift(APP_INFOS, BUS_INFOS)
+        self.swift = Swift(APP_INFOS)
 
     def test_init(self):
         """Test if swift is initialized correctly."""
@@ -121,15 +101,11 @@ class SwiftFunctionTest(unittest.TestCase):
         """Test parse()."""
         self.assertEqual(parse(AppInfo, APP_JSONS["app1"]), APP_INFOS["app1"])
         self.assertEqual(parse(AppInfo, APP_JSONS["app2_default"]), APP_INFOS["app2"])
-        self.assertEqual(parse(BusInfo, BUS_JSONS["bus1"]), BUS_INFOS["bus1"])
-        self.assertEqual(parse(BusInfo, BUS_JSONS["bus2_default"]), BUS_INFOS["bus2"])
 
     def test_strinfo(self):
         """Test strinfo()."""
         self.assertEqual(strinfo(APP_INFOS["app1"]), APP_JSONS["app1"])
         self.assertEqual(strinfo(APP_INFOS["app2"]), APP_JSONS["app2"])
-        self.assertEqual(strinfo(BUS_INFOS["bus1"]), BUS_JSONS["bus1"])
-        self.assertEqual(strinfo(BUS_INFOS["bus2"]), BUS_JSONS["bus2"])
 
     def test_add_to_path(self):
         """Test _add_to_path()."""
@@ -153,10 +129,10 @@ class SwiftFunctionTest(unittest.TestCase):
         self.assertEqual(args.setup_path, "./setup.json")
 
     @patch("builtins.open")
-    @patch("json.load", return_value={"app": APP_DICTS, "bus": BUS_DICTS})
+    @patch("json.load", return_value={"app": APP_DICTS})
     def test_read_setup_file(self, mock_open, mock_load):
         """Test _read_setup_file()."""
-        self.assertEqual(_read_setup_file(""), (APP_INFOS, BUS_INFOS))
+        self.assertEqual(_read_setup_file(""), APP_INFOS)
         mock_open.assert_called_once()
         mock_load.assert_called_once()
 
