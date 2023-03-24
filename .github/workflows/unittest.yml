@@ -21,7 +21,8 @@ jobs:
     - name: Add dependencies about external libraries
       run: |
         pip install pyqt5
+        sudo apt-get install python3-pyqt5
     - name: Unittest the code with coverage
       run: |
-        coverage run -m unittest discover tests
-        coverage report -m
+        xvfb-run `which coverage` run -m unittest discover tests
+        xvfb-run `which coverage` report -m
