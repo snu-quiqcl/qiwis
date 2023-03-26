@@ -10,7 +10,7 @@ import importlib
 from collections.abc import Iterable
 
 from PyQt5.QtCore import QObject
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel
 
 from swift.app import BaseApp
 from swift.swift import (
@@ -92,6 +92,14 @@ class SwiftTest(unittest.TestCase):
 
     def test_init(self):
         """Test if swift is initialized correctly."""
+        self.assertIsInstance(self.swift.mainWindow, QMainWindow)
+        self.assertIsInstance(self.swift.centralWidget, QLabel)
+        buses = set()
+        for name, appInfo in APP_INFOS.items():
+            self.assertIn(name, self.swift._apps)
+            buses.update(appInfo.bus)
+        for bus in buses:
+            self.assertIn(bus, self.swift._subscribers)
 
 
 class SwiftFunctionTest(unittest.TestCase):
