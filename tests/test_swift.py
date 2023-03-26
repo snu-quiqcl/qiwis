@@ -101,6 +101,12 @@ class SwiftTest(unittest.TestCase):
         for bus in buses:
             self.assertIn(bus, self.swift._subscribers)
 
+    def test_destroy_app(self):
+        """Test destroyApp()."""
+        name = list(APP_INFOS.keys())[0]
+        self.swift.destroyApp(name)
+        self.assertNotIn(name, self.swift._apps)
+
 
 class SwiftFunctionTest(unittest.TestCase):
     """Unit test for functions in swift.py"""
