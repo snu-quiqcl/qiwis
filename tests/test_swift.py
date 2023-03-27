@@ -10,7 +10,7 @@ import importlib
 from collections.abc import Iterable
 
 from PyQt5.QtCore import QObject
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QLabel
 
 from swift.app import BaseApp
 from swift.swift import (
@@ -83,14 +83,16 @@ class SwiftTest(unittest.TestCase):
 
     def setUp(self):
         """Create a QApplication and a Swift object every time."""
+        self.qapp = QApplication(sys.argv)
         importlib.import_module = MagicMock()
         for appInfo in APP_INFOS.values():
-            importlib.import_module.return_value.setattr(appInfo.cls, MagicMock(spec=BaseApp))
+            app = MagicMock()
+            app.frames.return_value = (QWidget(),)
+            cls = MagicMock(return_value=app)
+            setattr(importlib.import_module.return_value, appInfo.cls, cls)
         self.buses = set()
         for appInfo in APP_INFOS.values():
             self.buses.update(appInfo.bus)
-        # start GUI
-        self.qapp = QApplication(sys.argv)
         self.swift = Swift(APP_INFOS)
 
     def test_init(self):
