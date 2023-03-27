@@ -152,7 +152,7 @@ class Swift(QObject):
                     "right": Qt.RightDockWidgetArea,
                     "top": Qt.TopDockWidgetArea,
                     "bottom": Qt.BottomDockWidgetArea
-                }.get(info.pos, Qt.AllDockWidgetAreas)
+                }.get(info.pos, Qt.LeftDockWidgetArea)
                 self.mainWindow.addDockWidget(area, dockWidget)
         self._apps[name] = app
 
