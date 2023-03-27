@@ -84,8 +84,11 @@ class SwiftTest(unittest.TestCase):
     def setUp(self):
         """Create a QApplication and a Swift object every time."""
         importlib.import_module = MagicMock()
-        for name, appInfo in APP_INFOS.items():
-            importlib.import_module.return_value.setattr(appInfo.cls, BaseApp(name))
+        for appInfo in APP_INFOS.values():
+            importlib.import_module.return_value.setattr(appInfo.cls, MagicMock(spec=BaseApp))
+        self.buses = set()
+        for appInfo in APP_INFOS.values():
+            self.buses.update(appInfo.bus)
         # start GUI
         self.qapp = QApplication(sys.argv)
         self.swift = Swift(APP_INFOS)
@@ -94,11 +97,9 @@ class SwiftTest(unittest.TestCase):
         """Test if swift is initialized correctly."""
         self.assertIsInstance(self.swift.mainWindow, QMainWindow)
         self.assertIsInstance(self.swift.centralWidget, QLabel)
-        buses = set()
-        for name, appInfo in APP_INFOS.items():
+        for name in APP_INFOS:
             self.assertIn(name, self.swift._apps)
-            buses.update(appInfo.bus)
-        for bus in buses:
+        for bus in self.buses:
             self.assertIn(bus, self.swift._subscribers)
 
     def test_destroy_app(self):
@@ -106,6 +107,13 @@ class SwiftTest(unittest.TestCase):
         name = list(APP_INFOS.keys())[0]
         self.swift.destroyApp(name)
         self.assertNotIn(name, self.swift._apps)
+
+    def test_broadcast(self):
+        """Test _broadcast()."""
+        busName = list(self.buses)[0]
+        self.swift._broadcast(busName, "test_msg")
+        for app in self.swift._subscribers[busName]:
+            app.received.emit.assert_called_once()
 
 
 class SwiftFunctionTest(unittest.TestCase):
