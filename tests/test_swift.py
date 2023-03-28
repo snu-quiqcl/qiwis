@@ -82,9 +82,9 @@ class SwiftTest(unittest.TestCase):
         self.qapp = QApplication(sys.argv)
         importlib.import_module = MagicMock()
         for appInfo in APP_INFOS.values():
-            app = MagicMock()
-            app.frames.return_value = (QWidget(),)
-            cls = MagicMock(return_value=app)
+            app_ = MagicMock()
+            app_.frames.return_value = (QWidget(),)
+            cls = MagicMock(return_value=app_)
             setattr(importlib.import_module.return_value, appInfo.cls, cls)
         self.buses = set()
         for appInfo in APP_INFOS.values():
@@ -110,8 +110,8 @@ class SwiftTest(unittest.TestCase):
         """Test _broadcast()."""
         busName = list(self.buses)[0]
         self.swift._broadcast(busName, "test_msg")
-        for app in self.swift._subscribers[busName]:
-            app.received.emit.assert_called_once()
+        for app_ in self.swift._subscribers[busName]:
+            app_.received.emit.assert_called_once()
 
 
 class SwiftFunctionTest(unittest.TestCase):
