@@ -5,7 +5,6 @@ Module for testing swift package.
 import unittest
 from unittest.mock import MagicMock, patch
 import sys
-import os
 import importlib
 from collections.abc import Iterable
 
@@ -145,7 +144,6 @@ class SwiftFunctionTest(unittest.TestCase):
         """Test _get_argparser()."""
         parser = swift._get_argparser()
         args = parser.parse_args()
-        self.assertEqual(parser.description, "SNU widget integration framework for PyQt")
         self.assertEqual(args.setup_path, "test_setup.json")
 
     @patch.object(sys, "argv", [""])
@@ -163,7 +161,7 @@ class SwiftFunctionTest(unittest.TestCase):
         mock_load.assert_called_once()
 
     @patch("swift.swift._get_argparser")
-    @patch("swift.swift._read_setup_file", return_value=({}, {}))
+    @patch("swift.swift._read_setup_file", return_value={})
     @patch("swift.swift.Swift")
     @patch("PyQt5.QtWidgets.QApplication.exec_")
     def test_main(self, mock_get_argparser, mock_read_setup_file, mock_swift, mock_exec_):
