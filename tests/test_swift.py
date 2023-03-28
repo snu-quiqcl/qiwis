@@ -133,9 +133,11 @@ class SwiftFunctionTest(unittest.TestCase):
 
     def test_add_to_path(self):
         """Test _add_to_path()."""
+        test_dir = "/test_dir"
         old_path = sys.path.copy()
-        with swift._add_to_path(os.path.dirname("test_dir")):
+        with swift._add_to_path(test_dir):
             self.assertNotEqual(old_path, sys.path)
+            self.assertIn(test_dir, sys.path)
         self.assertEqual(old_path, sys.path)
 
     @patch.object(sys, "argv", ["", "-s", "test_setup.json"])
