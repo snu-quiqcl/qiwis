@@ -121,6 +121,9 @@ class SwiftFunctionTest(unittest.TestCase):
     def test_parse(self):
         """Test parse()."""
         self.assertEqual(swift.parse(swift.AppInfo, APP_JSONS["app1"]), APP_INFOS["app1"])
+
+    def test_parse_default(self):
+        """Test parse() about default fields."""
         self.assertEqual(swift.parse(swift.AppInfo, APP_JSONS["app2_default"]), APP_INFOS["app2"])
 
     def test_strinfo(self):
