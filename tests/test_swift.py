@@ -89,6 +89,7 @@ class SwiftTest(unittest.TestCase):
         self.buses = set()
         for appInfo in APP_INFOS.values():
             self.buses.update(appInfo.bus)
+        self.buses = sorted(self.buses)
         self.swift = swift.Swift(APP_INFOS)
 
     def test_init(self):
@@ -102,13 +103,13 @@ class SwiftTest(unittest.TestCase):
 
     def test_destroy_app(self):
         """Test destroyApp()."""
-        name = list(APP_INFOS.keys())[0]
+        name = next(iter(APP_INFOS))
         self.swift.destroyApp(name)
         self.assertNotIn(name, self.swift._apps)
 
     def test_broadcast(self):
         """Test _broadcast()."""
-        busName = list(self.buses)[0]
+        busName = next(iter(self.buses))
         self.swift._broadcast(busName, "test_msg")
         for app_ in self.swift._subscribers[busName]:
             app_.received.emit.assert_called_once()
