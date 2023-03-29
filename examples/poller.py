@@ -67,6 +67,7 @@ class PollerApp(BaseApp):
         self.dbs = {"": ""}
         self.dbName = ""
         self.viewerFrame = ViewerFrame()
+        self.viewerFrame.dbBox.addItem("")
         # connect signals to slots
         self.received.connect(self.updateDB)
         self.viewerFrame.dbBox.currentIndexChanged.connect(self.setDB)
@@ -98,20 +99,24 @@ class PollerApp(BaseApp):
             except json.JSONDecodeError as e:
                 print(f"apps.numgen.updateDB(): {e!r}")
             else:
-                orgDbName = self.dbName
-                self.dbs = {"": ""}
-                self.viewerFrame.dbBox.clear()
-                self.viewerFrame.dbBox.addItem("")
+                originalDBs = set(self.dbs)
+                newDBs = set([""])
                 for db in msg.get("db", ()):
                     if all(key in db for key in ("name", "path")):
                         name, path = db["name"], db["path"]
-                        self.dbs[name] = path
-                        self.viewerFrame.dbBox.addItem(name)
+                        newDBs.add(name)
+                        if name not in self.dbs:
+                            self.dbs[name] = path
+                            self.viewerFrame.dbBox.addItem(name)
                     else:
                         print(f"The message was ignored because "
                               f"the database {db} has no such key; name or path.")
-                if orgDbName in self.dbs:
-                    self.viewerFrame.dbBox.setCurrentText(orgDbName)
+                removingDBs = originalDBs - newDBs
+                if self.viewerFrame.dbBox.currentText() in removingDBs:
+                    self.viewerFrame.dbBox.setCurrentText("")
+                for name in removingDBs:
+                    self.dbs.pop(name)
+                    self.viewerFrame.dbBox.removeItem(self.viewerFrame.dbBox.findText(name))
         else:
             print(f"The message was ignored because "
                   f"the treatment for the bus {busName} is not implemented.")
