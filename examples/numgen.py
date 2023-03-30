@@ -80,6 +80,7 @@ class NumGenApp(BaseApp):
         self.dbs = {"": ""}
         self.dbName = ""
         self.generatorFrame = GeneratorFrame()
+        self.generatorFrame.dbBox.addItem("")
         self.viewerFrame = ViewerFrame()
         # connect signals to slots
         self.received.connect(self.updateDB)
@@ -95,6 +96,7 @@ class NumGenApp(BaseApp):
         """Updates the database list using the transferred message.
 
         This is a slot for received signal.
+        It assumes that the new database is added at the end.
 
         Args:
             channelName: A name of the channel that transfered the signal.
@@ -107,20 +109,24 @@ class NumGenApp(BaseApp):
             except json.JSONDecodeError as e:
                 print(f"apps.numgen.updateDB(): {e!r}")
             else:
-                orgDbName = self.dbName
-                self.dbs = {"": ""}
-                self.generatorFrame.dbBox.clear()
-                self.generatorFrame.dbBox.addItem("")
+                originalDBs = set(self.dbs)
+                newDBs = set([""])
                 for db in msg.get("db", ()):
                     if all(key in db for key in ("name", "path")):
                         name, path = db["name"], db["path"]
-                        self.dbs[name] = path
-                        self.generatorFrame.dbBox.addItem(name)
+                        newDBs.add(name)
+                        if name not in self.dbs:
+                            self.dbs[name] = path
+                            self.generatorFrame.dbBox.addItem(name)
                     else:
                         print(f"The message was ignored because "
                               f"the database {db} has no such key; name or path.")
-                if orgDbName in self.dbs:
-                    self.generatorFrame.dbBox.setCurrentText(orgDbName)
+                removingDBs = originalDBs - newDBs
+                if self.generatorFrame.dbBox.currentText() in removingDBs:
+                    self.generatorFrame.dbBox.setCurrentText("")
+                for name in removingDBs:
+                    self.dbs.pop(name)
+                    self.generatorFrame.dbBox.removeItem(self.generatorFrame.dbBox.findText(name))
         else:
             print(f"The message was ignored because "
                   f"the treatment for the channel {channelName} is not implemented.")
