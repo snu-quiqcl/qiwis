@@ -87,6 +87,7 @@ class PollerApp(BaseApp):
         """Updates the database list using the transferred message.
 
         This is a slot for received signal.
+        It assumes that the new database is added at the end.
 
         Args:
             busName: A name of the bus that transfered the signal.
