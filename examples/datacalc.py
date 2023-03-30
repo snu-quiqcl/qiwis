@@ -67,10 +67,12 @@ class DataCalcApp(BaseApp):
         self.dbs = {"": ""}
         self.dbNames = {"A": "", "B": ""}
         self.viewerFrame = ViewerFrame()
+        for dbBox in self.viewerFrame.dbBoxes.values():
+            dbBox.addItem("")
         # connect signals to slots
         self.received.connect(self.updateDB)
-        for dbBox in self.viewerFrame.dbBoxes.values():
-            dbBox.currentIndexChanged.connect(self.setDB)
+        self.viewerFrame.dbBoxes["A"].currentIndexChanged.connect(lambda: self.setDB("A"))
+        self.viewerFrame.dbBoxes["B"].currentIndexChanged.connect(lambda: self.setDB("B"))
         self.viewerFrame.calculateButton.clicked.connect(self.calculateSum)
 
     def frames(self) -> Tuple[ViewerFrame]:
@@ -94,38 +96,42 @@ class DataCalcApp(BaseApp):
             except json.JSONDecodeError as e:
                 print(f"apps.datacalc.updateDB(): {e!r}")
             else:
-                orgDbNames = self.dbNames.copy()
-                self.dbs = {"": ""}
-                for dbBox in self.viewerFrame.dbBoxes.values():
-                    dbBox.clear()
-                    dbBox.addItem("")
+                originalDBs = set(self.dbs)
+                newDBs = set([""])
                 for db in msg.get("db", ()):
                     if all(key in db for key in ("name", "path")):
                         name, path = db["name"], db["path"]
-                        self.dbs[name] = path
-                        for dbBox in self.viewerFrame.dbBoxes.values():
-                            dbBox.addItem(name)
+                        newDBs.add(name)
+                        if name not in self.dbs:
+                            self.dbs[name] = path
+                            for dbBox in self.viewerFrame.dbBoxes.values():
+                                dbBox.addItem(name)
                     else:
                         print(f"The message was ignored because "
                               f"the database {db} has no such key; name or path.")
-                for name, orgDbName in orgDbNames.items():
-                    if orgDbName in self.dbs:
-                        self.viewerFrame.dbBoxes[name].setCurrentText(orgDbName)
+                removingDBs = originalDBs - newDBs
+                for dbBox in self.viewerFrame.dbBoxes.values():
+                    if dbBox.currentText() in removingDBs:
+                        dbBox.setCurrentText("")
+                for name in removingDBs:
+                    self.dbs.pop(name)
+                    for dbBox in self.viewerFrame.dbBoxes.values():
+                        dbBox.removeItem(dbBox.findText(name))
         else:
             print(f"The message was ignored because "
                   f"the treatment for the channel {channelName} is not implemented.")
 
-    @pyqtSlot()
-    def setDB(self):
-        """Sets the databases to fetch the numbers."""
-        for name, dbBox in self.viewerFrame.dbBoxes.items():
-            self.dbNames[name] = dbBox.currentText()
-            self.broadcastRequested.emit(
-                "log", 
-                f"Database {name} is set as {self.dbNames[name]}."
-                if self.dbNames[name]
-                else f"Database {name} is not selected."
-            )
+    @pyqtSlot(str)
+    def setDB(self, name: str):
+        """Sets the database to fetch the numbers."""
+        dbBox = self.viewerFrame.dbBoxes[name]
+        self.dbNames[name] = dbBox.currentText()
+        self.broadcastRequested.emit(
+            "log", 
+            f"Database {name} is set as {self.dbNames[name]}."
+            if self.dbNames[name]
+            else f"Database {name} is not selected."
+        )
 
     @pyqtSlot()
     def calculateSum(self):
