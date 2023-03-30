@@ -100,10 +100,10 @@ class SwiftTest(unittest.TestCase):
         self.assertNotIn(name, self.swift._apps)
 
     def test_broadcast(self):
-        busName = next(iter(self.buses))
-        self.swift._broadcast(busName, "test_msg")
-        for app_ in self.swift._subscribers[busName]:
-            app_.received.emit.assert_called_once()
+        for busName in self.buses:
+            self.swift._broadcast(busName, "test_msg")
+        for name, app_ in self.swift._apps.items():
+            self.assertEqual(len(APP_INFOS[name].bus), app_.received.emit.call_count)
 
 
 class SwiftFunctionTest(unittest.TestCase):
