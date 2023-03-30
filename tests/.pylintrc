@@ -11,7 +11,9 @@ variable-rgx=_?_?(?:(?:[a-z0-9]+(?:_[a-z0-9]+)*_?_?)|(?:[a-z0-9]+(?:[A-Z][a-z0-9
 min-similarity-lines=20
 
 [MESSAGES CONTROL]
-disable=protected-access
+disable=
+    missing-docstring,
+    protected-access,
 
 [TYPECHECK]
 ignored-modules=swift
