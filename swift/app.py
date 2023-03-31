@@ -14,9 +14,9 @@ class BaseApp(QObject):
 
     Signals: 
         broadcastRequested(str, str): A signal for broadcasting to a channel 
-          which contains the destination channel name and the message.
+          which contains the target channel name and the message.
         received(str, str): A signal for receiving a global signal from a channel
-          which contains the departure channel name and the message.
+          which contains the source channel name and the message.
     """
 
     broadcastRequested = pyqtSignal(str, str)
