@@ -84,6 +84,9 @@ class DataCalcApp(BaseApp):
         """Updates the database list using the transferred message.
 
         This is a slot for received signal.
+        It assumes that:
+            The new database is always added at the end.
+            Changing the order of the databases is not allowed.
 
         Args:
             channelName: A name of the channel that transfered the signal.
