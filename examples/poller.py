@@ -83,7 +83,7 @@ class PollerApp(BaseApp):
         return (self.viewerFrame,)
 
     @pyqtSlot(str, str)
-    def updateDB(self, busName: str, msg: str):
+    def updateDB(self, channelName: str, msg: str):
         """Updates the database list using the transferred message.
 
         This is a slot for received signal.
@@ -92,11 +92,11 @@ class PollerApp(BaseApp):
             Changing the order of the databases is not allowed.
 
         Args:
-            busName: A name of the bus that transfered the signal.
-            msg: An input message to be transferred through the bus.
+            channelName: A name of the channel that transfered the signal.
+            msg: An input message to be transferred through the channel.
               The structure follows the message protocol of DBMgrApp.
         """
-        if busName == "dbbus":
+        if channelName == "dbch":
             try:
                 msg = json.loads(msg)
             except json.JSONDecodeError as e:
@@ -122,21 +122,21 @@ class PollerApp(BaseApp):
                     self.viewerFrame.dbBox.removeItem(self.viewerFrame.dbBox.findText(name))
         else:
             print(f"The message was ignored because "
-                  f"the treatment for the bus {busName} is not implemented.")
+                  f"the treatment for the channel {channelName} is not implemented.")
 
     @pyqtSlot()
     def setPeriod(self):
         """Sets the polling period."""
         period = self.viewerFrame.periodBox.value()
         self.timer.start(1000 * period)
-        self.broadcastRequested.emit("logbus", f"Period is set as {period}s.")
+        self.broadcastRequested.emit("logch", f"Period is set as {period}s.")
 
     @pyqtSlot()
     def setDB(self):
         """Sets the database to store the polled number."""
         self.dbName = self.viewerFrame.dbBox.currentText()
         self.broadcastRequested.emit(
-            "logbus", 
+            "logch", 
             f"Polled database is set as {self.dbName}." if self.dbName
             else "Polled database is not selected."
         )
@@ -148,8 +148,8 @@ class PollerApp(BaseApp):
         self.count += 1
         self.viewerFrame.countLabel.setText(f"polled count: {self.count}")
         self.viewerFrame.numberLabel.setText(f"polled number: {num}")
-        self.broadcastRequested.emit("logbus", f"Polled number: {num}.")
+        self.broadcastRequested.emit("logch", f"Polled number: {num}.")
         # save the polled number
         dbPath = self.dbs[self.dbName]
         if write(os.path.join(dbPath, self.dbName), self.table, num):
-            self.broadcastRequested.emit("logbus", "Polled number saved.")
+            self.broadcastRequested.emit("logch", "Polled number saved.")
