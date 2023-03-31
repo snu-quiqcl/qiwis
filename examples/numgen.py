@@ -101,7 +101,7 @@ class NumGenApp(BaseApp):
             msg: An input message to be transferred through the channel.
               The structure follows the message protocol of DBMgrApp.
         """
-        if channelName == "dbch":
+        if channelName == "db":
             try:
                 msg = json.loads(msg)
             except json.JSONDecodeError as e:
@@ -131,7 +131,7 @@ class NumGenApp(BaseApp):
         self.dbName = self.generatorFrame.dbBox.currentText()
         self.viewerFrame.statusLabel.setText("database updated")
         self.broadcastRequested.emit(
-            "logch", 
+            "log", 
             f"Database to store is set as {self.dbName}." if self.dbName
             else "Database to store is not selected."
         )
@@ -142,12 +142,12 @@ class NumGenApp(BaseApp):
         # generate a random number
         num = generate()
         self.viewerFrame.numberLabel.setText(f"generated number: {num}")
-        self.broadcastRequested.emit("logch", f"Generated number: {num}.")
+        self.broadcastRequested.emit("log", f"Generated number: {num}.")
         # save the generated number
         dbPath = self.dbs[self.dbName]
         is_save_success = write(os.path.join(dbPath, self.dbName), self.table, num)
         if is_save_success:
             self.viewerFrame.statusLabel.setText("number saved successfully")
-            self.broadcastRequested.emit("logch", "Generated number saved.")
+            self.broadcastRequested.emit("log", "Generated number saved.")
         else:
             self.viewerFrame.statusLabel.setText("failed to save number")

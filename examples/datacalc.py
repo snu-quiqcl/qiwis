@@ -88,7 +88,7 @@ class DataCalcApp(BaseApp):
             msg: An input message to be transferred through the channel.
               The structure follows the message protocol of DBMgrApp.
         """
-        if channelName == "dbch":
+        if channelName == "db":
             try:
                 msg = json.loads(msg)
             except json.JSONDecodeError as e:
@@ -121,7 +121,7 @@ class DataCalcApp(BaseApp):
         for name, dbBox in self.viewerFrame.dbBoxes.items():
             self.dbNames[name] = dbBox.currentText()
             self.broadcastRequested.emit(
-                "logch", 
+                "log", 
                 f"Database {name} is set as {self.dbNames[name]}."
                 if self.dbNames[name]
                 else f"Database {name} is not selected."
@@ -145,4 +145,4 @@ class DataCalcApp(BaseApp):
             result += value
         else:
             self.viewerFrame.numberLabel.setText(f"sum: {result}")
-            self.broadcastRequested.emit("logch", f"Sum: {result}.")
+            self.broadcastRequested.emit("log", f"Sum: {result}.")

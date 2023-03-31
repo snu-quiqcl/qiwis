@@ -96,7 +96,7 @@ class PollerApp(BaseApp):
             msg: An input message to be transferred through the channel.
               The structure follows the message protocol of DBMgrApp.
         """
-        if channelName == "dbch":
+        if channelName == "db":
             try:
                 msg = json.loads(msg)
             except json.JSONDecodeError as e:
@@ -129,14 +129,14 @@ class PollerApp(BaseApp):
         """Sets the polling period."""
         period = self.viewerFrame.periodBox.value()
         self.timer.start(1000 * period)
-        self.broadcastRequested.emit("logch", f"Period is set as {period}s.")
+        self.broadcastRequested.emit("log", f"Period is set as {period}s.")
 
     @pyqtSlot()
     def setDB(self):
         """Sets the database to store the polled number."""
         self.dbName = self.viewerFrame.dbBox.currentText()
         self.broadcastRequested.emit(
-            "logch", 
+            "log", 
             f"Polled database is set as {self.dbName}." if self.dbName
             else "Polled database is not selected."
         )
@@ -148,8 +148,8 @@ class PollerApp(BaseApp):
         self.count += 1
         self.viewerFrame.countLabel.setText(f"polled count: {self.count}")
         self.viewerFrame.numberLabel.setText(f"polled number: {num}")
-        self.broadcastRequested.emit("logch", f"Polled number: {num}.")
+        self.broadcastRequested.emit("log", f"Polled number: {num}.")
         # save the polled number
         dbPath = self.dbs[self.dbName]
         if write(os.path.join(dbPath, self.dbName), self.table, num):
-            self.broadcastRequested.emit("logch", "Polled number saved.")
+            self.broadcastRequested.emit("log", "Polled number saved.")

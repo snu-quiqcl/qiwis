@@ -105,7 +105,7 @@ class LoggerApp(BaseApp):
     @pyqtSlot()
     def checkToClear(self):
         """Shows a confirmation frame for log clearing."""
-        self.broadcastRequested.emit("logch", "Clicked to clear logs")
+        self.broadcastRequested.emit("log", "Clicked to clear logs")
         self.confirmFrame.show()
 
     @pyqtSlot()

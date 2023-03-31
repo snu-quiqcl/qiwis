@@ -5,7 +5,7 @@
             "cls": "NumGenApp",
             "show": true,
             "pos": "left",
-            "channel": ["dbch"],
+            "channel": ["db"],
             "args": {
                 "table": "number"
             }
@@ -22,7 +22,7 @@
             "cls": "DataCalcApp",
             "show": true,
             "pos": "top",
-            "channel": ["dbch"],
+            "channel": ["db"],
             "args": {
                 "tables": {
                     "A": "number",
@@ -35,7 +35,7 @@
             "cls": "PollerApp",
             "show": true,
             "pos": "bottom",
-            "channel": ["dbch"],
+            "channel": ["db"],
             "args": {
                 "table": "B"
             }
@@ -45,7 +45,7 @@
             "cls": "LoggerApp",
             "show": true,
             "pos": "bottom",
-            "channel": ["logch"]
+            "channel": ["log"]
         }
     }
 }
