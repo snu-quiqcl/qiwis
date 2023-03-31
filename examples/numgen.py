@@ -91,17 +91,17 @@ class NumGenApp(BaseApp):
         return (self.generatorFrame, self.viewerFrame)
 
     @pyqtSlot(str, str)
-    def updateDB(self, busName: str, msg: str):
+    def updateDB(self, channelName: str, msg: str):
         """Updates the database list using the transferred message.
 
         This is a slot for received signal.
 
         Args:
-            busName: A name of the bus that transfered the signal.
-            msg: An input message to be transferred through the bus.
+            channelName: A name of the channel that transfered the signal.
+            msg: An input message to be transferred through the channel.
               The structure follows the message protocol of DBMgrApp.
         """
-        if busName == "dbbus":
+        if channelName == "dbch":
             try:
                 msg = json.loads(msg)
             except json.JSONDecodeError as e:
@@ -123,7 +123,7 @@ class NumGenApp(BaseApp):
                     self.generatorFrame.dbBox.setCurrentText(orgDbName)
         else:
             print(f"The message was ignored because "
-                  f"the treatment for the bus {busName} is not implemented.")
+                  f"the treatment for the channel {channelName} is not implemented.")
 
     @pyqtSlot()
     def setDB(self):
@@ -131,7 +131,7 @@ class NumGenApp(BaseApp):
         self.dbName = self.generatorFrame.dbBox.currentText()
         self.viewerFrame.statusLabel.setText("database updated")
         self.broadcastRequested.emit(
-            "logbus", 
+            "logch", 
             f"Database to store is set as {self.dbName}." if self.dbName
             else "Database to store is not selected."
         )
@@ -142,12 +142,12 @@ class NumGenApp(BaseApp):
         # generate a random number
         num = generate()
         self.viewerFrame.numberLabel.setText(f"generated number: {num}")
-        self.broadcastRequested.emit("logbus", f"Generated number: {num}.")
+        self.broadcastRequested.emit("logch", f"Generated number: {num}.")
         # save the generated number
         dbPath = self.dbs[self.dbName]
         is_save_success = write(os.path.join(dbPath, self.dbName), self.table, num)
         if is_save_success:
             self.viewerFrame.statusLabel.setText("number saved successfully")
-            self.broadcastRequested.emit("logbus", "Generated number saved.")
+            self.broadcastRequested.emit("logch", "Generated number saved.")
         else:
             self.viewerFrame.statusLabel.setText("failed to save number")
