@@ -40,7 +40,7 @@ class AppInfo:
         show: Whether to show the app frames on creation.
         pos: Position on the main window; refer to Qt.DockWidgetArea enum.
           Should be one of "left", "right", "top", or "bottom", case-sensitive.
-          Otherwise, defaults to Qt.AllDockWidgetAreas.
+          Otherwise, defaults to Qt.LeftDockWidgetArea.
         bus: Buses which the app subscribes to.
         args: Keyword argument dictionary of the app class constructor.
           It must exclude name and parent arguments. Even if they exist, they will be ignored.
@@ -152,7 +152,7 @@ class Swift(QObject):
                     "right": Qt.RightDockWidgetArea,
                     "top": Qt.TopDockWidgetArea,
                     "bottom": Qt.BottomDockWidgetArea
-                }.get(info.pos, Qt.AllDockWidgetAreas)
+                }.get(info.pos, Qt.LeftDockWidgetArea)
                 self.mainWindow.addDockWidget(area, dockWidget)
         self._apps[name] = app
 
