@@ -78,17 +78,17 @@ class DataCalcApp(BaseApp):
         return (self.viewerFrame,)
 
     @pyqtSlot(str, str)
-    def updateDB(self, busName: str, msg: str):
+    def updateDB(self, channelName: str, msg: str):
         """Updates the database list using the transferred message.
 
         This is a slot for received signal.
 
         Args:
-            busName: A name of the bus that transfered the signal.
-            msg: An input message to be transferred through the bus.
+            channelName: A name of the channel that transfered the signal.
+            msg: An input message to be transferred through the channel.
               The structure follows the message protocol of DBMgrApp.
         """
-        if busName == "dbbus":
+        if channelName == "dbch":
             try:
                 msg = json.loads(msg)
             except json.JSONDecodeError as e:
@@ -113,7 +113,7 @@ class DataCalcApp(BaseApp):
                         self.viewerFrame.dbBoxes[name].setCurrentText(orgDbName)
         else:
             print(f"The message was ignored because "
-                  f"the treatment for the bus {busName} is not implemented.")
+                  f"the treatment for the channel {channelName} is not implemented.")
 
     @pyqtSlot()
     def setDB(self):
@@ -121,7 +121,7 @@ class DataCalcApp(BaseApp):
         for name, dbBox in self.viewerFrame.dbBoxes.items():
             self.dbNames[name] = dbBox.currentText()
             self.broadcastRequested.emit(
-                "logbus", 
+                "logch", 
                 f"Database {name} is set as {self.dbNames[name]}."
                 if self.dbNames[name]
                 else f"Database {name} is not selected."
@@ -145,4 +145,4 @@ class DataCalcApp(BaseApp):
             result += value
         else:
             self.viewerFrame.numberLabel.setText(f"sum: {result}")
-            self.broadcastRequested.emit("logbus", f"Sum: {result}.")
+            self.broadcastRequested.emit("logch", f"Sum: {result}.")
