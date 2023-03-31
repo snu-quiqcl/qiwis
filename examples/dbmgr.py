@@ -71,7 +71,7 @@ class DBMgrApp(BaseApp):
     """App for adding and removing available databases.
 
     Manage a manager frame.
-    Send an updated database information to database bus.
+    Send an updated database information to database channel.
 
     Protocol:
         A broadcastRequested signal is emitted 
@@ -112,9 +112,9 @@ class DBMgrApp(BaseApp):
             name: A file name of the updated database.
         """
         msg = {"db": [db._asdict() for db in self.dbList]}
-        self.broadcastRequested.emit("dbbus", json.dumps(msg))
+        self.broadcastRequested.emit("dbch", json.dumps(msg))
         self.broadcastRequested.emit(
-            "logbus",
+            "logch",
             f"Database {name} is added." if isAdded
             else f"Database {name} is removed."
         )
