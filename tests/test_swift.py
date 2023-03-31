@@ -97,7 +97,7 @@ class SwiftTest(unittest.TestCase):
     def test_destroy_app(self):
         for name in APP_INFOS:
             self.swift.destroyApp(name)
-        self.assertFalse(self.swift._apps)
+            self.assertNotIn(name, self.swift._apps)
 
     def test_broadcast(self):
         for busName in self.buses:
