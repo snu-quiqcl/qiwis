@@ -13,10 +13,10 @@ class BaseApp(QObject):
     """Base App class that all apps should inherit.
 
     Signals: 
-        broadcastRequested(str, str): A signal for broadcasting to a bus 
-          which contains the destination bus name and the message.
-        received(str, str): A signal for receiving a global signal from a bus
-          which contains the departure bus name and the message.
+        broadcastRequested(str, str): A signal for broadcasting to a channel 
+          which contains the destination channel name and the message.
+        received(str, str): A signal for receiving a global signal from a channel
+          which contains the departure channel name and the message.
     """
 
     broadcastRequested = pyqtSignal(str, str)
