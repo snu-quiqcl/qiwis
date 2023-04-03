@@ -195,20 +195,22 @@ class Swift(QObject):
               All requested actions are performed sequentially.
               Possible actions are as follows.
               
-              "create": create an app.
-                its value is a name of app you want to create.
-              "destroy": destroy an app.
-                its value is a dictionary with two keys; "name" and "info".
-                The value of "name" is a name of app you want to destroy.
+              "create": Create an app.
+                Its value is a list of dictionaries with two keys; "name" and "info".
+                The value of "name" is a name of app you want to create.
                 The value of "info" is a JSON string of a dictionary 
                   that contains the keyword arguments of AppInfo.
+              "destory": Destroy an app.
+                Its value is a list of names of app you want to destroy.
         """
         msg = json.loads(msg)
         for action, contents in msg.items():
             if action == "create":
-                self.createApp(contents["name"], AppInfo(**contents["info"]))
+                for app in contents:
+                    self.createApp(app["name"], AppInfo(**app["info"]))
             elif action == "destroy":
-                self.destroyApp(contents)
+                for name in contents:
+                    self.destroyApp(name)
             else:
                 print(f"The system call was ignored because "
                       f"the treatment for the action {action} is not implemented.")
