@@ -193,6 +193,9 @@ class Swift(QObject):
                 self.destroyApp(contents)
             elif action == "create":
                 self.createApp(contents["name"], AppInfo(**contents["info"]))
+            else:
+                print(f"The system call was ignored because "
+                      f"the treatment for the action {action} is not implemented.")
 
 
 @contextmanager
