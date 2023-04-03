@@ -108,6 +108,7 @@ class Swift(QObject):
         self.centralWidget.setAlignment(Qt.AlignCenter)
         self.centralWidget.setStyleSheet("background-color: gray;")
         self.mainWindow.setCentralWidget(self.centralWidget)
+        self._dockWidgets = {}
         self._apps = {}
         self._subscribers = defaultdict(set)
         appInfos = appInfos if appInfos else {}
@@ -154,6 +155,7 @@ class Swift(QObject):
                     "bottom": Qt.BottomDockWidgetArea
                 }.get(info.pos, Qt.LeftDockWidgetArea)
                 self.mainWindow.addDockWidget(area, dockWidget)
+                self._dockWidgets[name] = dockWidget
         self._apps[name] = app
 
     def destroyApp(self, name: str):
@@ -162,6 +164,8 @@ class Swift(QObject):
         Args:
             name: A name of the app to destroy.
         """
+        dockWidget = self._dockWidgets.pop(name)
+        self.mainWindow.removeDockWidget(dockWidget)
         app = self._apps.pop(name)
         for apps in self._subscribers.values():
             apps.discard(app)
@@ -183,7 +187,10 @@ class Swift(QObject):
             app.received.emit(channelName, msg)
 
     def _call_system(self, msg: str):
-        print(msg)
+        msg = json.loads(msg)
+        for action, contents in msg.items():
+            if action == "destroy":
+                self.destroyApp(contents)
 
 
 @contextmanager
