@@ -171,12 +171,19 @@ class Swift(QObject):
     def _broadcast(self, channelName: str, msg: str):
         """Broadcasts the message to the subscriber apps of the channel.
 
+        If channelName is "swift", the message is for system call.
+
         Args:
             channelName: Target channel name.
             msg: Message to be broadcast.
         """
+        if channelName == "swift":
+            self._call_system(msg)
         for app in self._subscribers[channelName]:
             app.received.emit(channelName, msg)
+
+    def _call_system(self, msg: str):
+        print(msg)
 
 
 @contextmanager
