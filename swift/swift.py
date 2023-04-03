@@ -191,6 +191,8 @@ class Swift(QObject):
         for action, contents in msg.items():
             if action == "destroy":
                 self.destroyApp(contents)
+            elif action == "create":
+                self.createApp(contents["name"], AppInfo(**contents["info"]))
 
 
 @contextmanager
