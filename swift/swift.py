@@ -41,7 +41,7 @@ class AppInfo:
         pos: Position on the main window; refer to Qt.DockWidgetArea enum.
           Should be one of "left", "right", "top", or "bottom", case-sensitive.
           Otherwise, defaults to Qt.LeftDockWidgetArea.
-        bus: Buses which the app subscribes to.
+        channel: Channels which the app subscribes to.
         args: Keyword argument dictionary of the app class constructor.
           It must exclude name and parent arguments. Even if they exist, they will be ignored.
           None for initializing the app with default values,
@@ -52,7 +52,7 @@ class AppInfo:
     path: str = "."
     show: bool = True
     pos: str = ""
-    bus: Iterable[str] = ()
+    channel: Iterable[str] = ()
     args: Optional[Mapping[str, Any]] = None
 
 
@@ -141,8 +141,8 @@ class Swift(QObject):
         else:
             app = cls(name, parent=self)
         app.broadcastRequested.connect(self._broadcast, type=Qt.QueuedConnection)
-        for busName in info.bus:
-            self._subscribers[busName].add(app)
+        for channelName in info.channel:
+            self._subscribers[channelName].add(app)
         if info.show:
             for frame in app.frames():
                 dockWidget = QDockWidget(name, self.mainWindow)
@@ -168,15 +168,15 @@ class Swift(QObject):
         app.deleteLater()
 
     @pyqtSlot(str, str)
-    def _broadcast(self, busName: str, msg: str):
-        """Broadcasts the message to the subscriber apps of the bus.
+    def _broadcast(self, channelName: str, msg: str):
+        """Broadcasts the message to the subscriber apps of the channel.
 
         Args:
-            busName: Target bus name.
+            channelName: Target channel name.
             msg: Message to be broadcast.
         """
-        for app in self._subscribers[busName]:
-            app.received.emit(busName, msg)
+        for app in self._subscribers[channelName]:
+            app.received.emit(channelName, msg)
 
 
 @contextmanager

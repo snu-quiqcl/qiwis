@@ -20,7 +20,7 @@ APP_INFOS = {
         path="path1",
         show=False,
         pos="left",
-        bus=["bus1", "bus2"],
+        channel=["ch1", "ch2"],
         args={"arg1": "value1"}
     ),
     "app2": swift.AppInfo(
@@ -36,7 +36,7 @@ APP_DICTS = {
         "path": "path1",
         "show": False,
         "pos": "left",
-        "bus": ["bus1", "bus2"],
+        "channel": ["ch1", "ch2"],
         "args": {"arg1": "value1"}
     },
     "app2": {
@@ -47,9 +47,9 @@ APP_DICTS = {
 
 APP_JSONS = {
     "app1": ('{"module": "module1", "cls": "cls1", "path": "path1", "show": false, '
-             '"pos": "left", "bus": ["bus1", "bus2"], "args": {"arg1": "value1"}}'),
+             '"pos": "left", "channel": ["ch1", "ch2"], "args": {"arg1": "value1"}}'),
     "app2": ('{"module": "module2", "cls": "cls2", "path": ".", "show": true, '
-             '"pos": "", "bus": [], "args": null}'),
+             '"pos": "", "channel": [], "args": null}'),
     "app2_default": '{"module": "module2", "cls": "cls2"}'
 }
 
@@ -80,10 +80,10 @@ class SwiftTest(unittest.TestCase):
             app_.frames.return_value = (QWidget(),)
             cls = MagicMock(return_value=app_)
             setattr(importlib.import_module.return_value, appInfo.cls, cls)
-        self.buses = set()
+        self.channels = set()
         for appInfo in APP_INFOS.values():
-            self.buses.update(appInfo.bus)
-        self.buses = sorted(self.buses)
+            self.channels.update(appInfo.channel)
+        self.channels = sorted(self.channels)
         self.swift = swift.Swift(APP_INFOS)
 
     def test_init(self):
@@ -91,8 +91,8 @@ class SwiftTest(unittest.TestCase):
         self.assertIsInstance(self.swift.centralWidget, QLabel)
         for name in APP_INFOS:
             self.assertIn(name, self.swift._apps)
-        for bus in self.buses:
-            self.assertIn(bus, self.swift._subscribers)
+        for channel in self.channels:
+            self.assertIn(channel, self.swift._subscribers)
 
     def test_destroy_app(self):
         for name in APP_INFOS:
@@ -100,10 +100,10 @@ class SwiftTest(unittest.TestCase):
             self.assertNotIn(name, self.swift._apps)
 
     def test_broadcast(self):
-        for busName in self.buses:
-            self.swift._broadcast(busName, "test_msg")
+        for channelName in self.channels:
+            self.swift._broadcast(channelName, "test_msg")
         for name, app_ in self.swift._apps.items():
-            self.assertEqual(len(APP_INFOS[name].bus), app_.received.emit.call_count)
+            self.assertEqual(len(APP_INFOS[name].channel), app_.received.emit.call_count)
 
 
 class SwiftFunctionTest(unittest.TestCase):

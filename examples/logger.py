@@ -92,20 +92,20 @@ class LoggerApp(BaseApp):
         return (self.loggerFrame,)
 
     @pyqtSlot(str, str)
-    def addLog(self, busName: str, msg: str):
-        """Adds a bus name and log message.
+    def addLog(self, channelName: str, msg: str):
+        """Adds a channel name and log message.
 
         Args:
-            busName: The name of bus
+            channelName: The name of channel
             msg: Log message
         """
         timeString = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-        self.loggerFrame.logEdit.insertPlainText(f"{timeString}:[{busName}], {msg}\n")
+        self.loggerFrame.logEdit.insertPlainText(f"{timeString}:[{channelName}], {msg}\n")
 
     @pyqtSlot()
     def checkToClear(self):
         """Shows a confirmation frame for log clearing."""
-        self.broadcastRequested.emit("logbus", "Clicked to clear logs")
+        self.broadcastRequested.emit("log", "Clicked to clear logs")
         self.confirmFrame.show()
 
     @pyqtSlot()

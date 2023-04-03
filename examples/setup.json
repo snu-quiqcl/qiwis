@@ -5,7 +5,7 @@
             "cls": "NumGenApp",
             "show": true,
             "pos": "left",
-            "bus": ["dbbus"],
+            "channel": ["db"],
             "args": {
                 "table": "number"
             }
@@ -15,14 +15,14 @@
             "cls": "DBMgrApp",
             "show": true,
             "pos": "right",
-            "bus": []
+            "channel": []
         },
         "datacalc": {
             "module": "examples.datacalc",
             "cls": "DataCalcApp",
             "show": true,
             "pos": "top",
-            "bus": ["dbbus"],
+            "channel": ["db"],
             "args": {
                 "tables": {
                     "A": "number",
@@ -35,7 +35,7 @@
             "cls": "PollerApp",
             "show": true,
             "pos": "bottom",
-            "bus": ["dbbus"],
+            "channel": ["db"],
             "args": {
                 "table": "B"
             }
@@ -45,7 +45,7 @@
             "cls": "LoggerApp",
             "show": true,
             "pos": "bottom",
-            "bus": ["logbus"]
+            "channel": ["log"]
         }
     }
 }
