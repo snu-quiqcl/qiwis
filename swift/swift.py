@@ -187,12 +187,28 @@ class Swift(QObject):
             app.received.emit(channelName, msg)
 
     def _call_system(self, msg: str):
+        """Handles the system call.
+
+        Args:
+            msg: A JSON string of a message about a system call.
+              Its keys represent an action. 
+              All requested actions are performed sequentially.
+              Possible actions are as follows.
+              
+              "create": create an app.
+                its value is a name of app you want to create.
+              "destroy": destroy an app.
+                its value is a dictionary with two keys; "name" and "info".
+                The value of "name" is a name of app you want to destroy.
+                The value of "info" is a JSON string of a dictionary 
+                  that contains the keyword arguments of AppInfo.
+        """
         msg = json.loads(msg)
         for action, contents in msg.items():
-            if action == "destroy":
-                self.destroyApp(contents)
-            elif action == "create":
+            if action == "create":
                 self.createApp(contents["name"], AppInfo(**contents["info"]))
+            elif action == "destroy":
+                self.destroyApp(contents)
             else:
                 print(f"The system call was ignored because "
                       f"the treatment for the action {action} is not implemented.")
