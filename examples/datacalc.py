@@ -4,6 +4,7 @@ App module for showing the sum of two values from selected databases.
 
 import os
 import json
+import functools
 from typing import Optional, Dict, Tuple
 
 from PyQt5.QtCore import QObject, pyqtSlot
@@ -71,8 +72,8 @@ class DataCalcApp(BaseApp):
             dbBox.addItem("")
         # connect signals to slots
         self.received.connect(self.updateDB)
-        self.viewerFrame.dbBoxes["A"].currentIndexChanged.connect(lambda: self.setDB("A"))
-        self.viewerFrame.dbBoxes["B"].currentIndexChanged.connect(lambda: self.setDB("B"))
+        for dbName, dbBox in self.viewerFrame.dbBoxes.items():
+            dbBox.currentIndexChanged.connect(functools.partial(self.setDB, dbName))
         self.viewerFrame.calculateButton.clicked.connect(self.calculateSum)
 
     def frames(self) -> Tuple[ViewerFrame]:
