@@ -108,7 +108,7 @@ class Swift(QObject):
         self.centralWidget.setAlignment(Qt.AlignCenter)
         self.centralWidget.setStyleSheet("background-color: gray;")
         self.mainWindow.setCentralWidget(self.centralWidget)
-        self._dockWidgets = {}
+        self._dockWidgets = defaultdict(list)
         self._apps = {}
         self._subscribers = defaultdict(set)
         appInfos = appInfos if appInfos else {}
@@ -144,18 +144,18 @@ class Swift(QObject):
         app.broadcastRequested.connect(self._broadcast, type=Qt.QueuedConnection)
         for channelName in info.channel:
             self._subscribers[channelName].add(app)
-        if info.show:
-            for frame in app.frames():
-                dockWidget = QDockWidget(name, self.mainWindow)
-                dockWidget.setWidget(frame)
-                area = {
-                    "left": Qt.LeftDockWidgetArea,
-                    "right": Qt.RightDockWidgetArea,
-                    "top": Qt.TopDockWidgetArea,
-                    "bottom": Qt.BottomDockWidgetArea
-                }.get(info.pos, Qt.LeftDockWidgetArea)
+        for frame in app.frames():
+            dockWidget = QDockWidget(name, self.mainWindow)
+            dockWidget.setWidget(frame)
+            area = {
+                "left": Qt.LeftDockWidgetArea,
+                "right": Qt.RightDockWidgetArea,
+                "top": Qt.TopDockWidgetArea,
+                "bottom": Qt.BottomDockWidgetArea
+            }.get(info.pos, Qt.LeftDockWidgetArea)
+            if info.show:
                 self.mainWindow.addDockWidget(area, dockWidget)
-                self._dockWidgets[name] = dockWidget
+            self._dockWidgets[name].append(dockWidget)
         self._apps[name] = app
 
     def destroyApp(self, name: str):
@@ -164,8 +164,10 @@ class Swift(QObject):
         Args:
             name: A name of the app to destroy.
         """
-        dockWidget = self._dockWidgets.pop(name)
-        self.mainWindow.removeDockWidget(dockWidget)
+        dockWidgets = self._dockWidgets.pop(name)
+        for dockWidget in dockWidgets:
+            self.mainWindow.removeDockWidget(dockWidget)
+            dockWidget.deleteLater()
         app = self._apps.pop(name)
         for apps in self._subscribers.values():
             apps.discard(app)
