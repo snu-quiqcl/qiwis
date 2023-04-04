@@ -112,7 +112,10 @@ class DataCalcApp(BaseApp):
                     newDBs.add(name)
                     if name not in self.dbs:
                         self.dbs[name] = path
-                        list(map(operator.methodcaller("addItem", name), self.viewerFrame.dbBoxes.values()))
+                        list(map(
+                            operator.methodcaller("addItem", name),
+                            self.viewerFrame.dbBoxes.values()
+                        ))
                 removingDBs = originalDBs - newDBs
                 for dbBox in self.viewerFrame.dbBoxes.values():
                     if dbBox.currentText() in removingDBs:
