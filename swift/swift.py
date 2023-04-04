@@ -88,6 +88,10 @@ class Swift(QObject):
 
     Note that QApplication instance must be created before instantiating Swift object.
 
+    A swift-call is a request for the swift system such as creating an app.
+    Messages trasferred through "swift" channel are considered as swift-call.
+    For details, see _callSwift().
+
     Brief procedure:
         1. Load setup environment.
         2. Create apps and show their frames.
@@ -177,22 +181,22 @@ class Swift(QObject):
     def _broadcast(self, channelName: str, msg: str):
         """Broadcasts the message to the subscriber apps of the channel.
 
-        If channelName is "swift", the message is for system call.
+        If channelName is "swift", the message is for swift-call.
 
         Args:
             channelName: Target channel name.
             msg: Message to be broadcast.
         """
         if channelName == "swift":
-            self._call_system(msg)
+            self._callSwift(msg)
         for app in self._subscribers[channelName]:
             app.received.emit(channelName, msg)
 
-    def _call_system(self, msg: str):
-        """Handles the system call.
+    def _callSwift(self, msg: str):
+        """Handles the swift-call.
 
         Args:
-            msg: A JSON string of a message about a system call.
+            msg: A JSON string of a message about a swift-call.
               Its keys represent an action. 
               All requested actions are performed sequentially.
               Possible actions are as follows.
@@ -214,7 +218,7 @@ class Swift(QObject):
                 for name in contents:
                     self.destroyApp(name)
             else:
-                print(f"The system call was ignored because "
+                print(f"The swift-call was ignored because "
                       f"the treatment for the action {action} is not implemented.")
 
 
