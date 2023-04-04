@@ -5,6 +5,7 @@ App module for showing the sum of two values from selected databases.
 import os
 import json
 import functools
+import operator
 from typing import Optional, Dict, Tuple
 
 from PyQt5.QtCore import QObject, pyqtSlot
@@ -111,8 +112,7 @@ class DataCalcApp(BaseApp):
                     newDBs.add(name)
                     if name not in self.dbs:
                         self.dbs[name] = path
-                        for dbBox in self.viewerFrame.dbBoxes.values():
-                            dbBox.addItem(name)
+                        list(map(operator.methodcaller("addItem", name), self.viewerFrame.dbBoxes.values()))
                 removingDBs = originalDBs - newDBs
                 for dbBox in self.viewerFrame.dbBoxes.values():
                     if dbBox.currentText() in removingDBs:
