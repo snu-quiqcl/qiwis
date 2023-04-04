@@ -65,9 +65,9 @@ def parse(cls: Type[T], kwargs: str) -> T:
     Args:
         cls: A class object.
         kwargs: A JSON string of a dictionary that contains the keyword arguments of cls.
-            Positional arguments should be given with the argument names, just like
-            the other keyword arguments.
-            There must not exist arguments which are not in cls constructor.
+          Positional arguments should be given with the argument names, just like
+          the other keyword arguments.
+          There must not exist arguments which are not in cls constructor.
     """
     return cls(**json.loads(kwargs))
 
