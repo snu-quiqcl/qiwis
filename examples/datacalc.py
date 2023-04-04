@@ -127,7 +127,11 @@ class DataCalcApp(BaseApp):
 
     @pyqtSlot(str)
     def setDB(self, name: str):
-        """Sets the database to fetch the numbers."""
+        """Sets the database to fetch the numbers.
+        
+        Args:
+            name: A name of the selected combobox.
+        """
         dbBox = self.viewerFrame.dbBoxes[name]
         self.dbNames[name] = dbBox.currentText()
         self.broadcastRequested.emit(
