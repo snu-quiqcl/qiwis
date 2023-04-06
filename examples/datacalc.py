@@ -99,28 +99,28 @@ class DataCalcApp(BaseApp):
                 msg = json.loads(msg)
             except json.JSONDecodeError as e:
                 print(f"apps.datacalc.updateDB(): {e!r}")
-            else:
-                originalDBs = set(self.dbs)
-                newDBs = set([""])
-                for db in msg.get("db", ()):
-                    if any(key not in db for key in ("name", "path")):
-                        print(f"The message was ignored because "
-                              f"the database {db} has no such key; name or path.")
-                        continue
-                    name, path = db["name"], db["path"]
-                    newDBs.add(name)
-                    if name not in self.dbs:
-                        self.dbs[name] = path
-                        for dbBox in self.viewerFrame.dbBoxes.values():
-                            dbBox.addItem(name)
-                removingDBs = originalDBs - newDBs
-                for dbBox in self.viewerFrame.dbBoxes.values():
-                    if dbBox.currentText() in removingDBs:
-                        dbBox.setCurrentText("")
-                for name in removingDBs:
-                    self.dbs.pop(name)
+                return
+            originalDBs = set(self.dbs)
+            newDBs = set([""])
+            for db in msg.get("db", ()):
+                if any(key not in db for key in ("name", "path")):
+                    print(f"The message was ignored because "
+                            f"the database {db} has no such key; name or path.")
+                    continue
+                name, path = db["name"], db["path"]
+                newDBs.add(name)
+                if name not in self.dbs:
+                    self.dbs[name] = path
                     for dbBox in self.viewerFrame.dbBoxes.values():
-                        dbBox.removeItem(dbBox.findText(name))
+                        dbBox.addItem(name)
+            removingDBs = originalDBs - newDBs
+            for dbBox in self.viewerFrame.dbBoxes.values():
+                if dbBox.currentText() in removingDBs:
+                    dbBox.setCurrentText("")
+            for name in removingDBs:
+                self.dbs.pop(name)
+                for dbBox in self.viewerFrame.dbBoxes.values():
+                    dbBox.removeItem(dbBox.findText(name))
         else:
             print(f"The message was ignored because "
                   f"the treatment for the channel {channelName} is not implemented.")

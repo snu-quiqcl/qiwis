@@ -101,25 +101,25 @@ class PollerApp(BaseApp):
                 msg = json.loads(msg)
             except json.JSONDecodeError as e:
                 print(f"apps.numgen.updateDB(): {e!r}")
-            else:
-                originalDBs = set(self.dbs)
-                newDBs = set([""])
-                for db in msg.get("db", ()):
-                    if any(key not in db for key in ("name", "path")):
-                        print(f"The message was ignored because "
-                              f"the database {db} has no such key; name or path.")
-                        continue
-                    name, path = db["name"], db["path"]
-                    newDBs.add(name)
-                    if name not in self.dbs:
-                        self.dbs[name] = path
-                        self.viewerFrame.dbBox.addItem(name)
-                removingDBs = originalDBs - newDBs
-                if self.viewerFrame.dbBox.currentText() in removingDBs:
-                    self.viewerFrame.dbBox.setCurrentText("")
-                for name in removingDBs:
-                    self.dbs.pop(name)
-                    self.viewerFrame.dbBox.removeItem(self.viewerFrame.dbBox.findText(name))
+                return
+            originalDBs = set(self.dbs)
+            newDBs = set([""])
+            for db in msg.get("db", ()):
+                if any(key not in db for key in ("name", "path")):
+                    print(f"The message was ignored because "
+                            f"the database {db} has no such key; name or path.")
+                    continue
+                name, path = db["name"], db["path"]
+                newDBs.add(name)
+                if name not in self.dbs:
+                    self.dbs[name] = path
+                    self.viewerFrame.dbBox.addItem(name)
+            removingDBs = originalDBs - newDBs
+            if self.viewerFrame.dbBox.currentText() in removingDBs:
+                self.viewerFrame.dbBox.setCurrentText("")
+            for name in removingDBs:
+                self.dbs.pop(name)
+                self.viewerFrame.dbBox.removeItem(self.viewerFrame.dbBox.findText(name))
         else:
             print(f"The message was ignored because "
                   f"the treatment for the channel {channelName} is not implemented.")
