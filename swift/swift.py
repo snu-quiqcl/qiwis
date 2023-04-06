@@ -196,30 +196,43 @@ class Swift(QObject):
         """Handles the swift-call.
 
         Args:
-            msg: A JSON string of a message about a swift-call.
-              Its keys represent an action. 
-              All requested actions are performed sequentially.
-              Possible actions are as follows.
+            msg: A JSON string of a message with two keys; "action" and "args".
+              A possible action is as follows.
               
               "create": Create an app.
-                Its value is a list of dictionaries with two keys; "name" and "info".
+                Its "args" is a dictionary with two keys; "name" and "info".
                 The value of "name" is a name of app you want to create.
                 The value of "info" is a JSON string of a dictionary 
                   that contains the keyword arguments of AppInfo.
               "destory": Destroy an app.
-                Its value is a list of names of app you want to destroy.
+                Its "args" is a dictionary with a key; "name".
+                The value of "name" is a name of app you want to destroy.
         """
-        msg = json.loads(msg)
-        for action, contents in msg.items():
-            if action == "create":
-                for app in contents:
-                    self.createApp(app["name"], AppInfo(**app["info"]))
-            elif action == "destroy":
-                for name in contents:
-                    self.destroyApp(name)
-            else:
-                print(f"The swift-call was ignored because "
-                      f"the treatment for the action {action} is not implemented.")
+        try:
+            msg = json.loads(msg)
+        except json.JSONDecodeError as e:
+            print(f"swift.swift._callSwift(): {e!r}")
+            return
+        if any(key not in msg for key in ("action", "args")):
+            print(f"The message was ignored because "
+                  f"it has no such key; action or args.")
+            return
+        action, args = msg["action"], msg["args"]
+        if action == "create":
+            if any(key not in args for key in ("name", "info")):
+                print(f"The message was ignored because "
+                      f"args of the create action have no such key; name or info.")
+                return
+            self.createApp(args["name"], AppInfo(**args["info"]))
+        elif action == "destroy":
+            if any(key not in args for key in ("name",)):
+                print(f"The message was ignored because "
+                      f"args of the destroy action have no such key; name.")
+                return
+            self.destroyApp(args["name"])
+        else:
+            print(f"The swift-call was ignored because "
+                  f"the treatment for the action {action} is not implemented.")
 
 
 @contextmanager
