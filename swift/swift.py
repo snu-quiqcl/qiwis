@@ -146,6 +146,7 @@ class Swift(QObject):
         else:
             app = cls(name, parent=self)
         app.broadcastRequested.connect(self._broadcast, type=Qt.QueuedConnection)
+        app.swiftcallRequested.connect(self._callSwift, type=Qt.QueuedConnection)
         for channelName in info.channel:
             self._subscribers[channelName].add(app)
         for frame in app.frames():
@@ -181,8 +182,6 @@ class Swift(QObject):
     def _broadcast(self, channelName: str, msg: str):
         """Broadcasts the message to the subscriber apps of the channel.
 
-        If channelName is "swift", the message is for swift-call.
-
         Args:
             channelName: Target channel name.
             msg: Message to be broadcast.
@@ -192,6 +191,7 @@ class Swift(QObject):
         for app in self._subscribers[channelName]:
             app.received.emit(channelName, msg)
 
+    @pyqtSlot(str)
     def _callSwift(self, msg: str):
         """Handles the swift-call.
 
