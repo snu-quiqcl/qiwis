@@ -4,7 +4,8 @@ Base module for App.
 Every App class should be a subclass of BaseApp.
 """
 
-from typing import Optional, Iterable
+import json
+from typing import Any, Optional, Iterable
 
 from PyQt5.QtCore import QObject, pyqtSignal
 from PyQt5.QtWidgets import QWidget
@@ -38,3 +39,19 @@ class BaseApp(QObject):
             An iterable object of Frame objects for showing.
         """
         return ()
+
+    def broadcast(self, channelName: str, content: Any):
+        """Broadcasts the content to the target channel.
+
+        Args:
+            channelName: Target channel name.
+            content: Content to be broadcast.
+        
+        """
+        if not isinstance(content, str):
+            try:
+                content = json.dumps(content)
+            except TypeError as e:
+                print(f"swift.app.broadcast(): {e!r}")
+                return
+        self.broadcastRequested.emit(channelName, content)
