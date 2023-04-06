@@ -55,3 +55,17 @@ class BaseApp(QObject):
                 print(f"swift.app.broadcast(): {e!r}")
                 return
         self.broadcastRequested.emit(channelName, content)
+
+
+    def receivedSlot(self, channelName: str, content: Any):
+        """This will be overridden by child classes."""
+
+    @pyqtSignal(str, str)
+    def _receivedMessage(self, channelName: str, msg: str):
+        """This is connected to self.received signal."""
+        try:
+            msg = json.loads(msg)
+        except json.JSONDecodeError as e:
+            print(f"swift.app._receivedMessage(): {e!r}")
+            return
+        self._receivedSlot(channelName, msg)
