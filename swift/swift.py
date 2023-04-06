@@ -235,7 +235,16 @@ class Swift(QObject):
                 print("The message was ignored because "
                       "args of the destroy action have no such key; name.")
                 return
-            self.destroyApp(args["name"])
+            name = args["name"]
+            reply = QMessageBox.warning(
+                None, 
+                "Swift-call",
+                f"The app {self.sender().name} requests for destroying an app {name}",
+                QMessageBox.Ok | QMessageBox.Cancel,
+                QMessageBox.Cancel
+            )
+            if reply == QMessageBox.Ok:
+                self.destroyApp(name)
         else:
             print(f"The swift-call was ignored because "
                   f"the treatment for the action {action} is not implemented.")
