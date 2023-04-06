@@ -4,6 +4,7 @@ App module for showing the sum of two values from selected databases.
 
 import os
 import json
+import functools
 from typing import Optional, Dict, Tuple
 
 from PyQt5.QtCore import QObject, pyqtSlot
@@ -67,10 +68,12 @@ class DataCalcApp(BaseApp):
         self.dbs = {"": ""}
         self.dbNames = {"A": "", "B": ""}
         self.viewerFrame = ViewerFrame()
+        for dbBox in self.viewerFrame.dbBoxes.values():
+            dbBox.addItem("")
         # connect signals to slots
         self.received.connect(self.updateDB)
-        for dbBox in self.viewerFrame.dbBoxes.values():
-            dbBox.currentIndexChanged.connect(self.setDB)
+        for dbName, dbBox in self.viewerFrame.dbBoxes.items():
+            dbBox.currentIndexChanged.connect(functools.partial(self.setDB, dbName))
         self.viewerFrame.calculateButton.clicked.connect(self.calculateSum)
 
     def frames(self) -> Tuple[ViewerFrame]:
@@ -82,6 +85,9 @@ class DataCalcApp(BaseApp):
         """Updates the database list using the transferred message.
 
         This is a slot for received signal.
+        It assumes that:
+            The new database is always added at the end.
+            Changing the order of the databases is not allowed.
 
         Args:
             channelName: A name of the channel that transfered the signal.
@@ -93,39 +99,47 @@ class DataCalcApp(BaseApp):
                 msg = json.loads(msg)
             except json.JSONDecodeError as e:
                 print(f"apps.datacalc.updateDB(): {e!r}")
-            else:
-                orgDbNames = self.dbNames.copy()
-                self.dbs = {"": ""}
+                return
+            originalDBs = set(self.dbs)
+            newDBs = set([""])
+            for db in msg.get("db", ()):
+                if any(key not in db for key in ("name", "path")):
+                    print(f"The message was ignored because "
+                            f"the database {db} has no such key; name or path.")
+                    continue
+                name, path = db["name"], db["path"]
+                newDBs.add(name)
+                if name not in self.dbs:
+                    self.dbs[name] = path
+                    for dbBox in self.viewerFrame.dbBoxes.values():
+                        dbBox.addItem(name)
+            removingDBs = originalDBs - newDBs
+            for dbBox in self.viewerFrame.dbBoxes.values():
+                if dbBox.currentText() in removingDBs:
+                    dbBox.setCurrentText("")
+            for name in removingDBs:
+                self.dbs.pop(name)
                 for dbBox in self.viewerFrame.dbBoxes.values():
-                    dbBox.clear()
-                    dbBox.addItem("")
-                for db in msg.get("db", ()):
-                    if all(key in db for key in ("name", "path")):
-                        name, path = db["name"], db["path"]
-                        self.dbs[name] = path
-                        for dbBox in self.viewerFrame.dbBoxes.values():
-                            dbBox.addItem(name)
-                    else:
-                        print(f"The message was ignored because "
-                              f"the database {db} has no such key; name or path.")
-                for name, orgDbName in orgDbNames.items():
-                    if orgDbName in self.dbs:
-                        self.viewerFrame.dbBoxes[name].setCurrentText(orgDbName)
+                    dbBox.removeItem(dbBox.findText(name))
         else:
             print(f"The message was ignored because "
                   f"the treatment for the channel {channelName} is not implemented.")
 
-    @pyqtSlot()
-    def setDB(self):
-        """Sets the databases to fetch the numbers."""
-        for name, dbBox in self.viewerFrame.dbBoxes.items():
-            self.dbNames[name] = dbBox.currentText()
-            self.broadcastRequested.emit(
-                "log", 
-                f"Database {name} is set as {self.dbNames[name]}."
-                if self.dbNames[name]
-                else f"Database {name} is not selected."
-            )
+    @pyqtSlot(str)
+    def setDB(self, name: str):
+        """Sets the database to fetch the numbers.
+        
+        Args:
+            name: A name of the selected combobox.
+        """
+        dbBox = self.viewerFrame.dbBoxes[name]
+        self.dbNames[name] = dbBox.currentText()
+        self.broadcastRequested.emit(
+            "log", 
+            f"Database {name} is set as {self.dbNames[name]}."
+            if self.dbNames[name]
+            else f"Database {name} is not selected."
+        )
 
     @pyqtSlot()
     def calculateSum(self):
