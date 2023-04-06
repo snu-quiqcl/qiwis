@@ -214,20 +214,20 @@ class Swift(QObject):
             print(f"swift.swift._callSwift(): {e!r}")
             return
         if any(key not in msg for key in ("action", "args")):
-            print(f"The message was ignored because "
-                  f"it has no such key; action or args.")
+            print("The message was ignored because "
+                  "it has no such key; action or args.")
             return
         action, args = msg["action"], msg["args"]
         if action == "create":
             if any(key not in args for key in ("name", "info")):
-                print(f"The message was ignored because "
-                      f"args of the create action have no such key; name or info.")
+                print("The message was ignored because "
+                      "args of the create action have no such key; name or info.")
                 return
             self.createApp(args["name"], AppInfo(**args["info"]))
         elif action == "destroy":
             if any(key not in args for key in ("name",)):
-                print(f"The message was ignored because "
-                      f"args of the destroy action have no such key; name.")
+                print("The message was ignored because "
+                      "args of the destroy action have no such key; name.")
                 return
             self.destroyApp(args["name"])
         else:
