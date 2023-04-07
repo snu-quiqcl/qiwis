@@ -48,12 +48,11 @@ class BaseApp(QObject):
             content: Content to be broadcast.
         
         """
-        if not isinstance(content, str):
-            try:
-                content = json.dumps(content)
-            except TypeError as e:
-                print(f"swift.app.broadcast(): {e!r}")
-                return
+        try:
+            content = json.dumps(content)
+        except TypeError as e:
+            print(f"swift.app.broadcast(): {e!r}")
+            return
         self.broadcastRequested.emit(channelName, content)
 
 
