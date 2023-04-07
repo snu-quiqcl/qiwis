@@ -52,8 +52,8 @@ class BaseApp(QObject):
             msg = json.dumps(content)
         except TypeError as e:
             print(f"swift.app.broadcast(): {e!r}")
-            return
-        self.broadcastRequested.emit(channelName, msg)
+        else:
+            self.broadcastRequested.emit(channelName, msg)
 
     def receivedSlot(self, channelName: str, content: Any):
         """Handles the received broadcast message.
@@ -78,5 +78,5 @@ class BaseApp(QObject):
             content = json.loads(msg)
         except json.JSONDecodeError as e:
             print(f"swift.app._receivedMessage(): {e!r}")
-            return
-        self.receivedSlot(channelName, content)
+        else:
+            self.receivedSlot(channelName, content)
