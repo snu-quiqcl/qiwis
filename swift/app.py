@@ -46,25 +46,37 @@ class BaseApp(QObject):
 
         Args:
             channelName: Target channel name.
-            content: Content to be broadcast.
-        
+            content: Content to be broadcast. It should be able to be converted to JSON object.
         """
         try:
-            content = json.dumps(content)
+            msg = json.dumps(content)
         except TypeError as e:
             print(f"swift.app.broadcast(): {e!r}")
             return
-        self.broadcastRequested.emit(channelName, content)
+        self.broadcastRequested.emit(channelName, msg)
 
     def receivedSlot(self, channelName: str, content: Any):
-        """This will be overridden by child classes."""
+        """Handles the received broadcast message.
+        
+        This is called when self.received signal is emitted.
+        This will be overridden by child classes.
+
+        Args:
+            channelName: Channel name that transferred the message.
+            content: Content to be broadcast.
+        """
 
     @pyqtSlot(str, str)
     def _receivedMessage(self, channelName: str, msg: str):
-        """This is connected to self.received signal."""
+        """This is connected to self.received signal.
+        
+        Args:
+            channelName: Channel name that transferred the message.
+            msg: A JSON string to be broadcast.
+        """
         try:
-            msg = json.loads(msg)
+            content = json.loads(msg)
         except json.JSONDecodeError as e:
             print(f"swift.app._receivedMessage(): {e!r}")
             return
-        self.receivedSlot(channelName, msg)
+        self.receivedSlot(channelName, content)
