@@ -195,13 +195,12 @@ class Swift(QObject):
 
         Args:
             msg: A JSON string of a message with two keys; "action" and "args".
-              A possible action is as follows.
+              Possible actions are as follows.
               
               "create": Create an app.
                 Its "args" is a dictionary with two keys; "name" and "info".
                 The value of "name" is a name of app you want to create.
-                The value of "info" is a JSON string of a dictionary 
-                  that contains the keyword arguments of AppInfo.
+                The value of "info" is a dictionary that contains the keyword arguments of AppInfo.
               "destory": Destroy an app.
                 Its "args" is a dictionary with a key; "name".
                 The value of "name" is a name of app you want to destroy.
