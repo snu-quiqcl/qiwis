@@ -90,7 +90,7 @@ class Swift(QObject):
 
     A swift-call is a request for the swift system such as creating an app.
     Messages emitted from "swiftcallRequested" signal are considered as swift-call.
-    For details, see _callSwift().
+    For details, see _swiftcall().
 
     Brief procedure:
         1. Load setup environment.
@@ -146,7 +146,7 @@ class Swift(QObject):
         else:
             app = cls(name, parent=self)
         app.broadcastRequested.connect(self._broadcast, type=Qt.QueuedConnection)
-        app.swiftcallRequested.connect(self._callSwift, type=Qt.QueuedConnection)
+        app.swiftcallRequested.connect(self._swiftcall, type=Qt.QueuedConnection)
         for channelName in info.channel:
             self._subscribers[channelName].add(app)
         for frame in app.frames():
@@ -190,7 +190,7 @@ class Swift(QObject):
             app.received.emit(channelName, msg)
 
     @pyqtSlot(str)
-    def _callSwift(self, msg: str):
+    def _swiftcall(self, msg: str):
         """Handles the swift-call.
 
         Args:
@@ -208,7 +208,7 @@ class Swift(QObject):
         try:
             msg = json.loads(msg)
         except json.JSONDecodeError as e:
-            print(f"swift.swift._callSwift(): {e!r}")
+            print(f"swift.swift._swiftcall(): {e!r}")
             return
         if any(key not in msg for key in ("action", "args")):
             print("The message was ignored because "
