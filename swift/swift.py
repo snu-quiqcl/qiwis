@@ -186,8 +186,6 @@ class Swift(QObject):
             channelName: Target channel name.
             msg: Message to be broadcast.
         """
-        if channelName == "swift":
-            self._callSwift(msg)
         for app in self._subscribers[channelName]:
             app.received.emit(channelName, msg)
 
