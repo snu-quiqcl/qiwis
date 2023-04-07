@@ -89,7 +89,7 @@ class Swift(QObject):
     Note that QApplication instance must be created before instantiating Swift object.
 
     A swift-call is a request for the swift system such as creating an app.
-    Messages trasferred through "swift" channel are considered as swift-call.
+    Messages emitted from "swiftcallRequested" signal are considered as swift-call.
     For details, see _callSwift().
 
     Brief procedure:
