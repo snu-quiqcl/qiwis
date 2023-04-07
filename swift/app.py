@@ -7,7 +7,7 @@ Every App class should be a subclass of BaseApp.
 import json
 from typing import Any, Optional, Iterable
 
-from PyQt5.QtCore import QObject, pyqtSignal
+from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QWidget
 
 class BaseApp(QObject):
@@ -31,6 +31,7 @@ class BaseApp(QObject):
         """
         super().__init__(parent=parent)
         self.name = name
+        self.received.connect(self._receivedMessage)
 
     def frames(self) -> Iterable[QWidget]:
         """Gets frames for which are managed by the App.
@@ -59,7 +60,7 @@ class BaseApp(QObject):
     def receivedSlot(self, channelName: str, content: Any):
         """This will be overridden by child classes."""
 
-    @pyqtSignal(str, str)
+    @pyqtSlot(str, str)
     def _receivedMessage(self, channelName: str, msg: str):
         """This is connected to self.received signal."""
         try:
@@ -67,4 +68,4 @@ class BaseApp(QObject):
         except json.JSONDecodeError as e:
             print(f"swift.app._receivedMessage(): {e!r}")
             return
-        self._receivedSlot(channelName, msg)
+        self.receivedSlot(channelName, msg)
