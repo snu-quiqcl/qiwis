@@ -56,7 +56,6 @@ class BaseApp(QObject):
             return
         self.broadcastRequested.emit(channelName, content)
 
-
     def receivedSlot(self, channelName: str, content: Any):
         """This will be overridden by child classes."""
 
