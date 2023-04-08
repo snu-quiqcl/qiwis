@@ -222,7 +222,7 @@ class Swift(QObject):
                 return
             name, info = args["name"], args["info"]
             reply = QMessageBox.warning(
-                None, 
+                None,
                 "swift-call",
                 f"The app {self.sender().name} requests for creating an app {name}",
                 QMessageBox.Ok | QMessageBox.Cancel,
@@ -237,7 +237,7 @@ class Swift(QObject):
                 return
             name = args["name"]
             reply = QMessageBox.warning(
-                None, 
+                None,
                 "swift-call",
                 f"The app {self.sender().name} requests for destroying an app {name}",
                 QMessageBox.Ok | QMessageBox.Cancel,
