@@ -4,9 +4,10 @@ Base module for App.
 Every App class should be a subclass of BaseApp.
 """
 
-from typing import Optional, Iterable
+import json
+from typing import Any, Optional, Iterable
 
-from PyQt5.QtCore import QObject, pyqtSignal
+from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QWidget
 
 class BaseApp(QObject):
@@ -31,6 +32,7 @@ class BaseApp(QObject):
         """
         super().__init__(parent=parent)
         self.name = name
+        self.received.connect(self._receivedMessage)
 
     def frames(self) -> Iterable[QWidget]:
         """Gets frames for which are managed by the App.
@@ -39,3 +41,43 @@ class BaseApp(QObject):
             An iterable object of Frame objects for showing.
         """
         return ()
+
+    def broadcast(self, channelName: str, content: Any):
+        """Broadcasts the content to the target channel.
+
+        Args:
+            channelName: Target channel name.
+            content: Content to be broadcast. It should be able to be converted to JSON object.
+        """
+        try:
+            msg = json.dumps(content)
+        except TypeError as e:
+            print(f"swift.app.broadcast(): {e!r}")
+        else:
+            self.broadcastRequested.emit(channelName, msg)
+
+    def receivedSlot(self, channelName: str, content: Any):
+        """Handles the received broadcast message.
+        
+        This is called when self.received signal is emitted.
+        This will be overridden by child classes.
+
+        Args:
+            channelName: Channel name that transferred the message.
+            content: Received content.
+        """
+
+    @pyqtSlot(str, str)
+    def _receivedMessage(self, channelName: str, msg: str):
+        """This is connected to self.received signal.
+        
+        Args:
+            channelName: Channel name that transferred the message.
+            msg: Received JSON string.
+        """
+        try:
+            content = json.loads(msg)
+        except json.JSONDecodeError as e:
+            print(f"swift.app._receivedMessage(): {e!r}")
+        else:
+            self.receivedSlot(channelName, content)
