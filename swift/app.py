@@ -63,7 +63,7 @@ class BaseApp(QObject):
 
         Args:
             channelName: Channel name that transferred the message.
-            content: Content to be broadcast.
+            content: Received content.
         """
 
     @pyqtSlot(str, str)
@@ -72,7 +72,7 @@ class BaseApp(QObject):
         
         Args:
             channelName: Channel name that transferred the message.
-            msg: A JSON string to be broadcast.
+            msg: Received JSON string.
         """
         try:
             content = json.loads(msg)
