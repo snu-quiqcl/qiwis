@@ -21,6 +21,7 @@ class BaseApp(QObject):
 
     broadcastRequested = pyqtSignal(str, str)
     received = pyqtSignal(str, str)
+    swiftcallRequested = pyqtSignal(str)
 
     def __init__(self, name: str, parent: Optional[QObject] = None):
         """

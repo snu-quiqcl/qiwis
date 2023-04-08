@@ -88,6 +88,10 @@ class Swift(QObject):
 
     Note that QApplication instance must be created before instantiating Swift object.
 
+    A swift-call is a request for the swift system such as creating an app.
+    Messages emitted from "swiftcallRequested" signal are considered as swift-call.
+    For details, see _swiftcall().
+
     Brief procedure:
         1. Load setup environment.
         2. Create apps and show their frames.
@@ -108,6 +112,7 @@ class Swift(QObject):
         self.centralWidget.setAlignment(Qt.AlignCenter)
         self.centralWidget.setStyleSheet("background-color: gray;")
         self.mainWindow.setCentralWidget(self.centralWidget)
+        self._dockWidgets = defaultdict(list)
         self._apps = {}
         self._subscribers = defaultdict(set)
         appInfos = appInfos if appInfos else {}
@@ -141,19 +146,21 @@ class Swift(QObject):
         else:
             app = cls(name, parent=self)
         app.broadcastRequested.connect(self._broadcast, type=Qt.QueuedConnection)
+        app.swiftcallRequested.connect(self._swiftcall, type=Qt.QueuedConnection)
         for channelName in info.channel:
             self._subscribers[channelName].add(app)
-        if info.show:
-            for frame in app.frames():
-                dockWidget = QDockWidget(name, self.mainWindow)
-                dockWidget.setWidget(frame)
-                area = {
-                    "left": Qt.LeftDockWidgetArea,
-                    "right": Qt.RightDockWidgetArea,
-                    "top": Qt.TopDockWidgetArea,
-                    "bottom": Qt.BottomDockWidgetArea
-                }.get(info.pos, Qt.LeftDockWidgetArea)
+        for frame in app.frames():
+            dockWidget = QDockWidget(name, self.mainWindow)
+            dockWidget.setWidget(frame)
+            area = {
+                "left": Qt.LeftDockWidgetArea,
+                "right": Qt.RightDockWidgetArea,
+                "top": Qt.TopDockWidgetArea,
+                "bottom": Qt.BottomDockWidgetArea
+            }.get(info.pos, Qt.LeftDockWidgetArea)
+            if info.show:
                 self.mainWindow.addDockWidget(area, dockWidget)
+            self._dockWidgets[name].append(dockWidget)
         self._apps[name] = app
 
     def destroyApp(self, name: str):
@@ -162,6 +169,10 @@ class Swift(QObject):
         Args:
             name: A name of the app to destroy.
         """
+        dockWidgets = self._dockWidgets.pop(name)
+        for dockWidget in dockWidgets:
+            self.mainWindow.removeDockWidget(dockWidget)
+            dockWidget.deleteLater()
         app = self._apps.pop(name)
         for apps in self._subscribers.values():
             apps.discard(app)
@@ -177,6 +188,48 @@ class Swift(QObject):
         """
         for app in self._subscribers[channelName]:
             app.received.emit(channelName, msg)
+
+    @pyqtSlot(str)
+    def _swiftcall(self, msg: str):
+        """Handles the swift-call.
+
+        Args:
+            msg: A JSON string of a message with two keys; "action" and "args".
+              Possible actions are as follows.
+              
+              "create": Create an app.
+                Its "args" is a dictionary with two keys; "name" and "info".
+                The value of "name" is a name of app you want to create.
+                The value of "info" is a dictionary that contains the keyword arguments of AppInfo.
+              "destory": Destroy an app.
+                Its "args" is a dictionary with a key; "name".
+                The value of "name" is a name of app you want to destroy.
+        """
+        try:
+            msg = json.loads(msg)
+        except json.JSONDecodeError as e:
+            print(f"swift.swift._swiftcall(): {e!r}")
+            return
+        if any(key not in msg for key in ("action", "args")):
+            print("The message was ignored because "
+                  "it has no such key; action or args.")
+            return
+        action, args = msg["action"], msg["args"]
+        if action == "create":
+            if any(key not in args for key in ("name", "info")):
+                print("The message was ignored because "
+                      "args of the create action have no such key; name or info.")
+                return
+            self.createApp(args["name"], AppInfo(**args["info"]))
+        elif action == "destroy":
+            if any(key not in args for key in ("name",)):
+                print("The message was ignored because "
+                      "args of the destroy action have no such key; name.")
+                return
+            self.destroyApp(args["name"])
+        else:
+            print(f"The swift-call was ignored because "
+                  f"the treatment for the action {action} is not implemented.")
 
 
 @contextmanager
