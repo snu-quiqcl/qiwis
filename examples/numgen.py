@@ -90,7 +90,7 @@ class NumGenApp(BaseApp):
         """Overridden."""
         return (self.generatorFrame, self.viewerFrame)
 
-    def updateDB(self, content: Any):
+    def updateDB(self, content: dict):
         """Updates the database list using the transferred message.
 
         It assumes that:
@@ -135,7 +135,10 @@ class NumGenApp(BaseApp):
             content: Received content.
         """
         if channelName == "db":
-            self.updateDB(content)
+            if isinstance(content, dict):
+                self.updateDB(content)
+            else:
+                print("The message for the channel db should be a dictionary.")
         else:
             print(f"The message was ignored because "
                   f"the treatment for the channel {channelName} is not implemented.")
