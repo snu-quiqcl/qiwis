@@ -261,6 +261,22 @@ class Swift(QObject):
         else:
             raise NotImplementedError(action)
 
+    @pyqtSlot(str)
+    def _swiftcall(self, msg: str):
+        """Slot for the swiftcallRequested signal.
+
+        Args:
+            msg: See _handleSwiftcall().
+        """
+        sender = self.sender()
+        try:
+            value = self._handleSwiftcall(msg)
+        except Exception as error:
+            result = Result(done=True, success=False, error=repr(error))
+        else:
+            result = Result(done=True, success=True, value=value)
+        sender.swiftcallReturned.emit(msg, json.dumps(dataclasses.asdict(result)))
+
 
 @contextmanager
 def _add_to_path(path: str):
