@@ -205,13 +205,14 @@ class Swift(QObject):
         for app in self._subscribers[channelName]:
             app.received.emit(channelName, msg)
 
-    def _handleSwiftcall(self, msg: str) -> Any:
+    def _handleSwiftcall(self, sender: str, msg: str) -> Any:
         """Handles the swift-call.
 
         This can raise an exception if the arguments do not follow the valid API.
         The caller must obey the API and catch the possible exceptions.
 
         Args:
+            sender: The name of the request sender app.
             msg: A JSON string of a message with two keys; "action" and "args".
               Possible actions are as follows.
               
@@ -237,7 +238,7 @@ class Swift(QObject):
             reply = QMessageBox.warning(
                 None,
                 "swift-call",
-                f"The app {self.sender().name} requests for creating an app {name}",
+                f"The app {sender} requests for creating an app {name}",
                 QMessageBox.Ok | QMessageBox.Cancel,
                 QMessageBox.Cancel
             )
@@ -250,7 +251,7 @@ class Swift(QObject):
             reply = QMessageBox.warning(
                 None,
                 "swift-call",
-                f"The app {self.sender().name} requests for destroying an app {name}",
+                f"The app {sender} requests for destroying an app {name}",
                 QMessageBox.Ok | QMessageBox.Cancel,
                 QMessageBox.Cancel
             )
@@ -270,7 +271,7 @@ class Swift(QObject):
         """
         sender = self.sender()
         try:
-            value = self._handleSwiftcall(msg)
+            value = self._handleSwiftcall(sender.name, msg)
         except Exception as error:
             result = Result(done=True, success=False, error=repr(error))
         else:
