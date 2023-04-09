@@ -83,6 +83,22 @@ def strinfo(info: AppInfo) -> str:
     return json.dumps(asdict(info))
 
 
+@dataclass
+class Result:
+    """Result data of a swift-call.
+    
+    Fields:
+        done: Whether the swift-call is done. True when the it has failed as well.
+        success: True when the swift-call is done without any problems.
+        value: Return value of the swift-call, if any. It must be converted to a JSON string.
+        error: Information about the problem that occurred during the swift-call.
+    """
+    done: bool
+    success: bool
+    value: Any
+    error: Optional[str]
+
+
 class Swift(QObject):
     """Actual manager for swift system.
 
