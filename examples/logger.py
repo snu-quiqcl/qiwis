@@ -3,7 +3,7 @@ App module for logging.
 """
 
 import time
-from typing import Optional, Tuple
+from typing import Any, Optional, Tuple
 
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QTextEdit, QLabel, QDialogButtonBox
@@ -82,7 +82,6 @@ class LoggerApp(BaseApp):
         super().__init__(name, parent=parent)
         self.loggerFrame = LoggerFrame()
         # connect signals to slots
-        self.received.connect(self.addLog)
         self.loggerFrame.clearButton.clicked.connect(self.checkToClear)
         self.confirmFrame = ConfirmClearingFrame()
         self.confirmFrame.confirmed.connect(self.clearLog)
@@ -91,21 +90,41 @@ class LoggerApp(BaseApp):
         """Overridden."""
         return (self.loggerFrame,)
 
-    @pyqtSlot(str, str)
-    def addLog(self, channelName: str, msg: str):
+    def addLog(self, content: str):
         """Adds a channel name and log message.
 
         Args:
-            channelName: The name of channel
             msg: Log message
         """
         timeString = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-        self.loggerFrame.logEdit.insertPlainText(f"{timeString}:[{channelName}], {msg}\n")
+        self.loggerFrame.logEdit.insertPlainText(f"{timeString}: {content}\n")
+
+    def receivedSlot(self, channelName: str, content: Any):
+        """Handles the received broadcast message.
+
+        This is called when received signal is emitted.
+        Possible channels are as follows.
+
+        "log": Log channel.
+            See self.addLog().
+
+        Args:
+            channelName: Channel name that transferred the message.
+            content: Received content.
+        """
+        if channelName == "log":
+            if isinstance(content, str):
+                self.addLog(content)
+            else:
+                print("The message for the channel log should be a string.")
+        else:
+            print(f"The message was ignored because "
+                  f"the treatment for the channel {channelName} is not implemented.")
 
     @pyqtSlot()
     def checkToClear(self):
         """Shows a confirmation frame for log clearing."""
-        self.broadcastRequested.emit("log", "Clicked to clear logs")
+        self.broadcast("log", "Clicked to clear logs")
         self.confirmFrame.show()
 
     @pyqtSlot()
