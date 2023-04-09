@@ -205,8 +205,7 @@ class Swift(QObject):
         for app in self._subscribers[channelName]:
             app.received.emit(channelName, msg)
 
-    @pyqtSlot(str)
-    def _swiftcall(self, msg: str):
+    def _handleSwiftcall(self, msg: str) -> Any:
         """Handles the swift-call.
 
         This can raise an exception if the arguments do not follow the valid API.
