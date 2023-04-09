@@ -221,21 +221,9 @@ class Swift(QObject):
                 Its "args" is a dictionary with a key; "name".
                 The value of "name" is a name of app you want to destroy.
         """
-        try:
-            msg = json.loads(msg)
-        except json.JSONDecodeError as e:
-            print(f"swift.swift._swiftcall(): {e!r}")
-            return
-        if any(key not in msg for key in ("action", "args")):
-            print("The message was ignored because "
-                  "it has no such key; action or args.")
-            return
+        msg = json.loads(msg)
         action, args = msg["action"], msg["args"]
         if action == "create":
-            if any(key not in args for key in ("name", "info")):
-                print("The message was ignored because "
-                      "args of the create action have no such key; name or info.")
-                return
             name, info = args["name"], args["info"]
             reply = QMessageBox.warning(
                 None,
@@ -247,10 +235,6 @@ class Swift(QObject):
             if reply == QMessageBox.Ok:
                 self.createApp(name, AppInfo(**info))
         elif action == "destroy":
-            if any(key not in args for key in ("name",)):
-                print("The message was ignored because "
-                      "args of the destroy action have no such key; name.")
-                return
             name = args["name"]
             reply = QMessageBox.warning(
                 None,
