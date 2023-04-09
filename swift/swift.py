@@ -95,8 +95,8 @@ class Result:
     """
     done: bool
     success: bool
-    value: Any
-    error: Optional[str]
+    value: Any = None
+    error: Optional[str] = None
 
 
 class Swift(QObject):
