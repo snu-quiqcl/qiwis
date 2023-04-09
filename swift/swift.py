@@ -209,6 +209,9 @@ class Swift(QObject):
     def _swiftcall(self, msg: str):
         """Handles the swift-call.
 
+        This can raise an exception if the arguments do not follow the valid API.
+        The caller must obey the API and catch the possible exceptions.
+
         Args:
             msg: A JSON string of a message with two keys; "action" and "args".
               Possible actions are as follows.
