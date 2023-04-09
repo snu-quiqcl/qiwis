@@ -90,7 +90,7 @@ class Result:
     Fields:
         done: Whether the swift-call is done. Even when it failed, this is True as well.
         success: True when the swift-call is done without any problems.
-        value: Return value of the swift-call, if any. It must be converted to a JSON string.
+        value: Return value of the swift-call, if any. It must be JSONifiable.
         error: Information about the problem that occurred during the swift-call.
     """
     done: bool
@@ -226,7 +226,6 @@ class Swift(QObject):
         
         Raises:
             RuntimeError: When the user rejects the request.
-            NotImplementedError: When the given request action is not implemented.
         
         Returns:
             The returned value of the swift-call, if any.
