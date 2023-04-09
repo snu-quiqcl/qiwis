@@ -15,9 +15,9 @@ import argparse
 import json
 import importlib
 import importlib.util
+import dataclasses
 from collections import defaultdict
 from contextlib import contextmanager
-from dataclasses import dataclass, asdict
 from typing import (
     Dict, Any, Iterable, Mapping, Optional, TypeVar, Type
 )
@@ -29,7 +29,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QDockWidget, QMes
 T = TypeVar("T")
 
 
-@dataclass
+@dataclasses.dataclass
 class AppInfo:
     """Information required to create an app.
     
@@ -80,10 +80,10 @@ def strinfo(info: AppInfo) -> str:
     Args:
         info: Dataclass object to convert to a JSON string.
     """
-    return json.dumps(asdict(info))
+    return json.dumps(dataclasses.asdict(info))
 
 
-@dataclass
+@dataclasses.dataclass
 class Result:
     """Result data of a swift-call.
     
