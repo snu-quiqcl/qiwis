@@ -23,7 +23,7 @@ from typing import (
 )
 
 from PyQt5.QtCore import QObject, pyqtSlot, Qt
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QDockWidget
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QDockWidget, QMessageBox
 
 
 T = TypeVar("T")
@@ -220,13 +220,31 @@ class Swift(QObject):
                 print("The message was ignored because "
                       "args of the create action have no such key; name or info.")
                 return
-            self.createApp(args["name"], AppInfo(**args["info"]))
+            name, info = args["name"], args["info"]
+            reply = QMessageBox.warning(
+                None,
+                "swift-call",
+                f"The app {self.sender().name} requests for creating an app {name}",
+                QMessageBox.Ok | QMessageBox.Cancel,
+                QMessageBox.Cancel
+            )
+            if reply == QMessageBox.Ok:
+                self.createApp(name, AppInfo(**info))
         elif action == "destroy":
             if any(key not in args for key in ("name",)):
                 print("The message was ignored because "
                       "args of the destroy action have no such key; name.")
                 return
-            self.destroyApp(args["name"])
+            name = args["name"]
+            reply = QMessageBox.warning(
+                None,
+                "swift-call",
+                f"The app {self.sender().name} requests for destroying an app {name}",
+                QMessageBox.Ok | QMessageBox.Cancel,
+                QMessageBox.Cancel
+            )
+            if reply == QMessageBox.Ok:
+                self.destroyApp(name)
         else:
             print(f"The swift-call was ignored because "
                   f"the treatment for the action {action} is not implemented.")
