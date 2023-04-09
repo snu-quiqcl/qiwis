@@ -88,7 +88,7 @@ class Result:
     """Result data of a swift-call.
     
     Fields:
-        done: Whether the swift-call is done. True when the it has failed as well.
+        done: Whether the swift-call is done. Even when it failed, this is True as well.
         success: True when the swift-call is done without any problems.
         value: Return value of the swift-call, if any. It must be converted to a JSON string.
         error: Information about the problem that occurred during the swift-call.
