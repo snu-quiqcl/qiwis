@@ -165,7 +165,7 @@ class Swift(QObject):
         app.broadcastRequested.connect(self._broadcast, type=Qt.QueuedConnection)
         app.swiftcallRequested.connect(
             functools.partial(self._swiftcall, name),
-            type=Qt.QueuedConnection
+            type=Qt.QueuedConnection,
         )
         for channelName in info.channel:
             self._subscribers[channelName].add(app)
