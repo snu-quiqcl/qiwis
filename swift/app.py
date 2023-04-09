@@ -18,6 +18,8 @@ class BaseApp(QObject):
           which contains the target channel name and the message.
         received(str, str): A signal for receiving a global signal from a channel
           which contains the source channel name and the message.
+        TODO(kangz12345): docstring for swiftcallRequested and swiftcallReturned.
+          They should be written when the swiftcall protocol is finally determined.
     """
 
     broadcastRequested = pyqtSignal(str, str)
