@@ -227,6 +227,9 @@ class Swift(QObject):
         Raises:
             RuntimeError: When the user rejects the request.
             NotImplementedError: When the given request action is not implemented.
+        
+        Returns:
+            The returned value of the swift-call, if any.
         """
         msg = json.loads(msg)
         action, args = msg["action"], msg["args"]
@@ -240,7 +243,7 @@ class Swift(QObject):
                 QMessageBox.Cancel
             )
             if reply == QMessageBox.Ok:
-                self.createApp(name, AppInfo(**info))
+                return self.createApp(name, AppInfo(**info))
             else:
                 raise RuntimeError("user rejected the request.")
         elif action == "destroy":
@@ -253,7 +256,7 @@ class Swift(QObject):
                 QMessageBox.Cancel
             )
             if reply == QMessageBox.Ok:
-                self.destroyApp(name)
+                return self.destroyApp(name)
             else:
                 raise RuntimeError("user rejected the request.")
         else:
