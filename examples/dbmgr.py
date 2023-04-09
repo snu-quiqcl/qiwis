@@ -3,7 +3,6 @@ App module for adding and removing available databases.
 """
 
 import os
-import json
 from collections import namedtuple
 from typing import Optional, Tuple
 

@@ -5,7 +5,6 @@ App module for generating and showing a random number.
 """
 
 import os
-import json
 from typing import Any, Optional, Tuple
 
 from PyQt5.QtCore import QObject, pyqtSlot
