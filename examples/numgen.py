@@ -90,41 +90,52 @@ class NumGenApp(BaseApp):
         """Overridden."""
         return (self.generatorFrame, self.viewerFrame)
 
+    def updateDB(self, content: Any):
+        """Updates the database list using the transferred message.
+
+        It assumes that:
+            The new database is always added at the end.
+            Changing the order of the databases is not allowed.
+
+        Args:
+            channelName: Channel name that transferred the message.
+            content: Received content.
+              The structure follows the message protocol of DBMgrApp.
+        """
+        originalDBs = set(self.dbs)
+        newDBs = set([""])
+        for db in content.get("db", ()):
+            if any(key not in db for key in ("name", "path")):
+                print(f"The message was ignored because "
+                        f"the database {db} has no such key; name or path.")
+                continue
+            name, path = db["name"], db["path"]
+            newDBs.add(name)
+            if name not in self.dbs:
+                self.dbs[name] = path
+                self.generatorFrame.dbBox.addItem(name)
+        removingDBs = originalDBs - newDBs
+        if self.generatorFrame.dbBox.currentText() in removingDBs:
+            self.generatorFrame.dbBox.setCurrentText("")
+        for name in removingDBs:
+            self.dbs.pop(name)
+            self.generatorFrame.dbBox.removeItem(self.generatorFrame.dbBox.findText(name))
+
     def receivedSlot(self, channelName: str, content: Any):
         """Handles the received broadcast message.
 
         This is called when received signal is emitted.
         Possible channels are as follows.
 
-        "db": Database channel. Updates the database list using the received content.
-            It assumes that:
-              The new database is always added at the end.
-              Changing the order of the databases is not allowed.
-              The structure follows the message protocol of DBMgrApp.
+        "db": Database channel.
+            See self.updateDB().
 
         Args:
             channelName: Channel name that transferred the message.
             content: Received content.
         """
         if channelName == "db":
-            originalDBs = set(self.dbs)
-            newDBs = set([""])
-            for db in content.get("db", ()):
-                if any(key not in db for key in ("name", "path")):
-                    print(f"The message was ignored because "
-                            f"the database {db} has no such key; name or path.")
-                    continue
-                name, path = db["name"], db["path"]
-                newDBs.add(name)
-                if name not in self.dbs:
-                    self.dbs[name] = path
-                    self.generatorFrame.dbBox.addItem(name)
-            removingDBs = originalDBs - newDBs
-            if self.generatorFrame.dbBox.currentText() in removingDBs:
-                self.generatorFrame.dbBox.setCurrentText("")
-            for name in removingDBs:
-                self.dbs.pop(name)
-                self.generatorFrame.dbBox.removeItem(self.generatorFrame.dbBox.findText(name))
+            self.updateDB(content)
         else:
             print(f"The message was ignored because "
                   f"the treatment for the channel {channelName} is not implemented.")
