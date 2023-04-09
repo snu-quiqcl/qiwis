@@ -258,21 +258,23 @@ class Swift(QObject):
             raise RuntimeError("user rejected the request.")
         raise NotImplementedError(action)
 
-    @pyqtSlot(str)
-    def _swiftcall(self, msg: str):
-        """Slot for the swiftcallRequested signal.
+    def _swiftcall(self, sender: str, msg: str):
+        """Will be connected to the swiftcallRequested signal.
+
+        Note that swiftcallRequested signal only has one str argument.
+        In fact the partial method will be connected using functools.partial().
 
         Args:
+            sender: See _handleSwiftcall().
             msg: See _handleSwiftcall().
         """
-        sender = self.sender()
         try:
-            value = self._handleSwiftcall(sender.name, msg)
+            value = self._handleSwiftcall(sender, msg)
         except Exception as error: # pylint: disable=broad-exception-caught
             result = Result(done=True, success=False, error=repr(error))
         else:
             result = Result(done=True, success=True, value=value)
-        sender.swiftcallReturned.emit(msg, json.dumps(dataclasses.asdict(result)))
+        self._apps[sender].swiftcallReturned.emit(msg, json.dumps(dataclasses.asdict(result)))
 
 
 @contextmanager
