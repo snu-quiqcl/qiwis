@@ -84,6 +84,20 @@ def strinfo(info: AppInfo) -> str:
 
 
 @dataclasses.dataclass
+class SwiftcallInfo:
+    """Information specifying a swiftcall.
+    
+    Fields:
+        call: Swiftcall method name, e.g., "createApp". It should be a valid
+          public method name of a Swift instance.
+        args: Arguments for the call, all as keyword arguments. The arguments
+          should follow the public API as well.
+    """
+    call: str
+    args: Mapping[str, Any] = dataclasses.field(default_factory=dict)
+
+
+@dataclasses.dataclass
 class Result:
     """Result data of a swift-call.
     
