@@ -16,6 +16,7 @@ import json
 import importlib
 import importlib.util
 import dataclasses
+import functools
 from collections import defaultdict
 from contextlib import contextmanager
 from typing import (
@@ -162,7 +163,10 @@ class Swift(QObject):
         else:
             app = cls(name, parent=self)
         app.broadcastRequested.connect(self._broadcast, type=Qt.QueuedConnection)
-        app.swiftcallRequested.connect(self._swiftcall, type=Qt.QueuedConnection)
+        app.swiftcallRequested.connect(
+            functools.partial(self._swiftcall, name),
+            type=Qt.QueuedConnection
+        )
         for channelName in info.channel:
             self._subscribers[channelName].add(app)
         for frame in app.frames():
