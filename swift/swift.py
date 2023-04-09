@@ -223,6 +223,10 @@ class Swift(QObject):
               "destory": Destroy an app.
                 Its "args" is a dictionary with a key; "name".
                 The value of "name" is a name of app you want to destroy.
+        
+        Raises:
+            RuntimeError: When the user rejects the request.
+            NotImplementedError: When the given request action is not implemented.
         """
         msg = json.loads(msg)
         action, args = msg["action"], msg["args"]
@@ -237,6 +241,8 @@ class Swift(QObject):
             )
             if reply == QMessageBox.Ok:
                 self.createApp(name, AppInfo(**info))
+            else:
+                raise RuntimeError("user rejected the request.")
         elif action == "destroy":
             name = args["name"]
             reply = QMessageBox.warning(
@@ -248,9 +254,10 @@ class Swift(QObject):
             )
             if reply == QMessageBox.Ok:
                 self.destroyApp(name)
+            else:
+                raise RuntimeError("user rejected the request.")
         else:
-            print(f"The swift-call was ignored because "
-                  f"the treatment for the action {action} is not implemented.")
+            raise NotImplementedError(action)
 
 
 @contextmanager
