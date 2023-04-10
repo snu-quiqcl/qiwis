@@ -274,7 +274,7 @@ class Swift(QObject):
         """
         try:
             value = self._handleSwiftcall(sender, msg)
-        except Exception as error: # pylint: disable=broad-exception-caught
+        except Exception as error:  # pylint: disable=broad-exception-caught
             result = Result(done=True, success=False, error=repr(error))
         else:
             result = Result(done=True, success=True, value=value)
