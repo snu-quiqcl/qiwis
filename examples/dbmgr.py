@@ -3,7 +3,6 @@ App module for adding and removing available databases.
 """
 
 import os
-import json
 from collections import namedtuple
 from typing import Optional, Tuple
 
@@ -112,8 +111,8 @@ class DBMgrApp(BaseApp):
             name: A file name of the updated database.
         """
         msg = {"db": [db._asdict() for db in self.dbList]}
-        self.broadcastRequested.emit("db", json.dumps(msg))
-        self.broadcastRequested.emit(
+        self.broadcast("db", msg)
+        self.broadcast(
             "log",
             f"Database {name} is added." if isAdded
             else f"Database {name} is removed."

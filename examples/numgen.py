@@ -5,8 +5,7 @@ App module for generating and showing a random number.
 """
 
 import os
-import json
-from typing import Optional, Tuple
+from typing import Any, Optional, Tuple
 
 from PyQt5.QtCore import QObject, pyqtSlot
 from PyQt5.QtWidgets import QWidget, QComboBox, QPushButton, QLabel, QVBoxLayout
@@ -83,7 +82,6 @@ class NumGenApp(BaseApp):
         self.generatorFrame.dbBox.addItem("")
         self.viewerFrame = ViewerFrame()
         # connect signals to slots
-        self.received.connect(self.updateDB)
         self.generatorFrame.dbBox.currentIndexChanged.connect(self.setDB)
         self.generatorFrame.generateButton.clicked.connect(self.generateNumber)
 
@@ -91,44 +89,49 @@ class NumGenApp(BaseApp):
         """Overridden."""
         return (self.generatorFrame, self.viewerFrame)
 
-    @pyqtSlot(str, str)
-    def updateDB(self, channelName: str, msg: str):
+    def updateDB(self, content: dict):
         """Updates the database list using the transferred message.
 
-        This is a slot for received signal.
         It assumes that:
             The new database is always added at the end.
             Changing the order of the databases is not allowed.
 
         Args:
-            channelName: A name of the channel that transfered the signal.
-            msg: An input message to be transferred through the channel.
+            content: Received content.
               The structure follows the message protocol of DBMgrApp.
         """
+        originalDBs = set(self.dbs)
+        newDBs = set([""])
+        for db in content.get("db", ()):
+            if any(key not in db for key in ("name", "path")):
+                print(f"The message was ignored because "
+                        f"the database {db} has no such key; name or path.")
+                continue
+            name, path = db["name"], db["path"]
+            newDBs.add(name)
+            if name not in self.dbs:
+                self.dbs[name] = path
+                self.generatorFrame.dbBox.addItem(name)
+        removingDBs = originalDBs - newDBs
+        if self.generatorFrame.dbBox.currentText() in removingDBs:
+            self.generatorFrame.dbBox.setCurrentText("")
+        for name in removingDBs:
+            self.dbs.pop(name)
+            self.generatorFrame.dbBox.removeItem(self.generatorFrame.dbBox.findText(name))
+
+    def receivedSlot(self, channelName: str, content: Any):
+        """Overridden.
+
+        Possible channels are as follows.
+
+        "db": Database channel.
+            See self.updateDB().
+        """
         if channelName == "db":
-            try:
-                msg = json.loads(msg)
-            except json.JSONDecodeError as e:
-                print(f"apps.numgen.updateDB(): {e!r}")
-                return
-            originalDBs = set(self.dbs)
-            newDBs = set([""])
-            for db in msg.get("db", ()):
-                if any(key not in db for key in ("name", "path")):
-                    print(f"The message was ignored because "
-                            f"the database {db} has no such key; name or path.")
-                    continue
-                name, path = db["name"], db["path"]
-                newDBs.add(name)
-                if name not in self.dbs:
-                    self.dbs[name] = path
-                    self.generatorFrame.dbBox.addItem(name)
-            removingDBs = originalDBs - newDBs
-            if self.generatorFrame.dbBox.currentText() in removingDBs:
-                self.generatorFrame.dbBox.setCurrentText("")
-            for name in removingDBs:
-                self.dbs.pop(name)
-                self.generatorFrame.dbBox.removeItem(self.generatorFrame.dbBox.findText(name))
+            if isinstance(content, dict):
+                self.updateDB(content)
+            else:
+                print("The message for the channel db should be a dictionary.")
         else:
             print(f"The message was ignored because "
                   f"the treatment for the channel {channelName} is not implemented.")
@@ -138,7 +141,7 @@ class NumGenApp(BaseApp):
         """Sets the database to store the number."""
         self.dbName = self.generatorFrame.dbBox.currentText()
         self.viewerFrame.statusLabel.setText("database updated")
-        self.broadcastRequested.emit(
+        self.broadcast(
             "log", 
             f"Database to store is set as {self.dbName}." if self.dbName
             else "Database to store is not selected."
@@ -150,12 +153,12 @@ class NumGenApp(BaseApp):
         # generate a random number
         num = generate()
         self.viewerFrame.numberLabel.setText(f"generated number: {num}")
-        self.broadcastRequested.emit("log", f"Generated number: {num}.")
+        self.broadcast("log", f"Generated number: {num}.")
         # save the generated number
         dbPath = self.dbs[self.dbName]
         is_save_success = write(os.path.join(dbPath, self.dbName), self.table, num)
         if is_save_success:
             self.viewerFrame.statusLabel.setText("number saved successfully")
-            self.broadcastRequested.emit("log", "Generated number saved.")
+            self.broadcast("log", "Generated number saved.")
         else:
             self.viewerFrame.statusLabel.setText("failed to save number")
