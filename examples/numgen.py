@@ -97,7 +97,6 @@ class NumGenApp(BaseApp):
             Changing the order of the databases is not allowed.
 
         Args:
-            channelName: Channel name that transferred the message.
             content: Received content.
               The structure follows the message protocol of DBMgrApp.
         """
