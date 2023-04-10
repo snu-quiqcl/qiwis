@@ -100,17 +100,12 @@ class LoggerApp(BaseApp):
         self.loggerFrame.logEdit.insertPlainText(f"{timeString}: {content}\n")
 
     def receivedSlot(self, channelName: str, content: Any):
-        """Handles the received broadcast message.
+        """Overridden.
 
-        This is called when received signal is emitted.
         Possible channels are as follows.
 
         "log": Log channel.
             See self.addLog().
-
-        Args:
-            channelName: Channel name that transferred the message.
-            content: Received content.
         """
         if channelName == "log":
             if isinstance(content, str):
