@@ -247,7 +247,7 @@ class Swift(QObject):
             )
             if reply == QMessageBox.Ok:
                 return self.createApp(name, AppInfo(**info))
-            raise RuntimeError("user rejected the request.")
+            raise RuntimeError("The user rejected the request.")
         if action == "destroy":
             name = args["name"]
             reply = QMessageBox.warning(
@@ -259,7 +259,7 @@ class Swift(QObject):
             )
             if reply == QMessageBox.Ok:
                 return self.destroyApp(name)
-            raise RuntimeError("user rejected the request.")
+            raise RuntimeError("The user rejected the request.")
         raise NotImplementedError(action)
 
     def _swiftcall(self, sender: str, msg: str):
