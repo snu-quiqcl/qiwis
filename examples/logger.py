@@ -94,7 +94,7 @@ class LoggerApp(BaseApp):
         """Adds a channel name and log message.
 
         Args:
-            msg: Log message
+            content: Received log message.
         """
         timeString = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         self.loggerFrame.logEdit.insertPlainText(f"{timeString}: {content}\n")
