@@ -85,7 +85,7 @@ def strinfo(info: AppInfo) -> str:
 
 
 @dataclasses.dataclass
-class Result:
+class SwiftcallResult:
     """Result data of a swift-call.
     
     Fields:
@@ -275,9 +275,9 @@ class Swift(QObject):
         try:
             value = self._handleSwiftcall(sender, msg)
         except Exception as error:  # pylint: disable=broad-exception-caught
-            result = Result(done=True, success=False, error=repr(error))
+            result = SwiftcallResult(done=True, success=False, error=repr(error))
         else:
-            result = Result(done=True, success=True, value=value)
+            result = SwiftcallResult(done=True, success=True, value=value)
         self._apps[sender].swiftcallReturned.emit(msg, json.dumps(dataclasses.asdict(result)))
 
 
