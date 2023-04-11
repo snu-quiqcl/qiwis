@@ -15,9 +15,10 @@ import argparse
 import json
 import importlib
 import importlib.util
+import dataclasses
+import functools
 from collections import defaultdict
 from contextlib import contextmanager
-from dataclasses import dataclass, asdict
 from typing import (
     Dict, Any, Iterable, Mapping, Optional, TypeVar, Type
 )
@@ -29,7 +30,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QDockWidget, QMes
 T = TypeVar("T")
 
 
-@dataclass
+@dataclasses.dataclass
 class AppInfo:
     """Information required to create an app.
     
@@ -80,7 +81,23 @@ def strinfo(info: AppInfo) -> str:
     Args:
         info: Dataclass object to convert to a JSON string.
     """
-    return json.dumps(asdict(info))
+    return json.dumps(dataclasses.asdict(info))
+
+
+@dataclasses.dataclass
+class SwiftcallResult:
+    """Result data of a swift-call.
+    
+    Fields:
+        done: Whether the swift-call is done. Even when it failed, this is True as well.
+        success: True when the swift-call is done without any problems.
+        value: Return value of the swift-call, if any. It must be JSONifiable.
+        error: Information about the problem that occurred during the swift-call.
+    """
+    done: bool
+    success: bool
+    value: Any = None
+    error: Optional[str] = None
 
 
 class Swift(QObject):
@@ -146,7 +163,10 @@ class Swift(QObject):
         else:
             app = cls(name, parent=self)
         app.broadcastRequested.connect(self._broadcast, type=Qt.QueuedConnection)
-        app.swiftcallRequested.connect(self._swiftcall, type=Qt.QueuedConnection)
+        app.swiftcallRequested.connect(
+            functools.partial(self._swiftcall, name),
+            type=Qt.QueuedConnection,
+        )
         for channelName in info.channel:
             self._subscribers[channelName].add(app)
         for frame in app.frames():
@@ -189,11 +209,14 @@ class Swift(QObject):
         for app in self._subscribers[channelName]:
             app.received.emit(channelName, msg)
 
-    @pyqtSlot(str)
-    def _swiftcall(self, msg: str):
+    def _handleSwiftcall(self, sender: str, msg: str) -> Any:
         """Handles the swift-call.
 
+        This can raise an exception if the arguments do not follow the valid API.
+        The caller must obey the API and catch the possible exceptions.
+
         Args:
+            sender: The name of the request sender app.
             msg: A JSON string of a message with two keys; "action" and "args".
               Possible actions are as follows.
               
@@ -204,50 +227,58 @@ class Swift(QObject):
               "destory": Destroy an app.
                 Its "args" is a dictionary with a key; "name".
                 The value of "name" is a name of app you want to destroy.
+        
+        Raises:
+            RuntimeError: When the user rejects the request.
+        
+        Returns:
+            The returned value of the swift-call, if any.
         """
-        try:
-            msg = json.loads(msg)
-        except json.JSONDecodeError as e:
-            print(f"swift.swift._swiftcall(): {e!r}")
-            return
-        if any(key not in msg for key in ("action", "args")):
-            print("The message was ignored because "
-                  "it has no such key; action or args.")
-            return
+        msg = json.loads(msg)
         action, args = msg["action"], msg["args"]
         if action == "create":
-            if any(key not in args for key in ("name", "info")):
-                print("The message was ignored because "
-                      "args of the create action have no such key; name or info.")
-                return
             name, info = args["name"], args["info"]
             reply = QMessageBox.warning(
                 None,
                 "swift-call",
-                f"The app {self.sender().name} requests for creating an app {name}",
+                f"The app {sender} requests for creating an app {name}",
                 QMessageBox.Ok | QMessageBox.Cancel,
                 QMessageBox.Cancel
             )
             if reply == QMessageBox.Ok:
-                self.createApp(name, AppInfo(**info))
-        elif action == "destroy":
-            if any(key not in args for key in ("name",)):
-                print("The message was ignored because "
-                      "args of the destroy action have no such key; name.")
-                return
+                return self.createApp(name, AppInfo(**info))
+            raise RuntimeError("The user rejected the request.")
+        if action == "destroy":
             name = args["name"]
             reply = QMessageBox.warning(
                 None,
                 "swift-call",
-                f"The app {self.sender().name} requests for destroying an app {name}",
+                f"The app {sender} requests for destroying an app {name}",
                 QMessageBox.Ok | QMessageBox.Cancel,
                 QMessageBox.Cancel
             )
             if reply == QMessageBox.Ok:
-                self.destroyApp(name)
+                return self.destroyApp(name)
+            raise RuntimeError("The user rejected the request.")
+        raise NotImplementedError(action)
+
+    def _swiftcall(self, sender: str, msg: str):
+        """Will be connected to the swiftcallRequested signal.
+
+        Note that swiftcallRequested signal only has one str argument.
+        In fact the partial method will be connected using functools.partial().
+
+        Args:
+            sender: See _handleSwiftcall().
+            msg: See _handleSwiftcall().
+        """
+        try:
+            value = self._handleSwiftcall(sender, msg)
+        except Exception as error:  # pylint: disable=broad-exception-caught
+            result = SwiftcallResult(done=True, success=False, error=repr(error))
         else:
-            print(f"The swift-call was ignored because "
-                  f"the treatment for the action {action} is not implemented.")
+            result = SwiftcallResult(done=True, success=True, value=value)
+        self._apps[sender].swiftcallReturned.emit(msg, json.dumps(dataclasses.asdict(result)))
 
 
 @contextmanager
