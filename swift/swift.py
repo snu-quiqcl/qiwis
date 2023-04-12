@@ -261,7 +261,7 @@ class Swift(QObject):
             dataclass instances instead of JSON strings.
         """
         signature = inspect.signature(call)
-        parsedArgs = dict()
+        parsedArgs = {}
         for name, arg in args.items():
             cls = signature.parameters[name].annotation
             parsedArgs[name] = parse(cls, arg) if isinstance(cls, Serializable) else arg
