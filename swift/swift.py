@@ -110,7 +110,7 @@ class SwiftcallInfo(Serializable):
 
 
 @dataclasses.dataclass
-class SwiftcallResult:
+class SwiftcallResult(Serializable):
     """Result data of a swift-call.
     
     Fields:
