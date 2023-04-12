@@ -42,7 +42,7 @@ class Serializable:
 
 
 @dataclasses.dataclass
-class AppInfo:
+class AppInfo(Serializable):
     """Information required to create an app.
     
     Fields:
@@ -84,7 +84,7 @@ def parse(cls: Type[T], kwargs: str) -> T:
     return cls(**json.loads(kwargs))
 
 
-def strinfo(info: AppInfo) -> str:
+def strinfo(info: Serializable) -> str:
     """Returns a JSON string converted from the given info.
 
     This is just a convenience function for users not to import dataclasses and json.
@@ -96,7 +96,7 @@ def strinfo(info: AppInfo) -> str:
 
 
 @dataclasses.dataclass
-class SwiftcallInfo:
+class SwiftcallInfo(Serializable):
     """Information of a swift-call request.
     
     Fields:
