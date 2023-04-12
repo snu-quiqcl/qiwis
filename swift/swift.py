@@ -31,7 +31,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QDockWidget, QMes
 T = TypeVar("T")
 
 
-class Serializable:
+class Serializable:  # pylint: disable=too-few-public-methods
     """A type for dataclasses that can be converted to a JSON string.
     
     The message protocols in swift use JSON strings to encode data.
