@@ -85,6 +85,20 @@ def strinfo(info: AppInfo) -> str:
 
 
 @dataclasses.dataclass
+class SwiftcallInfo:
+    """Information of a swift-call request.
+    
+    Fields:
+        call: The name of the swift-call feature, e.g., "createApp" for createApp().
+          This is case-sensitive.
+        args: The arguments of the swift-call as a dictionary of keyword arguements.
+          The names of the arguements are case-sensitive.
+    """
+    call: str
+    args: Mapping[str] = dataclasses.field(default_factory=dict)
+
+
+@dataclasses.dataclass
 class SwiftcallResult:
     """Result data of a swift-call.
     
