@@ -68,6 +68,7 @@ class AppInfo(Serializable):
     args: Optional[Mapping[str, Any]] = None
 
 
+# TODO(kangz12345): Make this and strinfo() a pair. Change this to loads() whenever we can rename this symbol.
 def parse(cls: Type[T], kwargs: str) -> T:
     """Returns a new cls instance from a JSON string.
 
@@ -84,6 +85,7 @@ def parse(cls: Type[T], kwargs: str) -> T:
     return cls(**json.loads(kwargs))
 
 
+# TODO(kangz12345): Method name looks too specific. Change this to dumps() whenever we can rename this symbol.
 def strinfo(info: Serializable) -> str:
     """Returns a JSON string converted from the given info.
 
