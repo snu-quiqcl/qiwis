@@ -114,7 +114,7 @@ class SwiftcallInfo(Serializable):
           but {"arg": '{"call": "call", "args": {}}'}.
     """
     call: str
-    args: Mapping[str] = dataclasses.field(default_factory=dict)
+    args: Mapping[str, Any] = dataclasses.field(default_factory=dict)
 
 
 @dataclasses.dataclass
@@ -242,7 +242,7 @@ class Swift(QObject):
         for app in self._subscribers[channelName]:
             app.received.emit(channelName, msg)
 
-    def _parseArgs(self, call: Callable, args: Mapping[str]) -> Dict[str]:
+    def _parseArgs(self, call: Callable, args: Mapping[str, Any]) -> Dict[str, Any]:
         """Converts all Serializable arguments to dataclass objects from strings.
 
         It checks the function signature of the call and converts the JSON string
