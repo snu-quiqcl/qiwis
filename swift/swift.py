@@ -106,6 +106,9 @@ class SwiftcallInfo(Serializable):
           This is case-sensitive.
         args: The arguments of the swift-call as a dictionary of keyword arguements.
           The names of the arguements are case-sensitive.
+          When an argument is Serializable, it must be given as a converted JSON string,
+          e.g., not {"arg": SwiftcallInfo(call="call")},
+          but {"arg": '{"call": "call", "args": {}}'}.
     """
     call: str
     args: Mapping[str] = dataclasses.field(default_factory=dict)
