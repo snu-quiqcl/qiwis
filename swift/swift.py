@@ -15,12 +15,13 @@ import argparse
 import json
 import importlib
 import importlib.util
+import inspect
 import dataclasses
 import functools
 from collections import defaultdict
 from contextlib import contextmanager
 from typing import (
-    Dict, Any, Iterable, Mapping, Optional, TypeVar, Type
+    Dict, Any, Callable, Iterable, Mapping, Optional, TypeVar, Type
 )
 
 from PyQt5.QtCore import QObject, pyqtSlot, Qt
