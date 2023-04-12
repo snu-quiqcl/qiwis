@@ -272,16 +272,9 @@ class Swift(QObject):
 
         Args:
             sender: The name of the request sender app.
-            msg: A JSON string of a message with two keys; "action" and "args".
-              Possible actions are as follows.
-              
-              "create": Create an app.
-                Its "args" is a dictionary with two keys; "name" and "info".
-                The value of "name" is a name of app you want to create.
-                The value of "info" is a dictionary that contains the keyword arguments of AppInfo.
-              "destory": Destroy an app.
-                Its "args" is a dictionary with a key; "name".
-                The value of "name" is a name of app you want to destroy.
+            msg: A JSON string that can be converted to SwiftcallInfo,
+              i.e., the same form as the returned string of strinfo().
+              See SwiftcallInfo for details.
         
         Raises:
             RuntimeError: When the user rejects the request.
@@ -289,33 +282,19 @@ class Swift(QObject):
         Returns:
             The returned value of the swift-call, if any.
         """
-        msg = json.loads(msg)
-        action, args = msg["action"], msg["args"]
-        if action == "create":
-            name, info = args["name"], args["info"]
-            reply = QMessageBox.warning(
-                None,
-                "swift-call",
-                f"The app {sender} requests for creating an app {name}",
-                QMessageBox.Ok | QMessageBox.Cancel,
-                QMessageBox.Cancel
-            )
-            if reply == QMessageBox.Ok:
-                return self.createApp(name, AppInfo(**info))
-            raise RuntimeError("The user rejected the request.")
-        if action == "destroy":
-            name = args["name"]
-            reply = QMessageBox.warning(
-                None,
-                "swift-call",
-                f"The app {sender} requests for destroying an app {name}",
-                QMessageBox.Ok | QMessageBox.Cancel,
-                QMessageBox.Cancel
-            )
-            if reply == QMessageBox.Ok:
-                return self.destroyApp(name)
-            raise RuntimeError("The user rejected the request.")
-        raise NotImplementedError(action)
+        info = parse(SwiftcallInfo, msg)
+        call = getattr(self, info.call)
+        args = self._parseArgs(call, info.args)
+        reply = QMessageBox.warning(
+            None,
+            "swift-call",
+            f"The app {sender} requests for a swift-call {info.call} with {args}.",
+            QMessageBox.Ok | QMessageBox.Cancel,
+            QMessageBox.Cancel,
+        )
+        if reply == QMessageBox.Ok:
+            return call(**args)
+        raise RuntimeError("The user rejected the request.")
 
     def _swiftcall(self, sender: str, msg: str):
         """Will be connected to the swiftcallRequested signal.
