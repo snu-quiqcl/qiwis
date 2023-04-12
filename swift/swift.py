@@ -305,7 +305,7 @@ class Swift(QObject):
             result = SwiftcallResult(done=True, success=False, error=repr(error))
         else:
             result = SwiftcallResult(done=True, success=True, value=value)
-        self._apps[sender].swiftcallReturned.emit(msg, json.dumps(dataclasses.asdict(result)))
+        self._apps[sender].swiftcallReturned.emit(msg, strinfo(result))
 
 
 @contextmanager
