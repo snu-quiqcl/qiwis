@@ -314,6 +314,8 @@ class Swift(QObject):
         except Exception as error:  # pylint: disable=broad-exception-caught
             result = SwiftcallResult(done=True, success=False, error=repr(error))
         else:
+            if isinstance(value, Serializable):
+                value = strinfo(value)
             result = SwiftcallResult(done=True, success=True, value=value)
         self._apps[sender].swiftcallReturned.emit(msg, strinfo(result))
 
