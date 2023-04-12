@@ -283,6 +283,8 @@ class Swift(QObject):
             The returned value of the swift-call, if any.
         """
         info = parse(SwiftcallInfo, msg)
+        if info.call.startswith("_"):
+            raise ValueError("Only public method calls are allowed.")
         call = getattr(self, info.call)
         args = self._parseArgs(call, info.args)
         reply = QMessageBox.warning(
