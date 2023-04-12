@@ -30,6 +30,17 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QDockWidget, QMes
 T = TypeVar("T")
 
 
+class Serializable:
+    """A type for dataclasses that can be converted to a JSON string.
+    
+    The message protocols in swift use JSON strings to encode data.
+    If a dataclass inherits this class, the dictionary yielded by asdict() must
+      be able to converted to a JSON string, i.e., JSONifiable.
+    Every argument of swift-calls must be JSONifiable by itself
+      or an instance of Serializable.
+    """
+
+
 @dataclasses.dataclass
 class AppInfo:
     """Information required to create an app.
