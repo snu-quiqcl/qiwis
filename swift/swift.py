@@ -239,6 +239,31 @@ class Swift(QObject):
         for app in self._subscribers[channelName]:
             app.received.emit(channelName, msg)
 
+    def _parseArgs(self, call: Callable, args: Mapping[str]) -> Dict[str]:
+        """Converts all Serializable arguments to dataclass objects from strings.
+
+        It checks the function signature of the call and converts the JSON string
+        arguments to concrete dataclass instances if the parameter type is Serializable.
+
+        The limitation of this implementation is that it can only support a single
+        concrete type for each method parameter, i.e., it does not support union types,
+        inheritance, etc.
+
+        Args:
+            call: Function object to inspect its signature.
+            args: See SwiftcallInfo.args.
+        
+        Returns:
+            A dictionary of the same arguments as args, but with concrete Serializable
+            dataclass instances instead of JSON strings.
+        """
+        signature = inspect.signature(call)
+        parsedArgs = dict()
+        for name, arg in args.items():
+            cls = signature.parameters[name].annotation
+            parsedArgs[name] = parse(cls, arg) if isinstance(cls, Serializable) else arg
+        return parsedArgs
+
     def _handleSwiftcall(self, sender: str, msg: str) -> Any:
         """Handles the swift-call.
 
