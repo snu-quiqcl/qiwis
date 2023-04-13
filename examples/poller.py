@@ -109,7 +109,7 @@ class PollerApp(BaseApp):
         for name in removingDBs:
             self.dbs.pop(name)
             self.viewerFrame.dbBox.removeItem(self.viewerFrame.dbBox.findText(name))
-        
+
     def receivedSlot(self, channelName: str, content: Any):
         """Overridden.
 
@@ -126,7 +126,7 @@ class PollerApp(BaseApp):
         else:
             print(f"The message was ignored because "
                   f"the treatment for the channel {channelName} is not implemented.")
-    
+
     @pyqtSlot()
     def setPeriod(self):
         """Sets the polling period."""
