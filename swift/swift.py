@@ -89,15 +89,13 @@ def parse(cls: Type[T], kwargs: str) -> T:
 
 # TODO(kangz12345): Method name looks too specific.
 # Change this to dumps() whenever we can rename this symbol.
-def strinfo(info: Serializable) -> str:
-    """Returns a JSON string converted from the given info.
-
-    This is just a convenience function for users not to import dataclasses and json.
+def strinfo(obj: Serializable) -> str:
+    """Returns a JSON string converted from the given Serializable object.
     
     Args:
-        info: Dataclass object to convert to a JSON string.
+        obj: Dataclass object to convert to a JSON string.
     """
-    return json.dumps(dataclasses.asdict(info))
+    return json.dumps(dataclasses.asdict(obj))
 
 
 @dataclasses.dataclass
