@@ -4,7 +4,7 @@ App module for polling a number and saving it into the selected database.
 
 import os
 import json
-from typing import Optional, Tuple
+from typing import Any, Optional, Tuple
 
 from PyQt5.QtCore import QObject, pyqtSlot, QTimer
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QComboBox, QSpinBox, QLabel
@@ -69,7 +69,6 @@ class PollerApp(BaseApp):
         self.viewerFrame = ViewerFrame()
         self.viewerFrame.dbBox.addItem("")
         # connect signals to slots
-        self.received.connect(self.updateDB)
         self.viewerFrame.dbBox.currentIndexChanged.connect(self.setDB)
         self.viewerFrame.periodBox.valueChanged.connect(self.setPeriod)
         # start timer
@@ -82,60 +81,65 @@ class PollerApp(BaseApp):
         """Overridden."""
         return (self.viewerFrame,)
 
-    @pyqtSlot(str, str)
-    def updateDB(self, channelName: str, msg: str):
+    def updateDB(self, content: dict):
         """Updates the database list using the transferred message.
 
-        This is a slot for received signal.
         It assumes that:
             The new database is always added at the end.
             Changing the order of the databases is not allowed.
 
         Args:
-            channelName: A name of the channel that transfered the signal.
-            msg: An input message to be transferred through the channel.
+            content: Received content.
               The structure follows the message protocol of DBMgrApp.
         """
+        originalDBs = set(self.dbs)
+        newDBs = set([""])
+        for db in content.get("db", ()):
+            if any(key not in db for key in ("name", "path")):
+                print(f"The message was ignored because "
+                        f"the database {db} has no such key; name or path.")
+                continue
+            name, path = db["name"], db["path"]
+            newDBs.add(name)
+            if name not in self.dbs:
+                self.dbs[name] = path
+                self.viewerFrame.dbBox.addItem(name)
+        removingDBs = originalDBs - newDBs
+        if self.viewerFrame.dbBox.currentText() in removingDBs:
+            self.viewerFrame.dbBox.setCurrentText("")
+        for name in removingDBs:
+            self.dbs.pop(name)
+            self.viewerFrame.dbBox.removeItem(self.viewerFrame.dbBox.findText(name))
+        
+    def receivedSlot(self, channelName: str, content: Any):
+        """Overridden.
+
+        Possible channels are as follows.
+
+        "db": Database channel.
+            See self.updateDB().
+        """
         if channelName == "db":
-            try:
-                msg = json.loads(msg)
-            except json.JSONDecodeError as e:
-                print(f"apps.numgen.updateDB(): {e!r}")
-                return
-            originalDBs = set(self.dbs)
-            newDBs = set([""])
-            for db in msg.get("db", ()):
-                if any(key not in db for key in ("name", "path")):
-                    print(f"The message was ignored because "
-                            f"the database {db} has no such key; name or path.")
-                    continue
-                name, path = db["name"], db["path"]
-                newDBs.add(name)
-                if name not in self.dbs:
-                    self.dbs[name] = path
-                    self.viewerFrame.dbBox.addItem(name)
-            removingDBs = originalDBs - newDBs
-            if self.viewerFrame.dbBox.currentText() in removingDBs:
-                self.viewerFrame.dbBox.setCurrentText("")
-            for name in removingDBs:
-                self.dbs.pop(name)
-                self.viewerFrame.dbBox.removeItem(self.viewerFrame.dbBox.findText(name))
+            if isinstance(content, dict):
+                self.updateDB(content)
+            else:
+                print("The message for the channel db should be a dictionary.")
         else:
             print(f"The message was ignored because "
                   f"the treatment for the channel {channelName} is not implemented.")
-
+    
     @pyqtSlot()
     def setPeriod(self):
         """Sets the polling period."""
         period = self.viewerFrame.periodBox.value()
         self.timer.start(1000 * period)
-        self.broadcastRequested.emit("log", f"Period is set as {period}s.")
+        self.broadcast("log", f"Period is set as {period}s.")
 
     @pyqtSlot()
     def setDB(self):
         """Sets the database to store the polled number."""
         self.dbName = self.viewerFrame.dbBox.currentText()
-        self.broadcastRequested.emit(
+        self.broadcast(
             "log", 
             f"Polled database is set as {self.dbName}." if self.dbName
             else "Polled database is not selected."
@@ -148,8 +152,8 @@ class PollerApp(BaseApp):
         self.count += 1
         self.viewerFrame.countLabel.setText(f"polled count: {self.count}")
         self.viewerFrame.numberLabel.setText(f"polled number: {num}")
-        self.broadcastRequested.emit("log", f"Polled number: {num}.")
+        self.broadcast("log", f"Polled number: {num}.")
         # save the polled number
         dbPath = self.dbs[self.dbName]
         if write(os.path.join(dbPath, self.dbName), self.table, num):
-            self.broadcastRequested.emit("log", "Polled number saved.")
+            self.broadcast("log", "Polled number saved.")
