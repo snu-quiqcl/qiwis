@@ -87,9 +87,7 @@ def parse(cls: Type[T], kwargs: str) -> T:
     return cls(**json.loads(kwargs))
 
 
-# TODO(kangz12345): Method name looks too specific.
-# Change this to dumps() whenever we can rename this symbol.
-def strinfo(obj: Serializable) -> str:
+def dumps(obj: Serializable) -> str:
     """Returns a JSON string converted from the given Serializable object.
     
     Args:
@@ -315,9 +313,9 @@ class Swift(QObject):
             result = SwiftcallResult(done=True, success=False, error=repr(error))
         else:
             if isinstance(value, Serializable):
-                value = strinfo(value)
+                value = dumps(value)
             result = SwiftcallResult(done=True, success=True, value=value)
-        self._apps[sender].swiftcallReturned.emit(msg, strinfo(result))
+        self._apps[sender].swiftcallReturned.emit(msg, dumps(result))
 
 
 @contextmanager
