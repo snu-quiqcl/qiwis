@@ -3,7 +3,6 @@ App module for polling a number and saving it into the selected database.
 """
 
 import os
-import json
 from typing import Any, Optional, Tuple
 
 from PyQt5.QtCore import QObject, pyqtSlot, QTimer
