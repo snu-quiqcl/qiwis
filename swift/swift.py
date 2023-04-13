@@ -69,9 +69,7 @@ class AppInfo(Serializable):
     args: Optional[Mapping[str, Any]] = None
 
 
-# TODO(kangz12345): Make this and strinfo() a pair.
-# Change this to loads() whenever we can rename this symbol.
-def parse(cls: Type[T], kwargs: str) -> T:
+def loads(cls: Type[T], kwargs: str) -> T:
     """Returns a new cls instance from a JSON string.
 
     This is a convenience function for just unpacking the JSON string and gives them
@@ -260,7 +258,7 @@ class Swift(QObject):
         parsedArgs = {}
         for name, arg in args.items():
             cls = signature.parameters[name].annotation
-            parsedArgs[name] = parse(cls, arg) if isinstance(cls, Serializable) else arg
+            parsedArgs[name] = loads(cls, arg) if isinstance(cls, Serializable) else arg
         return parsedArgs
 
     def _handleSwiftcall(self, sender: str, msg: str) -> Any:
@@ -281,7 +279,7 @@ class Swift(QObject):
         Returns:
             The returned value of the swift-call, if any.
         """
-        info = parse(SwiftcallInfo, msg)
+        info = loads(SwiftcallInfo, msg)
         if info.call.startswith("_"):
             raise ValueError("Only public method calls are allowed.")
         call = getattr(self, info.call)
