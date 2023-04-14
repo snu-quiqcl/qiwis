@@ -91,7 +91,7 @@ class BaseApp(QObject):
             self.receivedSlot(channelName, content)
 
 
-class SwiftcallProxy:
+class SwiftcallProxy:  # pylint: disable=too-few-public-methods
     """A proxy for requesting swift-calls conveniently.
     
     Every attribute access is proxied, and if you try to call a method of this
