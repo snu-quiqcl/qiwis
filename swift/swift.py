@@ -71,10 +71,7 @@ class AppInfo(Serializable):
 
 def loads(cls: Type[T], kwargs: str) -> T:
     """Returns a new cls instance from a JSON string.
-
-    This is a convenience function for just unpacking the JSON string and gives them
-    as keyword arguments of the constructor of cls.
-        
+    
     Args:
         cls: A class object.
         kwargs: A JSON string of a dictionary that contains the keyword arguments of cls.
