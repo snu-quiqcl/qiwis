@@ -10,6 +10,8 @@ from typing import Any, Optional, Callable, Iterable
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QWidget
 
+from swift import swift
+
 class BaseApp(QObject):
     """Base App class that all apps should inherit.
 
@@ -108,6 +110,7 @@ class SwiftcallProxy:
         """
         self.requested = requested
         self.returned = returned
+        self.results = {}
 
     def __getattribute__(self, call: str) -> Callable:
         """Returns a callable object which emits a swift-call requesting signal.
@@ -115,3 +118,28 @@ class SwiftcallProxy:
         Args:
             call: The name of the swift-call.
         """
+        def proxy(**args: Any) -> swift.SwiftcallResult:
+            """Emits a swift-call request signal with the given arguments.
+
+            It saves the returned result to self.results dictionary, so when
+            self.returned signal is emitted, i.e., the swift-call result is received,
+            it will update the result object contents.
+
+            Args:
+                **args: The arguments for the swift-call, all as keyword arguments.
+                  If an argument is a swift.Serializable instance, it will be
+                  converted to a JSON string by swift.dumps().
+
+            Returns:
+                A swift-call result object to keep tracking the result.
+            """
+            for name in args:
+                if isinstance(args[name], swift.Serializable):
+                    args[name] = swift.dumps(args[name])
+            info = swift.SwiftcallInfo(call=call, args=args)
+            result = swift.SwiftcallResult(done=False, success=False)
+            msg = swift.dumps(info)
+            self.results[msg] = result
+            self.requested.emit(msg)
+            return result
+        return proxy
