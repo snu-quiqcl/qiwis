@@ -133,9 +133,9 @@ class SwiftcallProxy:
             Returns:
                 A swift-call result object to keep tracking the result.
             """
-            for name in args:
-                if isinstance(args[name], swift.Serializable):
-                    args[name] = swift.dumps(args[name])
+            for name, arg in args.items():
+                if isinstance(arg, swift.Serializable):
+                    args[name] = swift.dumps(arg)
             info = swift.SwiftcallInfo(call=call, args=args)
             result = swift.SwiftcallResult(done=False, success=False)
             msg = swift.dumps(info)
