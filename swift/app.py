@@ -98,6 +98,17 @@ class SwiftcallProxy:
     does the same thing as calling a method of this object.
     """
 
+    def __init__(self, requested: QObject, returned: QObject):
+        """
+        Args:
+            requested: A pyqtSignal(str) which will be emitted when a proxied
+              method call is invoked. See BaseApp.swiftcallRequested.
+            returned: A pyqtSignal(str, str) to which slots will be connected.
+              See BaseApp.swiftcallReturned.
+        """
+        self.requested = requested
+        self.returned = returned
+
     def __getattribute__(self, call: str) -> Callable:
         """Returns a callable object which emits a swift-call requesting signal.
 
