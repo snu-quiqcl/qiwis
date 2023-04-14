@@ -3,9 +3,8 @@ App module for showing the sum of two values from selected databases.
 """
 
 import os
-import json
 import functools
-from typing import Optional, Dict, Tuple
+from typing import Any, Optional, Dict, Tuple
 
 from PyQt5.QtCore import QObject, pyqtSlot
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QComboBox, QPushButton, QLabel
@@ -71,7 +70,6 @@ class DataCalcApp(BaseApp):
         for dbBox in self.viewerFrame.dbBoxes.values():
             dbBox.addItem("")
         # connect signals to slots
-        self.received.connect(self.updateDB)
         for dbName, dbBox in self.viewerFrame.dbBoxes.items():
             dbBox.currentIndexChanged.connect(functools.partial(self.setDB, dbName))
         self.viewerFrame.calculateButton.clicked.connect(self.calculateSum)
@@ -80,47 +78,52 @@ class DataCalcApp(BaseApp):
         """Overridden."""
         return (self.viewerFrame,)
 
-    @pyqtSlot(str, str)
-    def updateDB(self, channelName: str, msg: str):
+    def updateDB(self, content: dict):
         """Updates the database list using the transferred message.
 
-        This is a slot for received signal.
         It assumes that:
             The new database is always added at the end.
             Changing the order of the databases is not allowed.
 
         Args:
-            channelName: A name of the channel that transfered the signal.
-            msg: An input message to be transferred through the channel.
+            content: Received content.
               The structure follows the message protocol of DBMgrApp.
         """
-        if channelName == "db":
-            try:
-                msg = json.loads(msg)
-            except json.JSONDecodeError as e:
-                print(f"apps.datacalc.updateDB(): {e!r}")
-                return
-            originalDBs = set(self.dbs)
-            newDBs = set([""])
-            for db in msg.get("db", ()):
-                if any(key not in db for key in ("name", "path")):
-                    print(f"The message was ignored because "
-                            f"the database {db} has no such key; name or path.")
-                    continue
-                name, path = db["name"], db["path"]
-                newDBs.add(name)
-                if name not in self.dbs:
-                    self.dbs[name] = path
-                    for dbBox in self.viewerFrame.dbBoxes.values():
-                        dbBox.addItem(name)
-            removingDBs = originalDBs - newDBs
-            for dbBox in self.viewerFrame.dbBoxes.values():
-                if dbBox.currentText() in removingDBs:
-                    dbBox.setCurrentText("")
-            for name in removingDBs:
-                self.dbs.pop(name)
+        originalDBs = set(self.dbs)
+        newDBs = set([""])
+        for db in content.get("db", ()):
+            if any(key not in db for key in ("name", "path")):
+                print(f"The message was ignored because "
+                        f"the database {db} has no such key; name or path.")
+                continue
+            name, path = db["name"], db["path"]
+            newDBs.add(name)
+            if name not in self.dbs:
+                self.dbs[name] = path
                 for dbBox in self.viewerFrame.dbBoxes.values():
-                    dbBox.removeItem(dbBox.findText(name))
+                    dbBox.addItem(name)
+        removingDBs = originalDBs - newDBs
+        for dbBox in self.viewerFrame.dbBoxes.values():
+            if dbBox.currentText() in removingDBs:
+                dbBox.setCurrentText("")
+        for name in removingDBs:
+            self.dbs.pop(name)
+            for dbBox in self.viewerFrame.dbBoxes.values():
+                dbBox.removeItem(dbBox.findText(name))
+
+    def receivedSlot(self, channelName: str, content: Any):
+        """Overridden.
+
+        Possible channels are as follows.
+
+        "db": Database channel.
+            See self.updateDB().
+        """
+        if channelName == "db":
+            if isinstance(content, dict):
+                self.updateDB(content)
+            else:
+                print("The message for the channel db should be a dictionary.")
         else:
             print(f"The message was ignored because "
                   f"the treatment for the channel {channelName} is not implemented.")
@@ -134,7 +137,7 @@ class DataCalcApp(BaseApp):
         """
         dbBox = self.viewerFrame.dbBoxes[name]
         self.dbNames[name] = dbBox.currentText()
-        self.broadcastRequested.emit(
+        self.broadcast(
             "log", 
             f"Database {name} is set as {self.dbNames[name]}."
             if self.dbNames[name]
@@ -159,4 +162,4 @@ class DataCalcApp(BaseApp):
             result += value
         else:
             self.viewerFrame.numberLabel.setText(f"sum: {result}")
-            self.broadcastRequested.emit("log", f"Sum: {result}.")
+            self.broadcast("log", f"Sum: {result}.")
