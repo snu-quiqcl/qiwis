@@ -5,7 +5,7 @@ Every App class should be a subclass of BaseApp.
 """
 
 import json
-from typing import Any, Optional, Iterable
+from typing import Any, Optional, Callable, Iterable
 
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QWidget
@@ -84,3 +84,20 @@ class BaseApp(QObject):
             print(f"swift.app._receivedMessage(): {e!r}")
         else:
             self.receivedSlot(channelName, content)
+
+
+class SwiftcallProxy:
+    """A proxy for requesting swift-calls conveniently.
+    
+    Every attribute access is proxied, and if you try to call a method of this
+    object, it will emit a swift-call requesting signal instead.
+    If you get an attribute of this object, you will get a callable object which
+    does the same thing as calling a method of this object.
+    """
+
+    def __getattribute__(self, call: str) -> Callable:
+        """Returns a callable object which emits a swift-call requesting signal.
+
+        Args:
+            call: The name of the swift-call.
+        """
