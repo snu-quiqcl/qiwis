@@ -15,12 +15,13 @@ import argparse
 import json
 import importlib
 import importlib.util
+import inspect
 import dataclasses
 import functools
 from collections import defaultdict
 from contextlib import contextmanager
 from typing import (
-    Dict, Any, Iterable, Mapping, Optional, TypeVar, Type
+    Dict, Any, Callable, Iterable, Mapping, Optional, TypeVar, Type
 )
 
 from PyQt5.QtCore import QObject, pyqtSlot, Qt
@@ -30,8 +31,19 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QDockWidget, QMes
 T = TypeVar("T")
 
 
+class Serializable:  # pylint: disable=too-few-public-methods
+    """A type for dataclasses that can be converted to a JSON string.
+    
+    The message protocols in swift use JSON strings to encode data.
+    If a dataclass inherits this class, the dictionary yielded by asdict() must
+      be able to converted to a JSON string, i.e., JSONifiable.
+    Every argument of swift-calls must be JSONifiable by itself
+      or an instance of Serializable.
+    """
+
+
 @dataclasses.dataclass
-class AppInfo:
+class AppInfo(Serializable):
     """Information required to create an app.
     
     Fields:
@@ -57,12 +69,9 @@ class AppInfo:
     args: Optional[Mapping[str, Any]] = None
 
 
-def parse(cls: Type[T], kwargs: str) -> T:
+def loads(cls: Type[T], kwargs: str) -> T:
     """Returns a new cls instance from a JSON string.
-
-    This is a convenience function for just unpacking the JSON string and gives them
-    as keyword arguments of the constructor of cls.
-        
+    
     Args:
         cls: A class object.
         kwargs: A JSON string of a dictionary that contains the keyword arguments of cls.
@@ -73,19 +82,34 @@ def parse(cls: Type[T], kwargs: str) -> T:
     return cls(**json.loads(kwargs))
 
 
-def strinfo(info: AppInfo) -> str:
-    """Returns a JSON string converted from the given info.
-
-    This is just a convenience function for users not to import dataclasses and json.
+def dumps(obj: Serializable) -> str:
+    """Returns a JSON string converted from the given Serializable object.
     
     Args:
-        info: Dataclass object to convert to a JSON string.
+        obj: Dataclass object to convert to a JSON string.
     """
-    return json.dumps(dataclasses.asdict(info))
+    return json.dumps(dataclasses.asdict(obj))
 
 
 @dataclasses.dataclass
-class SwiftcallResult:
+class SwiftcallInfo(Serializable):
+    """Information of a swift-call request.
+    
+    Fields:
+        call: The name of the swift-call feature, e.g., "createApp" for createApp().
+          This is case-sensitive.
+        args: The arguments of the swift-call as a dictionary of keyword arguements.
+          The names of the arguements are case-sensitive.
+          When an argument is Serializable, it must be given as a converted JSON string,
+          e.g., not {"arg": SwiftcallInfo(call="call")},
+          but {"arg": '{"call": "call", "args": {}}'}.
+    """
+    call: str
+    args: Mapping[str, Any] = dataclasses.field(default_factory=dict)
+
+
+@dataclasses.dataclass
+class SwiftcallResult(Serializable):
     """Result data of a swift-call.
     
     Fields:
@@ -209,6 +233,31 @@ class Swift(QObject):
         for app in self._subscribers[channelName]:
             app.received.emit(channelName, msg)
 
+    def _parseArgs(self, call: Callable, args: Mapping[str, Any]) -> Dict[str, Any]:
+        """Converts all Serializable arguments to dataclass objects from strings.
+
+        It checks the function signature of the call and converts the JSON string
+        arguments to concrete dataclass instances if the parameter type is Serializable.
+
+        The limitation of this implementation is that it can only support a single
+        concrete type for each method parameter, i.e., it does not support union types,
+        inheritance, etc.
+
+        Args:
+            call: Function object to inspect its signature.
+            args: See SwiftcallInfo.args.
+        
+        Returns:
+            A dictionary of the same arguments as args, but with concrete Serializable
+            dataclass instances instead of JSON strings.
+        """
+        signature = inspect.signature(call)
+        parsedArgs = {}
+        for name, arg in args.items():
+            cls = signature.parameters[name].annotation
+            parsedArgs[name] = loads(cls, arg) if isinstance(cls, Serializable) else arg
+        return parsedArgs
+
     def _handleSwiftcall(self, sender: str, msg: str) -> Any:
         """Handles the swift-call.
 
@@ -217,16 +266,9 @@ class Swift(QObject):
 
         Args:
             sender: The name of the request sender app.
-            msg: A JSON string of a message with two keys; "action" and "args".
-              Possible actions are as follows.
-              
-              "create": Create an app.
-                Its "args" is a dictionary with two keys; "name" and "info".
-                The value of "name" is a name of app you want to create.
-                The value of "info" is a dictionary that contains the keyword arguments of AppInfo.
-              "destory": Destroy an app.
-                Its "args" is a dictionary with a key; "name".
-                The value of "name" is a name of app you want to destroy.
+            msg: A JSON string that can be converted to SwiftcallInfo,
+              i.e., the same form as the returned string of strinfo().
+              See SwiftcallInfo for details.
         
         Raises:
             RuntimeError: When the user rejects the request.
@@ -234,33 +276,21 @@ class Swift(QObject):
         Returns:
             The returned value of the swift-call, if any.
         """
-        msg = json.loads(msg)
-        action, args = msg["action"], msg["args"]
-        if action == "create":
-            name, info = args["name"], args["info"]
-            reply = QMessageBox.warning(
-                None,
-                "swift-call",
-                f"The app {sender} requests for creating an app {name}",
-                QMessageBox.Ok | QMessageBox.Cancel,
-                QMessageBox.Cancel
-            )
-            if reply == QMessageBox.Ok:
-                return self.createApp(name, AppInfo(**info))
-            raise RuntimeError("The user rejected the request.")
-        if action == "destroy":
-            name = args["name"]
-            reply = QMessageBox.warning(
-                None,
-                "swift-call",
-                f"The app {sender} requests for destroying an app {name}",
-                QMessageBox.Ok | QMessageBox.Cancel,
-                QMessageBox.Cancel
-            )
-            if reply == QMessageBox.Ok:
-                return self.destroyApp(name)
-            raise RuntimeError("The user rejected the request.")
-        raise NotImplementedError(action)
+        info = loads(SwiftcallInfo, msg)
+        if info.call.startswith("_"):
+            raise ValueError("Only public method calls are allowed.")
+        call = getattr(self, info.call)
+        args = self._parseArgs(call, info.args)
+        reply = QMessageBox.warning(
+            None,
+            "swift-call",
+            f"The app {sender} requests for a swift-call {info.call} with {args}.",
+            QMessageBox.Ok | QMessageBox.Cancel,
+            QMessageBox.Cancel,
+        )
+        if reply == QMessageBox.Ok:
+            return call(**args)
+        raise RuntimeError("The user rejected the request.")
 
     def _swiftcall(self, sender: str, msg: str):
         """Will be connected to the swiftcallRequested signal.
@@ -277,8 +307,10 @@ class Swift(QObject):
         except Exception as error:  # pylint: disable=broad-exception-caught
             result = SwiftcallResult(done=True, success=False, error=repr(error))
         else:
+            if isinstance(value, Serializable):
+                value = dumps(value)
             result = SwiftcallResult(done=True, success=True, value=value)
-        self._apps[sender].swiftcallReturned.emit(msg, json.dumps(dataclasses.asdict(result)))
+        self._apps[sender].swiftcallReturned.emit(msg, dumps(result))
 
 
 @contextmanager

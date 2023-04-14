@@ -110,14 +110,14 @@ class SwiftFunctionTest(unittest.TestCase):
     """Unit test for functions in swift.py"""
 
     def test_parse(self):
-        self.assertEqual(swift.parse(swift.AppInfo, APP_JSONS["app1"]), APP_INFOS["app1"])
+        self.assertEqual(swift.loads(swift.AppInfo, APP_JSONS["app1"]), APP_INFOS["app1"])
 
     def test_parse_default(self):
-        self.assertEqual(swift.parse(swift.AppInfo, APP_JSONS["app2_default"]), APP_INFOS["app2"])
+        self.assertEqual(swift.loads(swift.AppInfo, APP_JSONS["app2_default"]), APP_INFOS["app2"])
 
     def test_strinfo(self):
-        self.assertEqual(swift.strinfo(APP_INFOS["app1"]), APP_JSONS["app1"])
-        self.assertEqual(swift.strinfo(APP_INFOS["app2"]), APP_JSONS["app2"])
+        self.assertEqual(swift.dumps(APP_INFOS["app1"]), APP_JSONS["app1"])
+        self.assertEqual(swift.dumps(APP_INFOS["app2"]), APP_JSONS["app2"])
 
     def test_add_to_path(self):
         test_dir = "/test_dir"
