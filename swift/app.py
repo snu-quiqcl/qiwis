@@ -40,7 +40,9 @@ class BaseApp(QObject):
         """
         super().__init__(parent=parent)
         self.name = name
+        self.swiftcall = SwiftcallProxy(self.swiftcallRequested)
         self.received.connect(self._receivedMessage)
+        self.swiftcallReturned.connect(self._receivedResult)
 
     def frames(self) -> Iterable[QWidget]:
         """Gets frames for which are managed by the App.
@@ -89,6 +91,22 @@ class BaseApp(QObject):
             print(f"swift.app._receivedMessage(): {e!r}")
         else:
             self.receivedSlot(channelName, content)
+
+    @pyqtSlot(str, str)
+    def _receivedResult(self, request: str, msg: str):
+        """This is connected to self.swiftcallReturned signal.
+
+        Args:
+            request: The request message that has been sent via 
+              self.swiftcallRequested signal.
+            msg: The received swift-call result message.
+        """
+        try:
+            result = swift.loads(swift.SwiftcallResult, msg)
+        except json.JSONDecodeError as e:
+            print(f"{self}._receivedResult: {e}")
+        else:
+            self.swiftcall.update_result(request, result)
 
 
 class SwiftcallProxy:  # pylint: disable=too-few-public-methods
