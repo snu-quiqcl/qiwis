@@ -25,6 +25,10 @@ class BaseApp(QObject):
         swiftcallReturned(str, str): The result of the requested swift-call
           with the original requested message and the result message converted
           from a swift.SwiftcallResult object by swift.dumps().
+    
+    Attributes:
+        name: The string identifier name of this app.
+        swiftcall: A swift-call proxy for requesting swift-calls conveniently.
     """
 
     broadcastRequested = pyqtSignal(str, str)
