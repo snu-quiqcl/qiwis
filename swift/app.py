@@ -5,7 +5,7 @@ Every App class should be a subclass of BaseApp.
 """
 
 import json
-from typing import Any, Optional, Callable, Iterable
+from typing import Any, Dict, Optional, Callable, Iterable
 
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QWidget
@@ -107,6 +107,7 @@ class SwiftcallProxy:  # pylint: disable=too-few-public-methods
               method call is invoked. See BaseApp.swiftcallRequested.
         """
         self.requested = requested
+        self.results: Dict[str, swift.SwiftcallResult] = {}
 
     def __getattr__(self, call: str) -> Callable:
         """Returns a callable object which emits a swift-call requesting signal.
