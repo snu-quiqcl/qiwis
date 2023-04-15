@@ -140,3 +140,19 @@ class SwiftcallProxy:  # pylint: disable=too-few-public-methods
             self.requested.emit(msg)
             return result
         return proxy
+
+    def update_result(self, request: str, result: swift.SwiftcallResult):
+        """Updates the result for the request parsing the received message.
+
+        Args:
+            request: The request message that has been sent to Swift.
+            result: The received result object.
+        """
+        _result = self.results.get(request, None)
+        if _result is None:
+            print(f"SwiftcallProxy._update_result: Failed to find a result for {request}.")
+            return
+        _result.error = result.error
+        _result.value = result.value
+        _result.success = result.success
+        _result.done = result.done
