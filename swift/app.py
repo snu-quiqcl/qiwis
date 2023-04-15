@@ -112,7 +112,7 @@ class SwiftcallProxy:  # pylint: disable=too-few-public-methods
         self.returned = returned
         self.results = {}
 
-    def __getattribute__(self, call: str) -> Callable:
+    def __getattr__(self, call: str) -> Callable:
         """Returns a callable object which emits a swift-call requesting signal.
 
         Args:
