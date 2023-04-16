@@ -255,7 +255,7 @@ class Swift(QObject):
         parsedArgs = {}
         for name, arg in args.items():
             cls = signature.parameters[name].annotation
-            parsedArgs[name] = loads(cls, arg) if isinstance(cls, Serializable) else arg
+            parsedArgs[name] = loads(cls, arg) if issubclass(cls, Serializable) else arg
         return parsedArgs
 
     def _handleSwiftcall(self, sender: str, msg: str) -> Any:
