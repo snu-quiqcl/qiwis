@@ -16,10 +16,9 @@ class BaseApp(QObject):
     """Base App class that all apps should inherit.
 
     Signals: 
-        broadcastRequested(str, str): The app requested broadcasting to a channel 
-          with the target channel name and the message.
-        received(str, str): A message is received from a channel which contains
-          the source channel name and the message.
+        broadcastRequested(channel, message): The app can emit this signal to request
+          broadcasting to a channel with the target channel name and the message.
+        received(channel, message): A broadcast message is received from a channel.
         swiftcallRequested(str): The app requested a swiftcall with a string
           message converted from a swift.SwiftcallInfo object by swift.dumps().
         swiftcallReturned(str, str): The result of the requested swift-call
