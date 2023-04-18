@@ -174,7 +174,7 @@ class SwiftcallProxy:  # pylint: disable=too-few-public-methods
         """
         _result = self.results.get(request, None)
         if _result is None:
-            print(f"SwiftcallProxy._update_result: Failed to find a result for {request}.")
+            print(f"SwiftcallProxy.update_result(): Failed to find a result for {request}.")
             return
         _result.error = result.error
         _result.value = result.value
