@@ -165,14 +165,19 @@ class SwiftcallProxy:  # pylint: disable=too-few-public-methods
             return result
         return proxy
 
-    def update_result(self, request: str, result: swift.SwiftcallResult):
+    def update_result(self, request: str, result: swift.SwiftcallResult, discard: bool = True):
         """Updates the result for the request parsing the received message.
 
         Args:
             request: The request message that has been sent to Swift.
             result: The received result object.
+            discard: If True, the result object is removed from self.results.
+              In most cases, it will be updated only once and never be looked up again.
+              Therefore, it is efficient to discard it after updating the result.
+              If you want to find the result from self.results later again, give False.
         """
-        _result = self.results.get(request, None)
+        _get_result = self.results.pop if discard else self.results.get
+        _result = _get_result(request, None)
         if _result is None:
             print(f"SwiftcallProxy.update_result(): Failed to find a result for {request}.")
             return
