@@ -3,6 +3,10 @@ Set-up file for releasing this package.
 """
 
 from setuptools import setup, find_packages
+import sys
+
+if sys.version_info[:2] < (3, 7):
+    raise Exception("You need Python 3.7+")
 
 setup(
     name='swift',
