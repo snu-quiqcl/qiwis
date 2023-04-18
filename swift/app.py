@@ -22,7 +22,7 @@ class BaseApp(QObject):
         swiftcallRequested(request): The app can emit this signal to request
           a swift-call with a request message converted from a swift.SwiftcallInfo
           object by swift.dumps().
-        swiftcallReturned(str, str): The result of the requested swift-call
+        swiftcallReturned(request, result): The result of the requested swift-call
           with the original requested message and the result message converted
           from a swift.SwiftcallResult object by swift.dumps().
     
