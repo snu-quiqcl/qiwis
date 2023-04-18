@@ -19,8 +19,9 @@ class BaseApp(QObject):
         broadcastRequested(channel, message): The app can emit this signal to request
           broadcasting to a channel with the target channel name and the message.
         received(channel, message): A broadcast message is received from a channel.
-        swiftcallRequested(str): The app requested a swiftcall with a string
-          message converted from a swift.SwiftcallInfo object by swift.dumps().
+        swiftcallRequested(request): The app can emit this signal to request
+          a swift-call with a request message converted from a swift.SwiftcallInfo
+          object by swift.dumps().
         swiftcallReturned(str, str): The result of the requested swift-call
           with the original requested message and the result message converted
           from a swift.SwiftcallResult object by swift.dumps().
