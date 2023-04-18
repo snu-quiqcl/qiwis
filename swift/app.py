@@ -46,7 +46,7 @@ class BaseApp(QObject):
         self.name = name
         self.swiftcall = SwiftcallProxy(self.swiftcallRequested)
         self.received.connect(self._receivedMessage)
-        self.swiftcallReturned.connect(self._receivedResult)
+        self.swiftcallReturned.connect(self._receivedSwiftcallResult)
 
     def frames(self) -> Iterable[QWidget]:
         """Gets frames for which are managed by the App.
@@ -97,7 +97,7 @@ class BaseApp(QObject):
             self.receivedSlot(channelName, content)
 
     @pyqtSlot(str, str)
-    def _receivedResult(self, request: str, msg: str):
+    def _receivedSwiftcallResult(self, request: str, msg: str):
         """This is connected to self.swiftcallReturned signal.
 
         Args:
