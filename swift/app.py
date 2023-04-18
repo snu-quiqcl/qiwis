@@ -158,6 +158,8 @@ class SwiftcallProxy:  # pylint: disable=too-few-public-methods
             info = swift.SwiftcallInfo(call=call, args=args)
             result = swift.SwiftcallResult(done=False, success=False)
             msg = swift.dumps(info)
+            if msg in self.results:
+                print(f"SwiftcallProxy.<local>.proxy(): Duplicate message {msg} is ignored.")
             self.results[msg] = result
             self.requested.emit(msg)
             return result
