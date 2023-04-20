@@ -233,12 +233,11 @@ class Swift(QObject):
             apps.discard(app)
         app.deleteLater()
 
-    def updateFrames(self, name: str, update: bool = False):
+    def updateFrames(self, name: str):
         """Updates the frames of an app.
         
         Args:
             name: A name of the app to update its frames.
-            update: Whether the original frames will be updated or remained.
         """
         app = self._apps[name]
         info = self.appInfos[name]
@@ -246,11 +245,11 @@ class Swift(QObject):
         newFrames = app.frames()
         orgFramesSet = set(orgFrames)
         newFramesSet = set(newFrames)
-        for frame in orgFramesSet if update else orgFramesSet - newFramesSet:
+        for frame in orgFramesSet - newFramesSet:
             dockWidget = orgFrames[frame]
             self.mainWindow.removeDockWidget(dockWidget)
             dockWidget.deleteLater()
-        for frame in newFramesSet if update else newFramesSet - orgFramesSet:
+        for frame in newFramesSet - orgFramesSet:
             self.addFrame(name, frame, info)
 
     @pyqtSlot(str, str)
