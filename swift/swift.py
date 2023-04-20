@@ -239,7 +239,7 @@ class Swift(QObject):
         for frame in orgFramesSet if update else orgFramesSet - newFramesSet:
             dockWidget = orgFrames[frame]
             self.mainWindow.removeDockWidget(dockWidget)
-            dockWidget.deleteLater()        
+            dockWidget.deleteLater()
         for frame in newFramesSet if update else newFramesSet - orgFramesSet:
             dockWidget = QDockWidget(name, self.mainWindow)
             dockWidget.setWidget(frame)
