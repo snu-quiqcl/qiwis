@@ -25,7 +25,7 @@ from typing import (
 )
 
 from PyQt5.QtCore import QObject, pyqtSlot, Qt
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QDockWidget, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QDockWidget, QMessageBox, QWidget
 
 
 T = TypeVar("T")
@@ -173,6 +173,26 @@ class Swift(QObject):
         for name, info in appInfos.items():
             self.createApp(name, info)
 
+    def addFrame(self, name: str, frame: QWidget, info: AppInfo):
+        """Adds a frame of the app and wraps it with a dock widget.
+        
+        Args:
+            name: A name of app.
+            frame: A frame to show.
+            info: An AppInfo object describing the app.
+        """
+        dockWidget = QDockWidget(name, self.mainWindow)
+        dockWidget.setWidget(frame)
+        area = {
+            "left": Qt.LeftDockWidgetArea,
+            "right": Qt.RightDockWidgetArea,
+            "top": Qt.TopDockWidgetArea,
+            "bottom": Qt.BottomDockWidgetArea
+        }.get(info.pos, Qt.LeftDockWidgetArea)
+        if info.show:
+            self.mainWindow.addDockWidget(area, dockWidget)
+        self._dockWidgets[name].append(dockWidget)
+
     def createApp(self, name: str, info: AppInfo):
         """Creates an app and shows their frames using set-up environment.
         
@@ -195,17 +215,7 @@ class Swift(QObject):
         for channelName in info.channel:
             self._subscribers[channelName].add(app)
         for frame in app.frames():
-            dockWidget = QDockWidget(name, self.mainWindow)
-            dockWidget.setWidget(frame)
-            area = {
-                "left": Qt.LeftDockWidgetArea,
-                "right": Qt.RightDockWidgetArea,
-                "top": Qt.TopDockWidgetArea,
-                "bottom": Qt.BottomDockWidgetArea
-            }.get(info.pos, Qt.LeftDockWidgetArea)
-            if info.show:
-                self.mainWindow.addDockWidget(area, dockWidget)
-            self._dockWidgets[name].append(dockWidget)
+            self.addFrame(name, frame, info)
         self._apps[name] = app
 
     def destroyApp(self, name: str):
@@ -241,17 +251,7 @@ class Swift(QObject):
             self.mainWindow.removeDockWidget(dockWidget)
             dockWidget.deleteLater()
         for frame in newFramesSet if update else newFramesSet - orgFramesSet:
-            dockWidget = QDockWidget(name, self.mainWindow)
-            dockWidget.setWidget(frame)
-            area = {
-                "left": Qt.LeftDockWidgetArea,
-                "right": Qt.RightDockWidgetArea,
-                "top": Qt.TopDockWidgetArea,
-                "bottom": Qt.BottomDockWidgetArea
-            }.get(info.pos, Qt.LeftDockWidgetArea)
-            if info.show:
-                self.mainWindow.addDockWidget(area, dockWidget)
-            self._dockWidgets[name].append(dockWidget)
+            self.addFrame(name, frame, info)
 
     @pyqtSlot(str, str)
     def _broadcast(self, channelName: str, msg: str):
