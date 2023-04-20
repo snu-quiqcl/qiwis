@@ -222,8 +222,18 @@ class Swift(QObject):
             apps.discard(app)
         app.deleteLater()
 
-    def updateFrames(self, name: str):
-        print("Called updateFrames()")
+    def updateFrames(self, name: str, update: bool = False):
+        """Updates the frames of an app.
+        
+        Args:
+            name: A name of the app to update its frames.
+            update: Whether the original frames will be updated or remained.
+        """
+        app = self._apps[name]
+        orgFrames = [dockWidget.widget() for dockWidget in self._dockWidgets[name]]
+        for frame in app.frames():
+            if not update and frame in orgFrames:
+                continue
 
     @pyqtSlot(str, str)
     def _broadcast(self, channelName: str, msg: str):
