@@ -148,6 +148,7 @@ class Swift(QObject):
             parent: A parent object.
         """
         super().__init__(parent=parent)
+        self.appInfos = appInfos
         self.mainWindow = QMainWindow()
         self.centralWidget = QLabel("Swift")
         self.centralWidget.setAlignment(Qt.AlignCenter)
@@ -230,10 +231,27 @@ class Swift(QObject):
             update: Whether the original frames will be updated or remained.
         """
         app = self._apps[name]
-        orgFrames = [dockWidget.widget() for dockWidget in self._dockWidgets[name]]
-        for frame in app.frames():
-            if not update and frame in orgFrames:
-                continue
+        info = self.appInfos[name]
+        orgFrames = {dockWidget.widget(): dockWidget for dockWidget in self._dockWidgets[name]}
+        newFrames = app.frames()
+        orgFramesSet = set(orgFrames)
+        newFramesSet = set(newFrames)
+        for frame in orgFramesSet if update else orgFramesSet - newFramesSet:
+            dockWidget = orgFrames[frame]
+            self.mainWindow.removeDockWidget(dockWidget)
+            dockWidget.deleteLater()        
+        for frame in newFramesSet if update else newFramesSet - orgFramesSet:
+            dockWidget = QDockWidget(name, self.mainWindow)
+            dockWidget.setWidget(frame)
+            area = {
+                "left": Qt.LeftDockWidgetArea,
+                "right": Qt.RightDockWidgetArea,
+                "top": Qt.TopDockWidgetArea,
+                "bottom": Qt.BottomDockWidgetArea
+            }.get(info.pos, Qt.LeftDockWidgetArea)
+            if info.show:
+                self.mainWindow.addDockWidget(area, dockWidget)
+            self._dockWidgets[name].append(dockWidget)
 
     @pyqtSlot(str, str)
     def _broadcast(self, channelName: str, msg: str):
