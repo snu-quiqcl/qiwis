@@ -222,6 +222,9 @@ class Swift(QObject):
             apps.discard(app)
         app.deleteLater()
 
+    def updateFrames(self, name: str):
+        print("Called updateFrames()")
+
     @pyqtSlot(str, str)
     def _broadcast(self, channelName: str, msg: str):
         """Broadcasts the message to the subscriber apps of the channel.
