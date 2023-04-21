@@ -175,6 +175,8 @@ class Swift(QObject):
 
     def addFrame(self, name: str, frame: QWidget, info: AppInfo):
         """Adds a frame of the app and wraps it with a dock widget.
+
+        This is not a swift-call because QWidget is not Serializable.
         
         Args:
             name: A name of app.
@@ -192,6 +194,10 @@ class Swift(QObject):
         if info.show:
             self.mainWindow.addDockWidget(area, dockWidget)
         self._dockWidgets[name].append(dockWidget)
+
+    def deleteFrame(self, dockWidget: QDockWidget):
+        self.mainWindow.removeDockWidget(dockWidget)
+        dockWidget.deleteLater()
 
     def createApp(self, name: str, info: AppInfo):
         """Creates an app and shows their frames using set-up environment.
@@ -226,8 +232,7 @@ class Swift(QObject):
         """
         dockWidgets = self._dockWidgets.pop(name)
         for dockWidget in dockWidgets:
-            self.mainWindow.removeDockWidget(dockWidget)
-            dockWidget.deleteLater()
+            self.deleteFrame(dockWidget)
         app = self._apps.pop(name)
         for apps in self._subscribers.values():
             apps.discard(app)
@@ -246,9 +251,7 @@ class Swift(QObject):
         orgFramesSet = set(orgFrames)
         newFramesSet = set(newFrames)
         for frame in orgFramesSet - newFramesSet:
-            dockWidget = orgFrames[frame]
-            self.mainWindow.removeDockWidget(dockWidget)
-            dockWidget.deleteLater()
+            self.deleteFrame(orgFrames[frame])
         for frame in newFramesSet - orgFramesSet:
             self.addFrame(name, frame, info)
 
