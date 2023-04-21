@@ -195,7 +195,14 @@ class Swift(QObject):
             self.mainWindow.addDockWidget(area, dockWidget)
         self._dockWidgets[name].append(dockWidget)
 
-    def deleteFrame(self, dockWidget: QDockWidget):
+    def removeFrame(self, dockWidget: QDockWidget):
+        """Removes the frame from the main window.
+        
+        This is not a swift-call because QDockWidget is not Serializable.
+        
+        Args:
+            dockWidget: A dock widget to remove.
+        """
         self.mainWindow.removeDockWidget(dockWidget)
         dockWidget.deleteLater()
 
@@ -232,7 +239,7 @@ class Swift(QObject):
         """
         dockWidgets = self._dockWidgets.pop(name)
         for dockWidget in dockWidgets:
-            self.deleteFrame(dockWidget)
+            self.removeFrame(dockWidget)
         app = self._apps.pop(name)
         for apps in self._subscribers.values():
             apps.discard(app)
@@ -251,7 +258,7 @@ class Swift(QObject):
         orgFramesSet = set(orgFrames)
         newFramesSet = set(newFrames)
         for frame in orgFramesSet - newFramesSet:
-            self.deleteFrame(orgFrames[frame])
+            self.removeFrame(orgFrames[frame])
         for frame in newFramesSet - orgFramesSet:
             self.addFrame(name, frame, info)
 
