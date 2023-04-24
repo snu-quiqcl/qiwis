@@ -21,7 +21,7 @@ import functools
 from collections import defaultdict
 from contextlib import contextmanager
 from typing import (
-    Dict, MutableSet, Any, Callable, Iterable, Mapping, KeysView, Optional, TypeVar, Type,
+    Dict, Set, Any, Callable, Iterable, Mapping, KeysView, Optional, TypeVar, Type,
 )
 
 from PyQt5.QtCore import QObject, pyqtSlot, Qt
@@ -158,7 +158,7 @@ class Swift(QObject):
         self.mainWindow.setCentralWidget(self.centralWidget)
         self._dockWidgets = defaultdict(list)
         self._apps: Dict[str, app.BaseApp] = {}
-        self._subscribers: Dict[str, MutableSet[str]] = defaultdict(set)
+        self._subscribers: Dict[str, Set[str]] = defaultdict(set)
         appInfos = appInfos if appInfos else {}
         self.load(appInfos)
         self.mainWindow.show()
