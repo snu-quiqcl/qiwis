@@ -272,6 +272,15 @@ class Swift(QObject):
         """Returns the names of the channels."""
         return self._subscribers.keys()
 
+    def subscriberNames(self, channel: str) -> Set[str]:
+        """Returns the names of the subscriber apps of the channel.
+        
+        Args:
+            channel: The name of the channel of interest.
+              If it has no subscribers or does not exist, an empty set is returned.
+        """
+        return self._subscribers.get(channel, set()).copy()
+
     @pyqtSlot(str, str)
     def _broadcast(self, channelName: str, msg: str):
         """Broadcasts the message to the subscriber apps of the channel.
