@@ -212,6 +212,10 @@ class Swift(QObject):
         """Returns the names of the apps including whose frames are hidden."""
         return self._apps.keys()
 
+    def channelNames(self) -> KeysView[str]:
+        """Returns the names of the channels."""
+        return self._subscribers.keys()
+
     def createApp(self, name: str, info: AppInfo):
         """Creates an app and shows their frames using set-up environment.
         
