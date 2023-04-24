@@ -280,7 +280,7 @@ class Swift(QObject):
             channel: The name of the channel of interest.
               If it has no subscribers or does not exist, an empty set is returned.
         """
-        return self._subscribers.get(channel, set()).copy()
+        return self._subscribers[channel].copy()
 
     @pyqtSlot(str, str)
     def _broadcast(self, channelName: str, msg: str):
