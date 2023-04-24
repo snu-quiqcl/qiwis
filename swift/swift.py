@@ -21,11 +21,13 @@ import functools
 from collections import defaultdict
 from contextlib import contextmanager
 from typing import (
-    Dict, Any, Callable, Iterable, Mapping, Optional, TypeVar, Type
+    Dict, MutableSet, Any, Callable, Iterable, Mapping, KeysView, Optional, TypeVar, Type,
 )
 
 from PyQt5.QtCore import QObject, pyqtSlot, Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QDockWidget, QMessageBox, QWidget
+
+from swift import app
 
 
 T = TypeVar("T")
@@ -155,8 +157,8 @@ class Swift(QObject):
         self.centralWidget.setStyleSheet("background-color: gray;")
         self.mainWindow.setCentralWidget(self.centralWidget)
         self._dockWidgets = defaultdict(list)
-        self._apps = {}
-        self._subscribers = defaultdict(set)
+        self._apps: Dict[str, app.BaseApp] = {}
+        self._subscribers: Dict[str, MutableSet[str]] = defaultdict(set)
         appInfos = appInfos if appInfos else {}
         self.load(appInfos)
         self.mainWindow.show()
