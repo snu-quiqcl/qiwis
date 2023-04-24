@@ -233,7 +233,7 @@ class Swift(QObject):
             type=Qt.QueuedConnection,
         )
         for channelName in info.channel:
-            self._subscribers[channelName].add(app)
+            self.subscribe(app, channelName)
         for frame in app.frames():
             self.addFrame(name, frame, info)
         self._apps[name] = app
@@ -281,6 +281,15 @@ class Swift(QObject):
               If it has no subscribers or does not exist, an empty set is returned.
         """
         return self._subscribers[channel].copy()
+
+    def subscribe(self, app: str, channel: str):
+        """Starts a subscription of the app to the channel.
+        
+        Args:
+            app: The name of the app which wants to subscribe to the channel.
+            channel: The target channel name.
+        """
+        self._subscribers[channel].add(app)
 
     @pyqtSlot(str, str)
     def _broadcast(self, channelName: str, msg: str):
