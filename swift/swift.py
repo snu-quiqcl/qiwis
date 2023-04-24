@@ -304,10 +304,9 @@ class Swift(QObject):
         subscribers = self._subscribers[channel]
         try:
             subscribers.remove(app)
-        except KeyError as e:
+        except KeyError:
             return False
-        else:
-            return True
+        return True
 
     @pyqtSlot(str, str)
     def _broadcast(self, channelName: str, msg: str):
