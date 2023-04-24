@@ -291,6 +291,24 @@ class Swift(QObject):
         """
         self._subscribers[channel].add(app)
 
+    def unsubscribe(self, app: str, channel: str) -> bool:
+        """Cancels the subscription of the app to the channel.
+        
+        Args:
+            app: The name of the app which wants to unsubscribe from the channel.
+            channel: The target channel name.
+        
+        Returns:
+            False when the app was not subscribing to the channel.
+        """
+        subscribers = self._subscribers[channel]
+        try:
+            subscribers.remove(app)
+        except KeyError as e:
+            return False
+        else:
+            return True
+
     @pyqtSlot(str, str)
     def _broadcast(self, channelName: str, msg: str):
         """Broadcasts the message to the subscriber apps of the channel.
