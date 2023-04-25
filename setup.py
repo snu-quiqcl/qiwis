@@ -6,7 +6,7 @@ import sys
 from setuptools import setup, find_packages
 
 if sys.version_info[:2] < (3, 7):
-    raise Exception("You need Python 3.7+")  # pylint: disable=broad-except
+    raise BaseException("You need Python 3.7+")
 
 setup(
     name="swift",
