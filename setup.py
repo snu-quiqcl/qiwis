@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 
 if sys.version_info[:2] < (3, 7):
     print("You need Python 3.7+")
-    exit()
+    sys.exit()
 
 setup(
     name="swift",
