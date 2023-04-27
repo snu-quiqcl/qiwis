@@ -100,6 +100,7 @@ class DBMgrApp(BaseApp):
         self.managerFrame = ManagerFrame()
         # connect signals to slots
         self.managerFrame.addButton.clicked.connect(self.addDB)
+        self.managerFrame.openDatacalcButton.clicked.connect(self.openDatacalc)
 
     def frames(self) -> Tuple[ManagerFrame]:
         """Overridden."""
@@ -164,3 +165,22 @@ class DBMgrApp(BaseApp):
         widget.deleteLater()
         # send the database list and a logging message
         self.sendDB(False, db.name)
+
+    @pyqtSlot()
+    def openDatacalc(self):
+        self.swiftcall.createApp(
+            name="datacalc",
+            info=AppInfo(
+                module="examples.datacalc",
+                cls="DataCalcApp",
+                show=True,
+                pos="top",
+                channel=["db"],
+                args={
+                    "tables": {
+                        "A": "number",
+                        "B": "B"
+                    }
+                }
+            )
+        )
