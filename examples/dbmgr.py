@@ -98,6 +98,7 @@ class DBMgrApp(BaseApp):
         """Extended."""
         super().__init__(name, parent=parent)
         self.dbList = []
+        self.isDatacalcOpen = False
         self.openCloseDatacalcResult = None
         self.managerFrame = ManagerFrame()
         # connect signals to slots
@@ -170,19 +171,26 @@ class DBMgrApp(BaseApp):
 
     @pyqtSlot()
     def openCloseDatacalc(self):
-        self.openCloseDatacalcResult = self.swiftcall.createApp(
-            name="datacalc",
-            info=AppInfo(
-                module="examples.datacalc",
-                cls="DataCalcApp",
-                show=True,
-                pos="top",
-                channel=["db"],
-                args={
-                    "tables": {
-                        "A": "number",
-                        "B": "B"
+        if self.openCloseDatacalcResult:
+            if not self.openCloseDatacalcResult.done:
+                print("DBMgrApp.openCloseDatacalc(): The previous swiftcall must be done.")
+                return
+            if self.openCloseDatacalcResult.success:
+                self.isDatacalcOpen = not self.isDatacalcOpen
+        else:
+            self.openCloseDatacalcResult = self.swiftcall.createApp(
+                name="datacalc",
+                info=AppInfo(
+                    module="examples.datacalc",
+                    cls="DataCalcApp",
+                    show=True,
+                    pos="top",
+                    channel=["db"],
+                    args={
+                        "tables": {
+                            "A": "number",
+                            "B": "B"
+                        }
                     }
-                }
+                )
             )
-        )
