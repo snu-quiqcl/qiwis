@@ -177,6 +177,8 @@ class DBMgrApp(BaseApp):
                 return
             if self.openCloseDatacalcResult.success:
                 self.isDatacalcOpen = not self.isDatacalcOpen
+        if self.isDatacalcOpen:
+            self.openCloseDatacalcResult = self.swiftcall.destroyApp(name="datacalc")
         else:
             self.openCloseDatacalcResult = self.swiftcall.createApp(
                 name="datacalc",
