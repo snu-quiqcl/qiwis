@@ -60,10 +60,12 @@ class ManagerFrame(QWidget):
         # widgets
         self.dbListWidget = QListWidget(self)
         self.addButton = QPushButton("add", self)
+        self.openDatacalcButton = QPushButton("open datacalc", self)
         # layout
         layout = QVBoxLayout(self)
         layout.addWidget(self.dbListWidget)
         layout.addWidget(self.addButton)
+        layout.addWidget(self.openDatacalcButton)
 
 
 class DBMgrApp(BaseApp):
