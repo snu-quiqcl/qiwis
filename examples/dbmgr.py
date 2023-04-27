@@ -60,12 +60,12 @@ class ManagerFrame(QWidget):
         # widgets
         self.dbListWidget = QListWidget(self)
         self.addButton = QPushButton("add", self)
-        self.openDatacalcButton = QPushButton("open datacalc", self)
+        self.openCloseDatacalcButton = QPushButton("open datacalc", self)
         # layout
         layout = QVBoxLayout(self)
         layout.addWidget(self.dbListWidget)
         layout.addWidget(self.addButton)
-        layout.addWidget(self.openDatacalcButton)
+        layout.addWidget(self.openCloseDatacalcButton)
 
 
 class DBMgrApp(BaseApp):
@@ -100,7 +100,7 @@ class DBMgrApp(BaseApp):
         self.managerFrame = ManagerFrame()
         # connect signals to slots
         self.managerFrame.addButton.clicked.connect(self.addDB)
-        self.managerFrame.openDatacalcButton.clicked.connect(self.openDatacalc)
+        self.managerFrame.openCloseDatacalcButton.clicked.connect(self.openDatacalc)
 
     def frames(self) -> Tuple[ManagerFrame]:
         """Overridden."""
