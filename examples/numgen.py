@@ -153,6 +153,9 @@ class NumGenApp(BaseApp):
         """Generates and shows a random number when the button is clicked."""
         # generate a random number
         num = generate()
+        if not self.isGenerated:
+            self.isGenerated = True
+            self.swiftcall.updateFrames(name=self.name)
         self.viewerFrame.numberLabel.setText(f"generated number: {num}")
         self.broadcast("log", f"Generated number: {num}.")
         # save the generated number
