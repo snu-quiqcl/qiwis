@@ -171,6 +171,11 @@ class DBMgrApp(BaseApp):
 
     @pyqtSlot()
     def openCloseDatacalc(self):
+        """Opens or closes a datacalc app.
+
+        If the dataclac app is open, close it.
+        Otherwise, open a new datacalc app.
+        """
         if self.openCloseDatacalcResult:
             if not self.openCloseDatacalcResult.done:
                 print("DBMgrApp.openCloseDatacalc(): The previous swiftcall must be done.")
