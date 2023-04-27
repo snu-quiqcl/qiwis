@@ -88,7 +88,8 @@ class NumGenApp(BaseApp):
 
     def frames(self) -> Tuple[GeneratorFrame, ViewerFrame]:
         """Overridden."""
-        return (self.generatorFrame, self.viewerFrame) if self.isGenerated else (self.generatorFrame,)
+        return (self.generatorFrame, self.viewerFrame) if self.isGenerated \
+               else (self.generatorFrame,)
 
     def updateDB(self, content: dict):
         """Updates the database list using the transferred message.
