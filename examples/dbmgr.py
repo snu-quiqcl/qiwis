@@ -53,6 +53,7 @@ class ManagerFrame(QWidget):
           Each database can be removed (actually disconnected) 
           when removeButton (of each item) clicked.
         addButton: A button for adding (actually connecting) a database.
+        openCloseDatacalcButton: A button for opening or closing a datacalc app.
     """
     def __init__(self, parent: Optional[QObject] = None):
         """Extended."""
@@ -97,10 +98,11 @@ class DBMgrApp(BaseApp):
         """Extended."""
         super().__init__(name, parent=parent)
         self.dbList = []
+        self.openCloseDatacalcResult = None
         self.managerFrame = ManagerFrame()
         # connect signals to slots
         self.managerFrame.addButton.clicked.connect(self.addDB)
-        self.managerFrame.openCloseDatacalcButton.clicked.connect(self.openDatacalc)
+        self.managerFrame.openCloseDatacalcButton.clicked.connect(self.openCloseDatacalc)
 
     def frames(self) -> Tuple[ManagerFrame]:
         """Overridden."""
@@ -167,8 +169,8 @@ class DBMgrApp(BaseApp):
         self.sendDB(False, db.name)
 
     @pyqtSlot()
-    def openDatacalc(self):
-        self.swiftcall.createApp(
+    def openCloseDatacalc(self):
+        self.openCloseDatacalcResult = self.swiftcall.createApp(
             name="datacalc",
             info=AppInfo(
                 module="examples.datacalc",
