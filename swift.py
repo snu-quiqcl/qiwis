@@ -6,7 +6,7 @@ Swift is a main manager for swift system.
 Using a set-up file written by a user, it sets up apps.
 
 Usage:
-    python -m swift.swift (-s <SETUP_PATH>)
+    python -m swift (-s <SETUP_PATH>)
 """
 
 import sys
