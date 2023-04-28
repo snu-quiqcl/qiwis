@@ -11,7 +11,7 @@ from collections.abc import Iterable
 from PyQt5.QtCore import QObject
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QLabel
 
-from swift import app, swift
+import swift
 
 APP_INFOS = {
     "app1": swift.AppInfo(
@@ -57,13 +57,13 @@ class AppTest(unittest.TestCase):
     """Unit test for app.py."""
 
     def setUp(self):
-        self.app = app.BaseApp("name")
+        self.app = swift.BaseApp("name")
 
     def test_init(self):
         self.assertEqual(self.app.name, "name")
 
     def test_set_parent(self):
-        app.BaseApp("name", QObject())
+        swift.BaseApp("name", QObject())
 
     def test_frames(self):
         self.assertIsInstance(self.app.frames(), Iterable)
@@ -145,9 +145,9 @@ class SwiftFunctionTest(unittest.TestCase):
         mock_open.assert_called_once()
         mock_load.assert_called_once()
 
-    @patch("swift.swift._get_argparser")
-    @patch("swift.swift._read_setup_file", return_value={})
-    @patch("swift.swift.Swift")
+    @patch("swift._get_argparser")
+    @patch("swift._read_setup_file", return_value={})
+    @patch("swift.Swift")
     @patch("PyQt5.QtWidgets.QApplication.exec_")
     def test_main(self, mock_get_argparser, mock_read_setup_file, mock_swift, mock_exec_):
         swift.main()

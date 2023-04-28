@@ -10,7 +10,7 @@ from typing import Any, Optional, Tuple
 from PyQt5.QtCore import QObject, pyqtSlot
 from PyQt5.QtWidgets import QWidget, QComboBox, QPushButton, QLabel, QVBoxLayout
 
-from swift.app import BaseApp
+from swift import BaseApp
 from examples.backend import generate, write
 
 class GeneratorFrame(QWidget):
