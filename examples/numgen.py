@@ -94,8 +94,7 @@ class NumGenApp(BaseApp):
         """
         if self.isGenerated:
             return (self.generatorFrame, self.viewerFrame)
-        else:
-            return (self.generatorFrame,)
+        return (self.generatorFrame,)
 
     def updateDB(self, content: dict):
         """Updates the database list using the transferred message.
