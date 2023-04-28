@@ -21,7 +21,8 @@ import functools
 from collections import defaultdict
 from contextlib import contextmanager
 from typing import (
-    Dict, Any, Callable, Iterable, Mapping, Optional, TypeVar, Type
+    Dict, DefaultDict, Set, Any, Callable, Iterable, Mapping, KeysView,
+    Optional, TypeVar, Type,
 )
 
 from PyQt5.QtCore import QObject, pyqtSlot, Qt
@@ -155,8 +156,8 @@ class Swift(QObject):
         self.centralWidget.setStyleSheet("background-color: gray;")
         self.mainWindow.setCentralWidget(self.centralWidget)
         self._dockWidgets = defaultdict(list)
-        self._apps = {}
-        self._subscribers = defaultdict(set)
+        self._apps: Dict[str, Any] = {}  # TODO(kangz12345): type hint for values
+        self._subscribers: DefaultDict[str, Set[str]] = defaultdict(set)
         appInfos = appInfos if appInfos else {}
         self.load(appInfos)
         self.mainWindow.show()
@@ -206,6 +207,10 @@ class Swift(QObject):
         self.mainWindow.removeDockWidget(dockWidget)
         dockWidget.deleteLater()
 
+    def appNames(self) -> KeysView[str]:
+        """Returns the names of the apps including whose frames are hidden."""
+        return self._apps.keys()
+
     def createApp(self, name: str, info: AppInfo):
         """Creates an app and shows their frames using set-up environment.
         
@@ -226,7 +231,7 @@ class Swift(QObject):
             type=Qt.QueuedConnection,
         )
         for channelName in info.channel:
-            self._subscribers[channelName].add(app)
+            self.subscribe(app, channelName)
         for frame in app.frames():
             self.addFrame(name, frame, info)
         self._apps[name] = app
@@ -261,6 +266,45 @@ class Swift(QObject):
             self.removeFrame(orgFrames[frame])
         for frame in newFramesSet - orgFramesSet:
             self.addFrame(name, frame, info)
+
+    def channelNames(self) -> KeysView[str]:
+        """Returns the names of the channels."""
+        return self._subscribers.keys()
+
+    def subscriberNames(self, channel: str) -> Set[str]:
+        """Returns the names of the subscriber apps of the channel.
+        
+        Args:
+            channel: The name of the channel of interest.
+              If it has no subscribers or does not exist, an empty set is returned.
+        """
+        return self._subscribers[channel].copy()
+
+    def subscribe(self, app: str, channel: str):
+        """Starts a subscription of the app to the channel.
+        
+        Args:
+            app: The name of the app which wants to subscribe to the channel.
+            channel: The target channel name.
+        """
+        self._subscribers[channel].add(app)
+
+    def unsubscribe(self, app: str, channel: str) -> bool:
+        """Cancels the subscription of the app to the channel.
+        
+        Args:
+            app: The name of the app which wants to unsubscribe from the channel.
+            channel: The target channel name.
+        
+        Returns:
+            False when the app was not subscribing to the channel.
+        """
+        subscribers = self._subscribers[channel]
+        try:
+            subscribers.remove(app)
+        except KeyError:
+            return False
+        return True
 
     @pyqtSlot(str, str)
     def _broadcast(self, channelName: str, msg: str):
