@@ -179,7 +179,7 @@ class DBMgrApp(BaseApp):
         If the dataclac app is open, close it.
         Otherwise, open a new datacalc app.
         """
-        if self.openCloseDatacalcResult:
+        if self.openCloseDatacalcResult is not None:
             if not self.openCloseDatacalcResult.done:
                 print("DBMgrApp.openCloseDatacalc(): The previous swiftcall must be done.")
                 return
