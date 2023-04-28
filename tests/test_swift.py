@@ -145,9 +145,9 @@ class SwiftFunctionTest(unittest.TestCase):
         mock_open.assert_called_once()
         mock_load.assert_called_once()
 
-    @patch("swift.swift._get_argparser")
-    @patch("swift.swift._read_setup_file", return_value={})
-    @patch("swift.swift.Swift")
+    @patch("swift._get_argparser")
+    @patch("swift._read_setup_file", return_value={})
+    @patch("swift.Swift")
     @patch("PyQt5.QtWidgets.QApplication.exec_")
     def test_main(self, mock_get_argparser, mock_read_setup_file, mock_swift, mock_exec_):
         swift.main()
