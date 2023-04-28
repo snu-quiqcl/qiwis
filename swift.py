@@ -156,7 +156,7 @@ class Swift(QObject):
         self.centralWidget.setStyleSheet("background-color: gray;")
         self.mainWindow.setCentralWidget(self.centralWidget)
         self._dockWidgets = defaultdict(list)
-        self._apps: Dict[str, Any] = {}  # TODO(kangz12345): type hint for values
+        self._apps: Dict[str, BaseApp] = {}
         self._subscribers: DefaultDict[str, Set[str]] = defaultdict(set)
         appInfos = appInfos if appInfos else {}
         self.load(appInfos)
