@@ -11,7 +11,7 @@ from collections.abc import Iterable
 from PyQt5.QtCore import QObject
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QLabel
 
-from swift import app, swift
+import swift
 
 APP_INFOS = {
     "app1": swift.AppInfo(
@@ -57,13 +57,13 @@ class AppTest(unittest.TestCase):
     """Unit test for app.py."""
 
     def setUp(self):
-        self.app = app.BaseApp("name")
+        self.app = swift.BaseApp("name")
 
     def test_init(self):
         self.assertEqual(self.app.name, "name")
 
     def test_set_parent(self):
-        app.BaseApp("name", QObject())
+        swift.BaseApp("name", QObject())
 
     def test_frames(self):
         self.assertIsInstance(self.app.frames(), Iterable)
