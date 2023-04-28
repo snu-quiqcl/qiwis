@@ -5,7 +5,7 @@ App module for generating and showing a random number.
 """
 
 import os
-from typing import Any, Optional, Tuple
+from typing import Any, Optional, Tuple, Union
 
 from PyQt5.QtCore import QObject, pyqtSlot
 from PyQt5.QtWidgets import QWidget, QComboBox, QPushButton, QLabel, QVBoxLayout
@@ -86,7 +86,7 @@ class NumGenApp(BaseApp):
         self.generatorFrame.dbBox.currentIndexChanged.connect(self.setDB)
         self.generatorFrame.generateButton.clicked.connect(self.generateNumber)
 
-    def frames(self) -> Tuple[GeneratorFrame, ViewerFrame]:
+    def frames(self) -> Union[Tuple[GeneratorFrame, ViewerFrame], Tuple[GeneratorFrame]]:
         """Overridden.
         
         Once a number is generated, returns both frames.
