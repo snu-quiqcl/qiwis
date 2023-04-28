@@ -28,8 +28,6 @@ from typing import (
 from PyQt5.QtCore import QObject, pyqtSlot, Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QDockWidget, QMessageBox, QWidget
 
-from swift.app import BaseApp
-
 
 T = TypeVar("T")
 
@@ -158,7 +156,7 @@ class Swift(QObject):
         self.centralWidget.setStyleSheet("background-color: gray;")
         self.mainWindow.setCentralWidget(self.centralWidget)
         self._dockWidgets = defaultdict(list)
-        self._apps: Dict[str, BaseApp] = {}
+        self._apps: Dict[str, Any] = {}
         self._subscribers: DefaultDict[str, Set[str]] = defaultdict(set)
         appInfos = appInfos if appInfos else {}
         self.load(appInfos)
