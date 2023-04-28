@@ -87,9 +87,15 @@ class NumGenApp(BaseApp):
         self.generatorFrame.generateButton.clicked.connect(self.generateNumber)
 
     def frames(self) -> Tuple[GeneratorFrame, ViewerFrame]:
-        """Overridden."""
-        return (self.generatorFrame, self.viewerFrame) if self.isGenerated \
-               else (self.generatorFrame,)
+        """Overridden.
+        
+        Once a number is generated, returns both frames.
+        Otherwise, returns only the generator frame.
+        """
+        if self.isGenerated:
+            return (self.generatorFrame, self.viewerFrame)
+        else:
+            return (self.generatorFrame,)
 
     def updateDB(self, content: dict):
         """Updates the database list using the transferred message.
