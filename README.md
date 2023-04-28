@@ -1,3 +1,7 @@
+<p align="center">
+  <img src = "https://user-images.githubusercontent.com/65724072/235059956-6531f005-9a70-4b52-8d0c-c4477b96336f.svg" width="40%" height="40%">
+</p>
+
 [![Pylint](https://github.com/snu-quiqcl/swift/actions/workflows/pylint.yml/badge.svg)](https://github.com/snu-quiqcl/swift/actions/workflows/pylint.yml)
 
 [![unittest](https://github.com/snu-quiqcl/swift/actions/workflows/unittest.yml/badge.svg)](https://github.com/snu-quiqcl/swift/actions/workflows/unittest.yml)
