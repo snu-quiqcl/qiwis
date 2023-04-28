@@ -90,6 +90,9 @@ class DBMgrApp(BaseApp):
         dbList: A list for storing available databases.
           Each element is a namedtuple which represents a database.
           It has two elements; file name and absolute path.
+        isDatacalcOpen: True if a datacalc app is open, and False if it is close.
+        openCloseDatacalcResult: The latest swiftcall result 
+          which requests for opening or closing a datacalc app.
         managerFrame: A frame that manages and shows available databases.
     """
     DB = namedtuple("DB", ["path", "name"])
