@@ -1,5 +1,5 @@
 <p align="center">
-  <img src = "https://user-images.githubusercontent.com/65724072/235059956-6531f005-9a70-4b52-8d0c-c4477b96336f.svg" width="40%" height="40%">
+  <img width="40%" alt="image" src="https://user-images.githubusercontent.com/65724072/235069958-50138e6a-b1ef-417c-9bbc-20c3a17ed406.svg">
 </p>
 
 [![Pylint](https://github.com/snu-quiqcl/swift/actions/workflows/pylint.yml/badge.svg)](https://github.com/snu-quiqcl/swift/actions/workflows/pylint.yml)
