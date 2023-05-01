@@ -1,5 +1,5 @@
 """
-Module for testing swift package.
+Module for testing swift module.
 """
 
 import unittest
