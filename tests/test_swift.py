@@ -87,9 +87,11 @@ class SwiftTest(unittest.TestCase):
         self.swift = swift.Swift(APP_INFOS)
 
     def test_init(self):
+        self.assertEqual(self.swift.appInfos, APP_INFOS)
         self.assertIsInstance(self.swift.mainWindow, QMainWindow)
         self.assertIsInstance(self.swift.centralWidget, QLabel)
-        for name in APP_INFOS:
+        for name, info in APP_INFOS.items():
+            self.assertIn(name, self.swift._dockWidgets)
             self.assertIn(name, self.swift._apps)
         for channel in self.channels:
             self.assertIn(channel, self.swift._subscribers)
