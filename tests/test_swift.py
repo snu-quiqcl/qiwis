@@ -96,6 +96,11 @@ class SwiftTest(unittest.TestCase):
         for channel in self.channels:
             self.assertIn(channel, self.swift._subscribers)
 
+    def test_app_names(self):
+        appNames = self.swift.appNames()
+        for name in APP_INFOS:
+            self.assertIn(name, appNames)
+
     def test_destroy_app(self):
         for name in APP_INFOS:
             self.swift.destroyApp(name)
