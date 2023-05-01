@@ -106,6 +106,11 @@ class SwiftTest(unittest.TestCase):
             self.swift.destroyApp(name)
             self.assertNotIn(name, self.swift._apps)
 
+    def test_channel_names(self):
+        channelNames = self.swift.channelNames()
+        for channelName in self.channels:
+            self.assertIn(channelName, channelNames)
+
     def test_broadcast(self):
         for channelName in self.channels:
             self.swift._broadcast(channelName, "test_msg")
