@@ -70,7 +70,7 @@ class BaseAppTest(unittest.TestCase):
 
 
 class SwiftTest(unittest.TestCase):
-    """Unit test for Swift class in swift.py"""
+    """Unit test for Swift class"""
 
     def setUp(self):
         self.qapp = QApplication(sys.argv)
