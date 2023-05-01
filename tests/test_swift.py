@@ -53,8 +53,8 @@ APP_JSONS = {
     "app2_default": '{"module": "module2", "cls": "cls2"}'
 }
 
-class AppTest(unittest.TestCase):
-    """Unit test for app.py."""
+class BaseAppTest(unittest.TestCase):
+    """Unit test for BaseApp class."""
 
     def setUp(self):
         self.app = swift.BaseApp("name")
