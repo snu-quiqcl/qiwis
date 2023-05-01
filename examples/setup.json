@@ -17,19 +17,6 @@
             "pos": "right",
             "channel": []
         },
-        "datacalc": {
-            "module": "examples.datacalc",
-            "cls": "DataCalcApp",
-            "show": true,
-            "pos": "top",
-            "channel": ["db"],
-            "args": {
-                "tables": {
-                    "A": "number",
-                    "B": "B"
-                }
-            }
-        },
         "poller": {
             "module": "examples.poller",
             "cls": "PollerApp",

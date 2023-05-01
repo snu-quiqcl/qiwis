@@ -10,7 +10,7 @@ from PyQt5.QtCore import QObject, pyqtSlot
 from PyQt5.QtWidgets import (QWidget, QLabel, QPushButton, QFileDialog,
                              QHBoxLayout, QVBoxLayout, QListWidget, QListWidgetItem)
 
-from swift import BaseApp
+from swift import AppInfo, BaseApp
 
 class DBWidget(QWidget):
     """Widget for showing a database.
@@ -53,6 +53,7 @@ class ManagerFrame(QWidget):
           Each database can be removed (actually disconnected) 
           when removeButton (of each item) clicked.
         addButton: A button for adding (actually connecting) a database.
+        openCloseDatacalcButton: A button for opening or closing a datacalc app.
     """
     def __init__(self, parent: Optional[QObject] = None):
         """Extended."""
@@ -60,10 +61,12 @@ class ManagerFrame(QWidget):
         # widgets
         self.dbListWidget = QListWidget(self)
         self.addButton = QPushButton("add", self)
+        self.openCloseDatacalcButton = QPushButton("open or close datacalc", self)
         # layout
         layout = QVBoxLayout(self)
         layout.addWidget(self.dbListWidget)
         layout.addWidget(self.addButton)
+        layout.addWidget(self.openCloseDatacalcButton)
 
 
 class DBMgrApp(BaseApp):
@@ -87,6 +90,9 @@ class DBMgrApp(BaseApp):
         dbList: A list for storing available databases.
           Each element is a namedtuple which represents a database.
           It has two elements; file name and absolute path.
+        isDatacalcOpen: True if a datacalc app is open, and False if it is close.
+        openCloseDatacalcResult: The latest swiftcall result 
+          which requests for opening or closing a datacalc app.
         managerFrame: A frame that manages and shows available databases.
     """
     DB = namedtuple("DB", ["path", "name"])
@@ -95,9 +101,12 @@ class DBMgrApp(BaseApp):
         """Extended."""
         super().__init__(name, parent=parent)
         self.dbList = []
+        self.isDatacalcOpen = False
+        self.openCloseDatacalcResult = None
         self.managerFrame = ManagerFrame()
         # connect signals to slots
         self.managerFrame.addButton.clicked.connect(self.addDB)
+        self.managerFrame.openCloseDatacalcButton.clicked.connect(self.openCloseDatacalc)
 
     def frames(self) -> Tuple[ManagerFrame]:
         """Overridden."""
@@ -162,3 +171,36 @@ class DBMgrApp(BaseApp):
         widget.deleteLater()
         # send the database list and a logging message
         self.sendDB(False, db.name)
+
+    @pyqtSlot()
+    def openCloseDatacalc(self):
+        """Opens or closes a datacalc app.
+
+        If the dataclac app is open, close it.
+        Otherwise, open a new datacalc app.
+        """
+        if self.openCloseDatacalcResult is not None:
+            if not self.openCloseDatacalcResult.done:
+                print("DBMgrApp.openCloseDatacalc(): The previous swiftcall must be done.")
+                return
+            if self.openCloseDatacalcResult.success:
+                self.isDatacalcOpen = not self.isDatacalcOpen
+        if self.isDatacalcOpen:
+            self.openCloseDatacalcResult = self.swiftcall.destroyApp(name="datacalc")
+        else:
+            self.openCloseDatacalcResult = self.swiftcall.createApp(
+                name="datacalc",
+                info=AppInfo(
+                    module="examples.datacalc",
+                    cls="DataCalcApp",
+                    show=True,
+                    pos="top",
+                    channel=["db"],
+                    args={
+                        "tables": {
+                            "A": "number",
+                            "B": "B"
+                        }
+                    }
+                )
+            )
