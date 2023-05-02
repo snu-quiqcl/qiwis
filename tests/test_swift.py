@@ -127,9 +127,13 @@ class SwiftTest(unittest.TestCase):
     def test_swiftcall(self):
         QMessageBox.warning = MagicMock(return_value=QMessageBox.Ok)
         self.swift._swiftcall("app1", json.dumps({"call": "appNames", "args": {}}))
-        self.swift._swiftcall("app1", json.dumps({"call": "_broadcast", "args": {}}))
+        self.swift._swiftcall("app1", json.dumps({
+            "call": "createApp", "args": {"name": "app3", "info": {"module": "module2", "cls": "cls2"}}
+        }))
+        self.swift.callWithSerializable = MagicMock()
         self.swift.getSerializable = MagicMock(return_value=APP_INFOS["app1"])
         self.swift._swiftcall("app1", json.dumps({"call": "getSerializable", "args": {}}))
+        self.swift._swiftcall("app1", json.dumps({"call": "_broadcast", "args": {}}))
         QMessageBox.warning.return_value = QMessageBox.Cancel
         self.swift._swiftcall("app1", json.dumps({"call": "appNames", "args": {}}))
 
