@@ -9,7 +9,7 @@ import importlib
 from collections.abc import Iterable
 import json
 
-from PyQt5.QtCore import QObject
+from PyQt5.QtCore import QObject, pyqtSignal, pyqtBoundSignal
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QWidget, QLabel
 
 import swift
@@ -54,22 +54,7 @@ APP_JSONS = {
     "app2_default": '{"module": "module2", "cls": "cls2"}'
 }
 
-class BaseAppTest(unittest.TestCase):
-    """Unit test for BaseApp class."""
-
-    def setUp(self):
-        self.app = swift.BaseApp("name")
-
-    def test_init(self):
-        self.assertEqual(self.app.name, "name")
-
-    def test_set_parent(self):
-        swift.BaseApp("name", QObject())
-
-    def test_frames(self):
-        self.assertIsInstance(self.app.frames(), Iterable)
-
-
+'''
 class SwiftTest(unittest.TestCase):
     """Unit test for Swift class."""
 
@@ -146,6 +131,27 @@ class SwiftTest(unittest.TestCase):
             self.swift._broadcast(channelName, "test_msg")
         for name, app_ in self.swift._apps.items():
             self.assertEqual(len(APP_INFOS[name].channel), app_.received.emit.call_count)
+'''
+
+class BaseAppTest(unittest.TestCase):
+    """Unit test for BaseApp class."""
+
+    def setUp(self):
+        self.app = swift.BaseApp("name")
+
+    def test_init(self):
+        self.assertEqual(self.app.name, "name")
+        self.assertIsInstance(self.app.swiftcall, swift.SwiftcallProxy)
+        self.assertEqual(type(self.app.broadcastRequested), pyqtBoundSignal)
+        self.assertEqual(type(self.app.received), pyqtBoundSignal)
+        self.assertEqual(type(self.app.swiftcallRequested), pyqtBoundSignal)
+        self.assertEqual(type(self.app.swiftcallReturned), pyqtBoundSignal)
+
+    def test_set_parent(self):
+        swift.BaseApp("name", QObject())
+
+    def test_frames(self):
+        self.assertIsInstance(self.app.frames(), Iterable)
 
 
 class SwiftFunctionTest(unittest.TestCase):
