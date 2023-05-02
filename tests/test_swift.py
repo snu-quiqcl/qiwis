@@ -91,7 +91,7 @@ class SwiftTest(unittest.TestCase):
         self.assertEqual(self.swift.appInfos, APP_INFOS)
         self.assertIsInstance(self.swift.mainWindow, QMainWindow)
         self.assertIsInstance(self.swift.centralWidget, QLabel)
-        for name, info in APP_INFOS.items():
+        for name in APP_INFOS:
             self.assertIn(name, self.swift._dockWidgets)
             self.assertIn(name, self.swift._apps)
         for channel in self.channels:
