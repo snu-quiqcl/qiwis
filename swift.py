@@ -231,7 +231,7 @@ class Swift(QObject):
             type=Qt.QueuedConnection,
         )
         for channelName in info.channel:
-            self.subscribe(app, channelName)
+            self.subscribe(name, channelName)
         for frame in app.frames():
             self.addFrame(name, frame, info)
         self._apps[name] = app
@@ -245,10 +245,9 @@ class Swift(QObject):
         dockWidgets = self._dockWidgets.pop(name)
         for dockWidget in dockWidgets:
             self.removeFrame(dockWidget)
-        app = self._apps.pop(name)
         for apps in self._subscribers.values():
-            apps.discard(app)
-        app.deleteLater()
+            apps.discard(name)
+        self._apps.pop(name).deleteLater()
 
     def updateFrames(self, name: str):
         """Updates the frames of an app.
@@ -314,8 +313,8 @@ class Swift(QObject):
             channelName: Target channel name.
             msg: Message to be broadcast.
         """
-        for app in self._subscribers[channelName]:
-            app.received.emit(channelName, msg)
+        for name in self._subscribers[channelName]:
+            self._apps[name].received.emit(channelName, msg)
 
     def _parseArgs(self, call: Callable, args: Mapping[str, Any]) -> Dict[str, Any]:
         """Converts all Serializable arguments to dataclass objects from strings.
