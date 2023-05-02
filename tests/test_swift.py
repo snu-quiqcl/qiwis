@@ -131,7 +131,7 @@ class SwiftTest(unittest.TestCase):
             self.swift._broadcast(channelName, "test_msg")
         for name, app_ in self.swift._apps.items():
             self.assertEqual(len(APP_INFOS[name].channel), app_.received.emit.call_count)
-'''
+
 
 class BaseAppTest(unittest.TestCase):
     """Unit test for BaseApp class."""
@@ -172,7 +172,14 @@ class BaseAppTest(unittest.TestCase):
         self.app._receivedSwiftcallResult(
             "request", '{"done": "tr" "ue", "success": true, "value": null, "error": null}'
         )
-        
+'''   
+
+class SwiftcallProxyTest(unittest.TestCase):
+    """Unit test for SwiftcallProxy class."""
+
+    def setUp(self):
+        self.swiftcall = swift.SwiftcallProxy(MagicMock())
+
 
 class SwiftFunctionTest(unittest.TestCase):
     """Unit test for functions."""
