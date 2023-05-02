@@ -117,13 +117,18 @@ class SwiftTest(unittest.TestCase):
             for name, info in APP_INFOS.items():
                 if channel in info.channel:
                     self.assertIn(name, subscriberNames)
+
+    def test_unsubcribe(self):
+        self.assertEqual(self.swift.unsubscribe("app1", "ch1"), True)
+        self.assertNotIn("app1", self.swift._subscribers["ch1"])
+        self.assertEqual(self.swift.unsubscribe("app2", "ch1"), False)
+
     
     def test_broadcast(self):
         for channelName in self.channels:
             self.swift._broadcast(channelName, "test_msg")
         for name, app_ in self.swift._apps.items():
             self.assertEqual(len(APP_INFOS[name].channel), app_.received.emit.call_count)
-
 
 class SwiftFunctionTest(unittest.TestCase):
     """Unit test for functions in swift.py"""
