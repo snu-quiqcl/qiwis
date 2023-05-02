@@ -245,10 +245,9 @@ class Swift(QObject):
         dockWidgets = self._dockWidgets.pop(name)
         for dockWidget in dockWidgets:
             self.removeFrame(dockWidget)
-        app = self._apps.pop(name)
         for apps in self._subscribers.values():
-            apps.discard(app)
-        app.deleteLater()
+            apps.discard(name)
+        self._apps.pop(name).deleteLater()
 
     def updateFrames(self, name: str):
         """Updates the frames of an app.
