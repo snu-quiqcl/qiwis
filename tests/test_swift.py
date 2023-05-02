@@ -7,9 +7,10 @@ from unittest.mock import MagicMock, patch
 import sys
 import importlib
 from collections.abc import Iterable
+import json
 
 from PyQt5.QtCore import QObject
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QLabel
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QWidget, QLabel
 
 import swift
 
@@ -123,12 +124,21 @@ class SwiftTest(unittest.TestCase):
         self.assertNotIn("app1", self.swift._subscribers["ch1"])
         self.assertEqual(self.swift.unsubscribe("app2", "ch1"), False)
 
-    
+    def test_swiftcall(self):
+        QMessageBox.warning = MagicMock(return_value=QMessageBox.Ok)
+        self.swift._swiftcall("app1", json.dumps({"call": "appNames", "args": {}}))
+        self.swift._swiftcall("app1", json.dumps({"call": "_broadcast", "args": {}}))
+        self.swift.getSerializable = MagicMock(return_value=APP_INFOS["app1"])
+        self.swift._swiftcall("app1", json.dumps({"call": "getSerializable", "args": {}}))
+        QMessageBox.warning.return_value = QMessageBox.Cancel
+        self.swift._swiftcall("app1", json.dumps({"call": "appNames", "args": {}}))
+
     def test_broadcast(self):
         for channelName in self.channels:
             self.swift._broadcast(channelName, "test_msg")
         for name, app_ in self.swift._apps.items():
             self.assertEqual(len(APP_INFOS[name].channel), app_.received.emit.call_count)
+
 
 class SwiftFunctionTest(unittest.TestCase):
     """Unit test for functions in swift.py"""
