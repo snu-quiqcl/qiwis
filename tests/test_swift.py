@@ -107,6 +107,10 @@ class SwiftTest(unittest.TestCase):
             self.swift.destroyApp(name)
             self.assertNotIn(name, self.swift._apps)
 
+    def test_update_frames(self):
+        self.swift._apps["app1"].frames.return_value = (QWidget(),)
+        self.swift.updateFrames("app1")
+
     def test_channel_names(self):
         channelNames = self.swift.channelNames()
         for channelName in self.channels:
