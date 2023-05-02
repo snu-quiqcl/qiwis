@@ -231,7 +231,7 @@ class Swift(QObject):
             type=Qt.QueuedConnection,
         )
         for channelName in info.channel:
-            self.subscribe(app, channelName)
+            self.subscribe(name, channelName)
         for frame in app.frames():
             self.addFrame(name, frame, info)
         self._apps[name] = app
