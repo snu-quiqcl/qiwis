@@ -21,8 +21,7 @@ import functools
 from collections import defaultdict
 from contextlib import contextmanager
 from typing import (
-    Dict, DefaultDict, Set, Any, Callable, Iterable, Mapping, KeysView,
-    Optional, TypeVar, Type,
+    Dict, DefaultDict, Set, Any, Callable, Iterable, Mapping, Optional, TypeVar, Type
 )
 
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, Qt
@@ -207,9 +206,9 @@ class Swift(QObject):
         self.mainWindow.removeDockWidget(dockWidget)
         dockWidget.deleteLater()
 
-    def appNames(self) -> KeysView[str]:
+    def appNames(self) -> tuple[str]:
         """Returns the names of the apps including whose frames are hidden."""
-        return self._apps.keys()
+        return tuple(self._apps.keys())
 
     def createApp(self, name: str, info: AppInfo):
         """Creates an app and shows their frames using set-up environment.
@@ -266,9 +265,9 @@ class Swift(QObject):
         for frame in newFramesSet - orgFramesSet:
             self.addFrame(name, frame, info)
 
-    def channelNames(self) -> KeysView[str]:
+    def channelNames(self) -> tuple[str]:
         """Returns the names of the channels."""
-        return self._subscribers.keys()
+        return tuple(self._subscribers.keys())
 
     def subscriberNames(self, channel: str) -> Set[str]:
         """Returns the names of the subscriber apps of the channel.
