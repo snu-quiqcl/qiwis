@@ -185,6 +185,13 @@ class SwiftcallProxyTest(unittest.TestCase):
         self.swiftcall.call(name=APP_INFOS["app1"])
         self.swiftcall.call()
 
+    def test_update_result(self):
+        self.swiftcall.results = {
+            "request1": swift.SwiftcallResult(done=False, success=False), "request2": None
+        }
+        self.swiftcall.update_result("request1", swift.SwiftcallResult(done=True, success=True), discard=False)
+        self.swiftcall.update_result("request2", swift.SwiftcallResult(done=True, success=True))
+
 
 class SwiftFunctionTest(unittest.TestCase):
     """Unit test for functions."""
