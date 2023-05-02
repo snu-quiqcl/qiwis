@@ -111,6 +111,13 @@ class SwiftTest(unittest.TestCase):
         for channelName in self.channels:
             self.assertIn(channelName, channelNames)
 
+    def test_subscriber_names(self):
+        for channel in self.channels:
+            subscriberNames = self.swift.subscriberNames(channel)
+            for name, info in APP_INFOS.items():
+                if channel in info.channel:
+                    self.assertIn(name, subscriberNames)
+    
     def test_broadcast(self):
         for channelName in self.channels:
             self.swift._broadcast(channelName, "test_msg")
