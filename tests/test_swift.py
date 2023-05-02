@@ -180,6 +180,11 @@ class SwiftcallProxyTest(unittest.TestCase):
     def setUp(self):
         self.swiftcall = swift.SwiftcallProxy(MagicMock())
 
+    def test_getattr(self):
+        self.swiftcall.call()
+        self.swiftcall.call(name=APP_INFOS["app1"])
+        self.swiftcall.call()
+
 
 class SwiftFunctionTest(unittest.TestCase):
     """Unit test for functions."""
