@@ -163,6 +163,17 @@ class BaseAppTest(unittest.TestCase):
         self.app.receivedSlot.assert_called_once()
         self.app._receivedMessage("ch1", '"msg1" "msg2"')
 
+    def test_received_swiftcall_result(self):
+        self.app.swiftcall.update_result = MagicMock()
+        self.app._receivedSwiftcallResult(
+            "request", '{"done": true, "success": true, "value": null, "error": null}'
+        )
+        self.app.swiftcall.update_result.assert_called_once()
+        self.app._receivedSwiftcallResult(
+            "request", '{"done": "tr" "ue", "success": true, "value": null, "error": null}'
+        )
+        
+
 
 class SwiftFunctionTest(unittest.TestCase):
     """Unit test for functions in swift.py"""
