@@ -157,6 +157,12 @@ class BaseAppTest(unittest.TestCase):
         self.app.broadcast("ch1", "msg")
         self.app.broadcast("ch1", lambda: None)
 
+    def test_received_message(self):
+        self.app.receivedSlot = MagicMock()
+        self.app._receivedMessage("ch1", '"msg"')
+        self.app.receivedSlot.assert_called_once()
+        self.app._receivedMessage("ch1", '"msg1" "msg2"')
+
 
 class SwiftFunctionTest(unittest.TestCase):
     """Unit test for functions in swift.py"""
