@@ -174,17 +174,14 @@ class BaseAppTest(unittest.TestCase):
         )
         
 
-
 class SwiftFunctionTest(unittest.TestCase):
-    """Unit test for functions in swift.py"""
+    """Unit test for functions."""
 
-    def test_parse(self):
+    def test_loads(self):
         self.assertEqual(swift.loads(swift.AppInfo, APP_JSONS["app1"]), APP_INFOS["app1"])
-
-    def test_parse_default(self):
         self.assertEqual(swift.loads(swift.AppInfo, APP_JSONS["app2_default"]), APP_INFOS["app2"])
 
-    def test_strinfo(self):
+    def test_dumps(self):
         self.assertEqual(swift.dumps(APP_INFOS["app1"]), APP_JSONS["app1"])
         self.assertEqual(swift.dumps(APP_INFOS["app2"]), APP_JSONS["app2"])
 
