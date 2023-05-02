@@ -2,14 +2,14 @@
 Module for testing swift module.
 """
 
-import unittest
-from unittest.mock import MagicMock, patch
 import sys
 import importlib
-from collections.abc import Iterable
 import json
+import unittest
+from unittest.mock import MagicMock, patch
+from collections.abc import Iterable
 
-from PyQt5.QtCore import QObject, pyqtSignal, pyqtBoundSignal
+from PyQt5.QtCore import QObject, pyqtBoundSignal
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QWidget, QLabel
 
 import swift
@@ -54,7 +54,7 @@ APP_JSONS = {
     "app2_default": '{"module": "module2", "cls": "cls2"}'
 }
 
-'''
+
 class SwiftTest(unittest.TestCase):
     """Unit test for Swift class."""
 
@@ -172,7 +172,7 @@ class BaseAppTest(unittest.TestCase):
         self.app._receivedSwiftcallResult(
             "request", '{"done": "tr" "ue", "success": true, "value": null, "error": null}'
         )
-'''   
+
 
 class SwiftcallProxyTest(unittest.TestCase):
     """Unit test for SwiftcallProxy class."""
