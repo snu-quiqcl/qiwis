@@ -153,6 +153,10 @@ class BaseAppTest(unittest.TestCase):
     def test_frames(self):
         self.assertIsInstance(self.app.frames(), Iterable)
 
+    def test_broadcast(self):
+        self.app.broadcast("ch1", "msg")
+        self.app.broadcast("ch1", lambda: None)
+
 
 class SwiftFunctionTest(unittest.TestCase):
     """Unit test for functions in swift.py"""
