@@ -117,7 +117,8 @@ class SwiftTest(unittest.TestCase):
         QMessageBox.warning = MagicMock(return_value=QMessageBox.Ok)
         self.swift._swiftcall("app1", json.dumps({"call": "appNames", "args": {}}))
         self.swift._swiftcall("app1", json.dumps({
-            "call": "createApp", "args": {"name": "app3", "info": {"module": "module2", "cls": "cls2"}}
+            "call": "createApp",
+            "args": {"name": "app3", "info": {"module": "module2", "cls": "cls2"}}
         }))
         self.swift.callWithSerializable = MagicMock()
         self.swift.getSerializable = MagicMock(return_value=APP_INFOS["app1"])
@@ -189,8 +190,12 @@ class SwiftcallProxyTest(unittest.TestCase):
         self.swiftcall.results = {
             "request1": swift.SwiftcallResult(done=False, success=False), "request2": None
         }
-        self.swiftcall.update_result("request1", swift.SwiftcallResult(done=True, success=True), discard=False)
-        self.swiftcall.update_result("request2", swift.SwiftcallResult(done=True, success=True))
+        self.swiftcall.update_result(
+            "request1", swift.SwiftcallResult(done=True, success=True), discard=False
+        )
+        self.swiftcall.update_result(
+            "request2", swift.SwiftcallResult(done=True, success=True)
+        )
 
 
 class SwiftFunctionTest(unittest.TestCase):
