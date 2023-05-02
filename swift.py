@@ -208,7 +208,7 @@ class Swift(QObject):
 
     def appNames(self) -> tuple[str]:
         """Returns the names of the apps including whose frames are hidden."""
-        return tuple(self._apps.keys())
+        return tuple(self._apps.keys())  # pylint: disable=unsubscriptable-object
 
     def createApp(self, name: str, info: AppInfo):
         """Creates an app and shows their frames using set-up environment.
@@ -267,7 +267,7 @@ class Swift(QObject):
 
     def channelNames(self) -> tuple[str]:
         """Returns the names of the channels."""
-        return tuple(self._subscribers.keys())
+        return tuple(self._subscribers.keys())  # pylint: disable=unsubscriptable-object
 
     def subscriberNames(self, channel: str) -> Set[str]:
         """Returns the names of the subscriber apps of the channel.
