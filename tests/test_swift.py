@@ -93,8 +93,16 @@ class SwiftTest(unittest.TestCase):
             self.assertNotIn(name, self.swift._apps)
 
     def test_update_frames(self):
-        self.swift._apps["app1"].frames.return_value = (QWidget(),)
+        orgFramesSet = {dockWidget.widget() for dockWidget in self.swift._dockWidgets["app1"]}
+        newFrames = (QWidget(),)
+        newFramesSet = set(newFrames)
+        self.swift._apps["app1"].frames.return_value = newFrames
         self.swift.updateFrames("app1")
+        curFramesSet = {dockWidget.widget() for dockWidget in self.swift._dockWidgets["app1"]}
+        for frame in orgFramesSet - newFramesSet:
+            self.assertNotIn(frame, curFramesSet)
+        for frame in newFrames:
+            self.assertIn(frame, curFramesSet)
 
     def test_channel_names(self):
         channelNames = self.swift.channelNames()
