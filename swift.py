@@ -243,7 +243,7 @@ class Swift(QObject):
         Args:
             name: A name of the app to destroy.
         """
-        dockWidgets = self._dockWidgets.pop(name)
+        dockWidgets = self._dockWidgets[name]
         for dockWidget in dockWidgets:
             self.removeFrame(name, dockWidget)
         for apps in self._subscribers.values():
