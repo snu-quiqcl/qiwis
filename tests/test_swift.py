@@ -69,7 +69,6 @@ class SwiftTest(unittest.TestCase):
         self.channels = set()
         for appInfo in APP_INFOS.values():
             self.channels.update(appInfo.channel)
-        self.channels = sorted(self.channels)
         self.swift = swift.Swift(APP_INFOS)
 
     def test_init(self):
@@ -104,9 +103,8 @@ class SwiftTest(unittest.TestCase):
             self.assertIn(frame, curFramesSet)
 
     def test_channel_names(self):
-        channelNames = self.swift.channelNames()
-        for channelName in self.channels:
-            self.assertIn(channelName, channelNames)
+        channelNamesSet = set(self.swift.channelNames())
+        self.assertEqual(channelNamesSet, self.channels)
 
     def test_subscriber_names(self):
         for channel in self.channels:
