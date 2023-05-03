@@ -108,10 +108,11 @@ class SwiftTest(unittest.TestCase):
 
     def test_subscriber_names(self):
         for channel in self.channels:
-            subscriberNames = self.swift.subscriberNames(channel)
-            for name, info in APP_INFOS.items():
-                if channel in info.channel:
-                    self.assertIn(name, subscriberNames)
+            subscriberNamesSet = set(self.swift.subscriberNames(channel))
+            self.assertEqual(
+                subscriberNamesSet, 
+                {name for name, info in APP_INFOS.items() if channel in info.channel}
+            )
 
     def test_unsubcribe(self):
         self.assertEqual(self.swift.unsubscribe("app1", "ch1"), True)
