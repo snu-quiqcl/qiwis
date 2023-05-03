@@ -83,9 +83,8 @@ class SwiftTest(unittest.TestCase):
             self.assertIn(channel, self.swift._subscribers)
 
     def test_app_names(self):
-        appNames = self.swift.appNames()
-        for name in APP_INFOS:
-            self.assertIn(name, appNames)
+        appNamesSet = set(self.swift.appNames())
+        self.assertEqual(appNamesSet, {name for name in APP_INFOS})
 
     def test_destroy_app(self):
         for name in APP_INFOS:
