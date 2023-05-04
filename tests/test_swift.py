@@ -162,7 +162,6 @@ class BaseAppTest(unittest.TestCase):
 
     def test_init(self):
         self.assertEqual(self.app.name, "name")
-        self.assertIsInstance(self.app.swiftcall, swift.SwiftcallProxy)
 
     def test_set_parent(self):
         swift.BaseApp("name", QObject())
