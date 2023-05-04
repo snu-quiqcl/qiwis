@@ -97,9 +97,12 @@ class SwiftTest(unittest.TestCase):
         self.assertIn("app3", self.swift._subscribers["ch1"])
 
     def test_destroy_app(self):
-        for name in APP_INFOS:
+        for name, info in APP_INFOS.items():
             self.swift.destroyApp(name)
             self.assertNotIn(name, self.swift._apps)
+            self.assertNotIn(name, self.swift._dockWidgets)
+            for channel in info.channel:
+                self.assertNotIn(name, self.swift._subscribers[channel])
 
     def test_update_frames(self):
         orgFramesSet = {dockWidget.widget() for dockWidget in self.swift._dockWidgets["app1"]}
