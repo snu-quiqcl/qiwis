@@ -246,6 +246,7 @@ class Swift(QObject):
         dockWidgets = self._dockWidgets[name]
         for dockWidget in dockWidgets:
             self.removeFrame(name, dockWidget)
+        del self._dockWidgets[name]
         for apps in self._subscribers.values():
             apps.discard(name)
         self._apps.pop(name).deleteLater()
