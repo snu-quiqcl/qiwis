@@ -194,10 +194,17 @@ class BaseAppTest(unittest.TestCase):
         self.app._receivedSwiftcallResult(
             "request", '{"done": true, "success": true, "value": null, "error": null}'
         )
-        self.app.swiftcall.update_result.assert_called_once()
+        self.app.swiftcall.update_result.assert_called_once_with(
+            "request",
+            swift.SwiftcallResult(done=True, success=True)
+        )
+
+    def test_received_swiftcall_result_exception(self):
+        self.app.swiftcall.update_result = MagicMock()
         self.app._receivedSwiftcallResult(
             "request", '{"done": "tr" "ue", "success": true, "value": null, "error": null}'
         )
+        self.app.swiftcall.update_result.assert_not_called()
 
 
 class SwiftcallProxyTest(unittest.TestCase):
