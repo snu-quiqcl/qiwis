@@ -83,6 +83,19 @@ class SwiftTest(unittest.TestCase):
         appNamesSet = set(self.swift.appNames())
         self.assertEqual(appNamesSet, set(APP_INFOS))
 
+    def test_create_app(self):
+        app_ = MagicMock()
+        app_.frames.return_value = (QWidget(),)
+        cls = MagicMock(return_value=app_)
+        setattr(importlib.import_module.return_value, "cls3", cls)
+        self.swift.createApp(
+            "app3",
+            swift.AppInfo(**{"module": "module3", "cls": "cls3", "channel": ["ch1"]})
+        )
+        self.assertIn("app3", self.swift._apps)
+        self.assertIn("app3", self.swift._dockWidgets)
+        self.assertIn("app3", self.swift._subscribers["ch1"])
+
     def test_destroy_app(self):
         for name in APP_INFOS:
             self.swift.destroyApp(name)
