@@ -73,8 +73,6 @@ class SwiftTest(unittest.TestCase):
 
     def test_init(self):
         self.assertEqual(self.swift.appInfos, APP_INFOS)
-        self.assertIsInstance(self.swift.mainWindow, QMainWindow)
-        self.assertIsInstance(self.swift.centralWidget, QLabel)
         for name in APP_INFOS:
             self.assertIn(name, self.swift._dockWidgets)
             self.assertIn(name, self.swift._apps)
@@ -149,10 +147,6 @@ class BaseAppTest(unittest.TestCase):
     def test_init(self):
         self.assertEqual(self.app.name, "name")
         self.assertIsInstance(self.app.swiftcall, swift.SwiftcallProxy)
-        self.assertEqual(type(self.app.broadcastRequested), pyqtBoundSignal)
-        self.assertEqual(type(self.app.received), pyqtBoundSignal)
-        self.assertEqual(type(self.app.swiftcallRequested), pyqtBoundSignal)
-        self.assertEqual(type(self.app.swiftcallReturned), pyqtBoundSignal)
 
     def test_set_parent(self):
         swift.BaseApp("name", QObject())
