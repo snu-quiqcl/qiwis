@@ -9,8 +9,8 @@ import unittest
 from unittest.mock import MagicMock, patch
 from collections.abc import Iterable
 
-from PyQt5.QtCore import QObject, pyqtBoundSignal
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QWidget, QLabel
+from PyQt5.QtCore import QObject
+from PyQt5.QtWidgets import QApplication, QMessageBox, QWidget
 
 import swift
 
@@ -124,7 +124,7 @@ class SwiftTest(unittest.TestCase):
         for channel in self.channels:
             subscriberNamesSet = set(self.swift.subscriberNames(channel))
             self.assertEqual(
-                subscriberNamesSet, 
+                subscriberNamesSet,
                 {name for name, info in APP_INFOS.items() if channel in info.channel}
             )
 
