@@ -170,8 +170,14 @@ class BaseAppTest(unittest.TestCase):
         self.assertIsInstance(self.app.frames(), Iterable)
 
     def test_broadcast(self):
+        self.app.broadcastRequested = MagicMock()
         self.app.broadcast("ch1", "msg")
+        self.app.broadcastRequested.emit.assert_called_once_with("ch1", '"msg"')
+
+    def test_broadcast_exception(self):
+        self.app.broadcastRequested = MagicMock()
         self.app.broadcast("ch1", lambda: None)
+        self.app.broadcastRequested.emit.assert_not_called()
 
     def test_received_message(self):
         self.app.receivedSlot = MagicMock()
