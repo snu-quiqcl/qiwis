@@ -83,7 +83,7 @@ class SwiftTest(unittest.TestCase):
 
     def test_app_names(self):
         appNamesSet = set(self.swift.appNames())
-        self.assertEqual(appNamesSet, {name for name in APP_INFOS})
+        self.assertEqual(appNamesSet, set(APP_INFOS))
 
     def test_destroy_app(self):
         for name in APP_INFOS:
