@@ -182,8 +182,12 @@ class BaseAppTest(unittest.TestCase):
     def test_received_message(self):
         self.app.receivedSlot = MagicMock()
         self.app._receivedMessage("ch1", '"msg"')
-        self.app.receivedSlot.assert_called_once()
+        self.app.receivedSlot.assert_called_once_with("ch1", "msg")
+
+    def test_received_message_exception(self):
+        self.app.receivedSlot = MagicMock()
         self.app._receivedMessage("ch1", '"msg1" "msg2"')
+        self.app.receivedSlot.assert_not_called()
 
     def test_received_swiftcall_result(self):
         self.app.swiftcall.update_result = MagicMock()
