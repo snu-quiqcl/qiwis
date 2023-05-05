@@ -62,7 +62,7 @@ class SwiftTest(unittest.TestCase):
         self.qapp = QApplication(sys.argv)
         importlib.import_module = MagicMock()
         for appInfo in APP_INFOS.values():
-            app_ = MagicMock(cls=appInfo.cls)
+            app_ = MagicMock(**{"cls": appInfo.cls})
             app_.frames.return_value = (QWidget(),)
             cls = MagicMock(return_value=app_)
             setattr(importlib.import_module.return_value, appInfo.cls, cls)
@@ -85,7 +85,7 @@ class SwiftTest(unittest.TestCase):
         self.assertEqual(appNamesSet, set(APP_INFOS))
 
     def test_create_app(self):
-        app_ = MagicMock(cls="cls3")
+        app_ = MagicMock(**{"cls": "cls3"})
         app_.frames.return_value = (QWidget(),)
         cls = MagicMock(return_value=app_)
         setattr(importlib.import_module.return_value, "cls3", cls)
@@ -114,7 +114,7 @@ class SwiftTest(unittest.TestCase):
         finalFramesSet = {dockWidget.widget() for dockWidget in self.swift._dockWidgets["app1"]}
         self.assertFalse(finalFramesSet & (orgFramesSet - newFramesSet))
         self.assertEqual(finalFramesSet, newFramesSet)
-    
+
     def test_update_frames_exclusive(self):
         orgFramesSet = {dockWidget.widget() for dockWidget in self.swift._dockWidgets["app1"]}
         newFramesSet = {QWidget()}
