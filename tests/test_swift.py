@@ -106,17 +106,23 @@ class SwiftTest(unittest.TestCase):
             for channel in info.channel:
                 self.assertNotIn(name, self.swift._subscribers[channel])
 
-    def test_update_frames(self):
+    def test_update_frames_inclusive(self):
         orgFramesSet = {dockWidget.widget() for dockWidget in self.swift._dockWidgets["app1"]}
-        newFrames = (QWidget(),)
-        newFramesSet = set(newFrames)
-        self.swift._apps["app1"].frames.return_value = newFrames
+        newFramesSet = orgFramesSet | {QWidget()}
+        self.swift._apps["app1"].frames.return_value = tuple(newFramesSet)
         self.swift.updateFrames("app1")
-        curFramesSet = {dockWidget.widget() for dockWidget in self.swift._dockWidgets["app1"]}
-        for frame in orgFramesSet - newFramesSet:
-            self.assertNotIn(frame, curFramesSet)
-        for frame in newFrames:
-            self.assertIn(frame, curFramesSet)
+        finalFramesSet = {dockWidget.widget() for dockWidget in self.swift._dockWidgets["app1"]}
+        self.assertFalse(finalFramesSet & (orgFramesSet - newFramesSet))
+        self.assertEqual(finalFramesSet, newFramesSet)
+    
+    def test_update_frames_exclusive(self):
+        orgFramesSet = {dockWidget.widget() for dockWidget in self.swift._dockWidgets["app1"]}
+        newFramesSet = {QWidget()}
+        self.swift._apps["app1"].frames.return_value = tuple(newFramesSet)
+        self.swift.updateFrames("app1")
+        finalFramesSet = {dockWidget.widget() for dockWidget in self.swift._dockWidgets["app1"]}
+        self.assertFalse(finalFramesSet & orgFramesSet)
+        self.assertEqual(finalFramesSet, newFramesSet)
 
     def test_channel_names(self):
         channelNamesSet = set(self.swift.channelNames())
