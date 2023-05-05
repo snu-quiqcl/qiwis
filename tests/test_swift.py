@@ -73,7 +73,8 @@ class SwiftTest(unittest.TestCase):
 
     def test_init(self):
         self.assertEqual(self.swift.appInfos, APP_INFOS)
-        for name in APP_INFOS:
+        for name, info in APP_INFOS.items():
+            importlib.import_module.assert_any_call(info.module)
             self.assertIn(name, self.swift._dockWidgets)
             self.assertIn(name, self.swift._apps)
         for channel in self.channels:
@@ -92,6 +93,7 @@ class SwiftTest(unittest.TestCase):
             "app3",
             swift.AppInfo(**{"module": "module3", "cls": "cls3", "channel": ["ch1"]})
         )
+        importlib.import_module.assert_called_with("module3")
         self.assertIn("app3", self.swift._apps)
         self.assertIn("app3", self.swift._dockWidgets)
         self.assertIn("app3", self.swift._subscribers["ch1"])
