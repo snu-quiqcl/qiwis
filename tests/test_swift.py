@@ -62,7 +62,7 @@ class SwiftTest(unittest.TestCase):
         self.qapp = QApplication(sys.argv)
         importlib.import_module = MagicMock()
         for appInfo in APP_INFOS.values():
-            app_ = MagicMock()
+            app_ = MagicMock(cls=appInfo.cls)
             app_.frames.return_value = (QWidget(),)
             cls = MagicMock(return_value=app_)
             setattr(importlib.import_module.return_value, appInfo.cls, cls)
@@ -75,8 +75,8 @@ class SwiftTest(unittest.TestCase):
         self.assertEqual(self.swift.appInfos, APP_INFOS)
         for name, info in APP_INFOS.items():
             importlib.import_module.assert_any_call(info.module)
+            self.assertEqual(self.swift._apps[name].cls, info.cls)
             self.assertIn(name, self.swift._dockWidgets)
-            self.assertIn(name, self.swift._apps)
         for channel in self.channels:
             self.assertIn(channel, self.swift._subscribers)
 
@@ -85,7 +85,7 @@ class SwiftTest(unittest.TestCase):
         self.assertEqual(appNamesSet, set(APP_INFOS))
 
     def test_create_app(self):
-        app_ = MagicMock()
+        app_ = MagicMock(cls="cls3")
         app_.frames.return_value = (QWidget(),)
         cls = MagicMock(return_value=app_)
         setattr(importlib.import_module.return_value, "cls3", cls)
@@ -94,7 +94,7 @@ class SwiftTest(unittest.TestCase):
             swift.AppInfo(**{"module": "module3", "cls": "cls3", "channel": ["ch1"]})
         )
         importlib.import_module.assert_called_with("module3")
-        self.assertIn("app3", self.swift._apps)
+        self.assertEqual(self.swift._apps["app3"].cls, "cls3")
         self.assertIn("app3", self.swift._dockWidgets)
         self.assertIn("app3", self.swift._subscribers["ch1"])
 
