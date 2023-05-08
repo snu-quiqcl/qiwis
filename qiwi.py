@@ -37,7 +37,7 @@ class Serializable:  # pylint: disable=too-few-public-methods
     The message protocols in qiwi use JSON strings to encode data.
     If a dataclass inherits this class, the dictionary yielded by asdict() must
       be able to converted to a JSON string, i.e., JSONifiable.
-    Every argument of qiwi-calls must be JSONifiable by itself
+    Every argument of qiwicalls must be JSONifiable by itself
       or an instance of Serializable.
     """
 
@@ -93,12 +93,12 @@ def dumps(obj: Serializable) -> str:
 
 @dataclasses.dataclass
 class QiwicallInfo(Serializable):
-    """Information of a qiwi-call request.
+    """Information of a qiwicall request.
     
     Fields:
-        call: The name of the qiwi-call feature, e.g., "createApp" for createApp().
+        call: The name of the qiwicall feature, e.g., "createApp" for createApp().
           This is case-sensitive.
-        args: The arguments of the qiwi-call as a dictionary of keyword arguements.
+        args: The arguments of the qiwicall as a dictionary of keyword arguements.
           The names of the arguements are case-sensitive.
           When an argument is Serializable, it must be given as a converted JSON string,
           e.g., not {"arg": QiwicallInfo(call="call")},
@@ -110,13 +110,13 @@ class QiwicallInfo(Serializable):
 
 @dataclasses.dataclass
 class QiwicallResult(Serializable):
-    """Result data of a qiwi-call.
+    """Result data of a qiwicall.
     
     Fields:
-        done: Whether the qiwi-call is done. Even when it failed, this is True as well.
-        success: True when the qiwi-call is done without any problems.
-        value: Return value of the qiwi-call, if any. It must be JSONifiable.
-        error: Information about the problem that occurred during the qiwi-call.
+        done: Whether the qiwicall is done. Even when it failed, this is True as well.
+        success: True when the qiwicall is done without any problems.
+        value: Return value of the qiwicall, if any. It must be JSONifiable.
+        error: Information about the problem that occurred during the qiwicall.
     """
     done: bool
     success: bool
@@ -129,8 +129,8 @@ class Qiwi(QObject):
 
     Note that QApplication instance must be created before instantiating Qiwi object.
 
-    A qiwi-call is a request for the qiwi system such as creating an app.
-    Messages emitted from "qiwicallRequested" signal are considered as qiwi-call.
+    A qiwicall is a request for the qiwi system such as creating an app.
+    Messages emitted from "qiwicallRequested" signal are considered as qiwicall.
     For details, see _qiwicall().
 
     Brief procedure:
@@ -176,7 +176,7 @@ class Qiwi(QObject):
     def addFrame(self, name: str, frame: QWidget, info: AppInfo):
         """Adds a frame of the app and wraps it with a dock widget.
 
-        This is not a qiwi-call because QWidget is not Serializable.
+        This is not a qiwicall because QWidget is not Serializable.
         
         Args:
             name: A name of app.
@@ -198,7 +198,7 @@ class Qiwi(QObject):
     def removeFrame(self, name: str, dockWidget: QDockWidget):
         """Removes the frame from the main window.
         
-        This is not a qiwi-call because QDockWidget is not Serializable.
+        This is not a qiwicall because QDockWidget is not Serializable.
         
         Args:
             name: A name of app.
@@ -344,7 +344,7 @@ class Qiwi(QObject):
         return parsedArgs
 
     def _handleQiwicall(self, sender: str, msg: str) -> Any:
-        """Handles the qiwi-call.
+        """Handles the qiwicall.
 
         This can raise an exception if the arguments do not follow the valid API.
         The caller must obey the API and catch the possible exceptions.
@@ -362,7 +362,7 @@ class Qiwi(QObject):
             RuntimeError: When the user rejects the request.
         
         Returns:
-            The returned value of the qiwi-call, if any.
+            The returned value of the qiwicall, if any.
         """
         info = loads(QiwicallInfo, msg)
         if info.call.startswith("_"):
@@ -371,8 +371,8 @@ class Qiwi(QObject):
         args = self._parseArgs(call, info.args)
         reply = QMessageBox.warning(
             None,
-            "qiwi-call",
-            f"The app {sender} requests for a qiwi-call {info.call} with {args}.",
+            "qiwicall",
+            f"The app {sender} requests for a qiwicall {info.call} with {args}.",
             QMessageBox.Ok | QMessageBox.Cancel,
             QMessageBox.Cancel,
         )
@@ -409,15 +409,15 @@ class BaseApp(QObject):
           broadcasting to a channel with the target channel name and the message.
         received(channel, message): A broadcast message is received from a channel.
         qiwicallRequested(request): The app can emit this signal to request
-          a qiwi-call with a request message converted from a qiwi.QiwicallInfo
+          a qiwicall with a request message converted from a qiwi.QiwicallInfo
           object by qiwi.dumps().
-        qiwicallReturned(request, result): The result of the requested qiwi-call
+        qiwicallReturned(request, result): The result of the requested qiwicall
           with the original requested message and the result message converted
           from a qiwi.QiwicallResult object by qiwi.dumps().
     
     Attributes:
         name: The string identifier name of this app.
-        qiwicall: A qiwi-call proxy for requesting qiwi-calls conveniently.
+        qiwicall: A qiwicall proxy for requesting qiwicalls conveniently.
     """
 
     broadcastRequested = pyqtSignal(str, str)
@@ -492,7 +492,7 @@ class BaseApp(QObject):
         Args:
             request: The request message that has been sent via 
               self.qiwicallRequested signal.
-            msg: The received qiwi-call result message.
+            msg: The received qiwicall result message.
         """
         try:
             result = loads(QiwicallResult, msg)
@@ -503,10 +503,10 @@ class BaseApp(QObject):
 
 
 class QiwicallProxy:  # pylint: disable=too-few-public-methods
-    """A proxy for requesting qiwi-calls conveniently.
+    """A proxy for requesting qiwicalls conveniently.
     
     Every attribute access is proxied, and if you try to call a method of this
-    object, it will emit a qiwi-call requesting signal instead.
+    object, it will emit a qiwicall requesting signal instead.
     If you get an attribute of this object, you will get a callable object which
     does the same thing as calling a method of this object.
     """
@@ -521,25 +521,25 @@ class QiwicallProxy:  # pylint: disable=too-few-public-methods
         self.results: Dict[str, QiwicallResult] = {}
 
     def __getattr__(self, call: str) -> Callable:
-        """Returns a callable object which emits a qiwi-call requesting signal.
+        """Returns a callable object which emits a qiwicall requesting signal.
 
         Args:
-            call: The name of the qiwi-call.
+            call: The name of the qiwicall.
         """
         def proxy(**args: Any) -> QiwicallResult:
-            """Emits a qiwi-call request signal with the given arguments.
+            """Emits a qiwicall request signal with the given arguments.
 
             It saves the returned result to self.results dictionary, so when
-            self.returned signal is emitted, i.e., the qiwi-call result is received,
+            self.returned signal is emitted, i.e., the qiwicall result is received,
             it will update the result object contents.
 
             Args:
-                **args: The arguments for the qiwi-call, all as keyword arguments.
+                **args: The arguments for the qiwicall, all as keyword arguments.
                   If an argument is a qiwi.Serializable instance, it will be
                   converted to a JSON string by qiwi.dumps().
 
             Returns:
-                A qiwi-call result object to keep tracking the result.
+                A qiwicall result object to keep tracking the result.
             """
             for name, arg in args.items():
                 if isinstance(arg, Serializable):
