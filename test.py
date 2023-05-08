@@ -164,6 +164,13 @@ class SwiftTest(unittest.TestCase):
         for name, app_ in self.swift._apps.items():
             self.assertEqual(len(APP_INFOS[name].channel), app_.received.emit.call_count)
 
+    def test_parse_args_primitive(self):
+        def call_for_test(arg_number: float, arg_bool: bool, arg_null: None, arg_string: str):
+            """A dummy function for testing, which has only primitive type arguments."""
+        args = {"arg_number": 1.5, "arg_bool": True, "arg_null": None, "arg_string": "abc"}
+        parsed_args = self.swift._parseArgs(call_for_test, args)
+        self.assertEqual(args, parsed_args)
+
 
 class BaseAppTest(unittest.TestCase):
     """Unit test for BaseApp class."""
