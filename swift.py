@@ -21,8 +21,7 @@ import functools
 from collections import defaultdict
 from contextlib import contextmanager
 from typing import (
-    Dict, DefaultDict, Set, Any, Callable, Iterable, Mapping, KeysView,
-    Optional, TypeVar, Type,
+    Dict, DefaultDict, Set, Any, Callable, Iterable, Mapping, Optional, Tuple, TypeVar, Type
 )
 
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, Qt
@@ -196,20 +195,22 @@ class Swift(QObject):
             self.mainWindow.addDockWidget(area, dockWidget)
         self._dockWidgets[name].append(dockWidget)
 
-    def removeFrame(self, dockWidget: QDockWidget):
+    def removeFrame(self, name: str, dockWidget: QDockWidget):
         """Removes the frame from the main window.
         
         This is not a swift-call because QDockWidget is not Serializable.
         
         Args:
+            name: A name of app.
             dockWidget: A dock widget to remove.
         """
         self.mainWindow.removeDockWidget(dockWidget)
+        self._dockWidgets[name].remove(dockWidget)
         dockWidget.deleteLater()
 
-    def appNames(self) -> KeysView[str]:
+    def appNames(self) -> Tuple[str]:
         """Returns the names of the apps including whose frames are hidden."""
-        return self._apps.keys()
+        return tuple(self._apps.keys())
 
     def createApp(self, name: str, info: AppInfo):
         """Creates an app and shows their frames using set-up environment.
@@ -242,9 +243,10 @@ class Swift(QObject):
         Args:
             name: A name of the app to destroy.
         """
-        dockWidgets = self._dockWidgets.pop(name)
+        dockWidgets = self._dockWidgets[name]
         for dockWidget in dockWidgets:
-            self.removeFrame(dockWidget)
+            self.removeFrame(name, dockWidget)
+        del self._dockWidgets[name]
         for apps in self._subscribers.values():
             apps.discard(name)
         self._apps.pop(name).deleteLater()
@@ -262,13 +264,13 @@ class Swift(QObject):
         orgFramesSet = set(orgFrames)
         newFramesSet = set(newFrames)
         for frame in orgFramesSet - newFramesSet:
-            self.removeFrame(orgFrames[frame])
+            self.removeFrame(name, orgFrames[frame])
         for frame in newFramesSet - orgFramesSet:
             self.addFrame(name, frame, info)
 
-    def channelNames(self) -> KeysView[str]:
+    def channelNames(self) -> Tuple[str]:
         """Returns the names of the channels."""
-        return self._subscribers.keys()
+        return tuple(self._subscribers.keys())
 
     def subscriberNames(self, channel: str) -> Set[str]:
         """Returns the names of the subscriber apps of the channel.
