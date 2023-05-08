@@ -2,6 +2,7 @@
 Module for testing swift module.
 """
 
+import dataclasses
 import sys
 import importlib
 import json
@@ -170,6 +171,34 @@ class SwiftTest(unittest.TestCase):
         args = {"arg_number": 1.5, "arg_bool": True, "arg_null": None, "arg_string": "abc"}
         parsed_args = self.swift._parseArgs(call_for_test, args)
         self.assertEqual(args, parsed_args)
+
+    def test_parse_args_serializable(self):
+        @dataclasses.dataclass
+        class ClassForTest(swift.Serializable):
+            field_number: float
+            field_bool: bool
+            field_null: None
+            field_string: str
+        def call_for_test(arg1: ClassForTest, arg2: ClassForTest):
+            """A dummy function for testing, which has only Serializable type arguments."""
+        fields1 = {
+            "field_number": 1.5,
+            "field_bool": True,
+            "field_null": None,
+            "field_string": "abc",
+        }
+        fields2 = {
+            "field_number": 0,
+            "field_bool": False,
+            "field_null": None,
+            "field_string": "",
+        }
+        arg1 = ClassForTest(**fields1)
+        arg2 = ClassForTest(**fields2)
+        args = {"arg1": arg1, "arg2": arg2}
+        parsed_args = self.swift._parseArgs(call_for_test, args)
+        self.assertEqual(json.dumps(fields1), parsed_args["arg1"])
+        self.assertEqual(json.dumps(fields2), parsed_args["arg2"])
 
 
 class BaseAppTest(unittest.TestCase):
