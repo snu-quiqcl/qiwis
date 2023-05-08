@@ -16,4 +16,4 @@ disable=
     protected-access,
 
 [TYPECHECK]
-ignored-modules=swift
+ignored-modules=qiwi
