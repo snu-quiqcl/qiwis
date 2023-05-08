@@ -23,5 +23,5 @@ jobs:
         pip install pyqt5
     - name: Analyze the code with pylint
       run: |
-        pylint $(git ls-files '*.py' ':!:tests/*.py')
-        pylint --rc tests/.pylintrc  $(git ls-files 'tests/*.py')
+        pylint $(git ls-files '*.py' ':!:test.py')
+        pylint --rc .pylintrc_test test.py
