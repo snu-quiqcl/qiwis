@@ -166,7 +166,7 @@ class SwiftTest(unittest.TestCase):
             self.assertEqual(len(APP_INFOS[name].channel), app_.received.emit.call_count)
 
     def test_parse_args_primitive(self):
-        def call_for_test(arg_number: float, arg_bool: bool, arg_null: None, arg_string: str):
+        def call_for_test(arg_number: float, arg_bool: bool, arg_null: None, arg_string: str):  # pylint: disable=unused-argument
             """A dummy function for testing, which has only primitive type arguments."""
         args = {"arg_number": 1.5, "arg_bool": True, "arg_null": None, "arg_string": "abc"}
         parsed_args = self.swift._parseArgs(call_for_test, args)
@@ -179,7 +179,7 @@ class SwiftTest(unittest.TestCase):
             field_bool: bool
             field_null: None
             field_string: str
-        def call_for_test(arg1: ClassForTest, arg2: ClassForTest):
+        def call_for_test(arg1: ClassForTest, arg2: ClassForTest):  # pylint: disable=unused-argument
             """A dummy function for testing, which has only Serializable type arguments."""
         fields1 = {
             "field_number": 1.5,
