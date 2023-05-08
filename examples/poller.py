@@ -8,7 +8,7 @@ from typing import Any, Optional, Tuple
 from PyQt5.QtCore import QObject, pyqtSlot, QTimer
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QComboBox, QSpinBox, QLabel
 
-from swift import BaseApp
+from qiwi import BaseApp
 from examples.backend import poll, write
 
 class ViewerFrame(QWidget):
