@@ -114,7 +114,6 @@ class SwiftTest(unittest.TestCase):
         self.swift._apps["app1"].frames.return_value = tuple(newFramesSet)
         self.swift.updateFrames("app1")
         finalFramesSet = {dockWidget.widget() for dockWidget in self.swift._dockWidgets["app1"]}
-        self.assertFalse(finalFramesSet & (orgFramesSet - newFramesSet))
         self.assertEqual(finalFramesSet, newFramesSet)
 
     def test_update_frames_exclusive(self):
