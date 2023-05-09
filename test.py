@@ -7,7 +7,7 @@ import sys
 import importlib
 import json
 import unittest
-from unittest.mock import MagicMock, patch, DEFAULT
+from unittest.mock import MagicMock, patch, DEFAULT, call
 from collections.abc import Iterable
 from typing import Any, Optional, Mapping
 
