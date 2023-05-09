@@ -7,7 +7,7 @@ import sys
 import importlib
 import json
 import unittest
-from unittest.mock import MagicMock, patch, DEFAULT, call
+from unittest import mock
 from collections.abc import Iterable
 from typing import Any, Optional, Mapping
 
@@ -64,12 +64,12 @@ class SwiftTest(unittest.TestCase):
     """Unit test for Swift class."""
 
     def setUp(self):
-        importlib.import_module = MagicMock()
+        importlib.import_module = mock.MagicMock()
         for appInfo in APP_INFOS.values():
-            app_ = MagicMock()
+            app_ = mock.MagicMock()
             app_.cls = appInfo.cls
             app_.frames.return_value = (QWidget(),)
-            cls = MagicMock(return_value=app_)
+            cls = mock.MagicMock(return_value=app_)
             setattr(importlib.import_module.return_value, appInfo.cls, cls)
         self.channels = set()
         for appInfo in APP_INFOS.values():
@@ -90,10 +90,10 @@ class SwiftTest(unittest.TestCase):
         self.assertEqual(appNamesSet, set(APP_INFOS))
 
     def test_create_app(self):
-        app_ = MagicMock()
+        app_ = mock.MagicMock()
         app_.cls = "cls3"
         app_.frames.return_value = (QWidget(),)
-        cls = MagicMock(return_value=app_)
+        cls = mock.MagicMock(return_value=app_)
         setattr(importlib.import_module.return_value, "cls3", cls)
         self.swift.createApp(
             "app3",
@@ -155,7 +155,7 @@ class SwiftTest(unittest.TestCase):
         error: Optional[Exception] = None):
         """Helper method for testing _swiftcall()."""
         msg = swift.dumps(swift.SwiftcallInfo(call="callForTest", args={}))
-        with patch.multiple(self.swift, _handleSwiftcall=DEFAULT, _apps=DEFAULT):
+        with mock.patch.multiple(self.swift, _handleSwiftcall=mock.DEFAULT, _apps=mock.DEFAULT):
             if error is None:
                 self.swift._handleSwiftcall.return_value = value
             else:
@@ -250,11 +250,11 @@ class HandleSwiftcallTest(unittest.TestCase):
         }
         self.call = swift.SwiftcallInfo(call="callForTest", args=self.args)
         self.msg = json.dumps(dataclasses.asdict(self.call))
-        self.swift.callForTest = MagicMock()
-        self.swift._parseArgs = MagicMock(return_value=self.args)
-        QMessageBox.warning = MagicMock(return_value=QMessageBox.Ok)
+        self.swift.callForTest = mock.MagicMock()
+        self.swift._parseArgs = mock.MagicMock(return_value=self.args)
+        QMessageBox.warning = mock.MagicMock(return_value=QMessageBox.Ok)
         self._stashed_swift_loads = swift.loads
-        swift.loads = MagicMock(return_value=self.call)
+        swift.loads = mock.MagicMock(return_value=self.call)
 
     def doCleanups(self):
         swift.loads = self._stashed_swift_loads
@@ -272,7 +272,7 @@ class HandleSwiftcallTest(unittest.TestCase):
     def test_non_public(self):
         self.call.call = "_callForTest"
         self.msg = json.dumps(dataclasses.asdict(self.call))
-        self.swift._callForTest = MagicMock()
+        self.swift._callForTest = mock.MagicMock()
         with self.assertRaises(ValueError):
             self.swift._handleSwiftcall(sender="sender", msg=self.msg)
         self.swift._callForTest.assert_not_called()
@@ -294,27 +294,27 @@ class BaseAppTest(unittest.TestCase):
         self.assertIsInstance(self.app.frames(), Iterable)
 
     def test_broadcast(self):
-        self.app.broadcastRequested = MagicMock()
+        self.app.broadcastRequested = mock.MagicMock()
         self.app.broadcast("ch1", "msg")
         self.app.broadcastRequested.emit.assert_called_once_with("ch1", '"msg"')
 
     def test_broadcast_exception(self):
-        self.app.broadcastRequested = MagicMock()
+        self.app.broadcastRequested = mock.MagicMock()
         self.app.broadcast("ch1", lambda: None)
         self.app.broadcastRequested.emit.assert_not_called()
 
     def test_received_message(self):
-        self.app.receivedSlot = MagicMock()
+        self.app.receivedSlot = mock.MagicMock()
         self.app._receivedMessage("ch1", '"msg"')
         self.app.receivedSlot.assert_called_once_with("ch1", "msg")
 
     def test_received_message_exception(self):
-        self.app.receivedSlot = MagicMock()
+        self.app.receivedSlot = mock.MagicMock()
         self.app._receivedMessage("ch1", '"msg1" "msg2"')
         self.app.receivedSlot.assert_not_called()
 
     def test_received_swiftcall_result(self):
-        self.app.swiftcall.update_result = MagicMock()
+        self.app.swiftcall.update_result = mock.MagicMock()
         self.app._receivedSwiftcallResult(
             "request", '{"done": true, "success": true, "value": null, "error": null}'
         )
@@ -324,7 +324,7 @@ class BaseAppTest(unittest.TestCase):
         )
 
     def test_received_swiftcall_result_exception(self):
-        self.app.swiftcall.update_result = MagicMock()
+        self.app.swiftcall.update_result = mock.MagicMock()
         self.app._receivedSwiftcallResult(
             "request", '{"done": "tr" "ue", "success": true, "value": null, "error": null}'
         )
@@ -335,7 +335,7 @@ class SwiftcallProxyTest(unittest.TestCase):
     """Unit test for SwiftcallProxy class."""
 
     def setUp(self):
-        self.swiftcall = swift.SwiftcallProxy(MagicMock())
+        self.swiftcall = swift.SwiftcallProxy(mock.MagicMock())
 
     def help_proxy(self, info: swift.SwiftcallInfo, args: Mapping[str, Any]):
         """Helper method for testing proxy.
@@ -345,7 +345,7 @@ class SwiftcallProxyTest(unittest.TestCase):
             args: A keyword argument mapping for calling the proxy.
         """
         msg = swift.dumps(info)
-        with patch.object(self.swiftcall, "results", {}):
+        with mock.patch.object(self.swiftcall, "results", {}):
             result = self.swiftcall.callForTest(**args)
             self.swiftcall.requested.emit.assert_called_once_with(msg)
             self.assertIs(result, self.swiftcall.results[msg])
@@ -387,12 +387,12 @@ class SwiftcallProxyTest(unittest.TestCase):
         args = {"a": 123}
         info = swift.SwiftcallInfo(call="callForTest", args=args)
         msg = swift.dumps(info)
-        with patch.object(self.swiftcall, "results", {}):
+        with mock.patch.object(self.swiftcall, "results", {}):
             result1 = self.swiftcall.callForTest(**args)
             result2 = self.swiftcall.callForTest(**args)
             self.assertSequenceEqual(
                 self.swiftcall.requested.emit.mock_calls,
-                (call(msg), call(msg)),
+                (mock.call(msg), mock.call(msg)),
             )
             self.assertIs(result2, self.swiftcall.results[msg])
             self.assertEqual(result2, swift.SwiftcallResult(done=False, success=False))
@@ -401,7 +401,7 @@ class SwiftcallProxyTest(unittest.TestCase):
     def test_update_result_success(self):
         old_result = swift.SwiftcallResult(done=False, success=False)
         new_result = swift.SwiftcallResult(done=True, success=True, value=0)
-        with patch.object(self.swiftcall, "results", {"request": old_result}):
+        with mock.patch.object(self.swiftcall, "results", {"request": old_result}):
             self.swiftcall.update_result("request", new_result)
             self.assertEqual(old_result, new_result)
             self.assertNotIn("request", self.swiftcall.results)
@@ -409,7 +409,7 @@ class SwiftcallProxyTest(unittest.TestCase):
     def test_update_result_error(self):
         old_result = swift.SwiftcallResult(done=False, success=False)
         new_result = swift.SwiftcallResult(done=True, success=False, error=RuntimeError("test"))
-        with patch.object(self.swiftcall, "results", {"request": old_result}):
+        with mock.patch.object(self.swiftcall, "results", {"request": old_result}):
             self.swiftcall.update_result("request", new_result)
             self.assertEqual(old_result, new_result)
             self.assertNotIn("request", self.swiftcall.results)
@@ -417,7 +417,7 @@ class SwiftcallProxyTest(unittest.TestCase):
     def test_update_result_no_discard(self):
         old_result = swift.SwiftcallResult(done=False, success=False)
         new_result = swift.SwiftcallResult(done=True, success=True, value=0)
-        with patch.object(self.swiftcall, "results", {"request": old_result}):
+        with mock.patch.object(self.swiftcall, "results", {"request": old_result}):
             self.swiftcall.update_result("request", new_result, discard=False)
             self.assertEqual(old_result, new_result)
             self.assertIs(old_result, self.swiftcall.results["request"])
@@ -442,28 +442,28 @@ class SwiftFunctionTest(unittest.TestCase):
             self.assertIn(test_dir, sys.path)
         self.assertEqual(old_path, sys.path)
 
-    @patch.object(sys, "argv", ["", "-s", "test_setup.json"])
+    @mock.patch.object(sys, "argv", ["", "-s", "test_setup.json"])
     def test_get_argparser(self):
         parser = swift._get_argparser()
         args = parser.parse_args()
         self.assertEqual(args.setup_path, "test_setup.json")
 
-    @patch.object(sys, "argv", [""])
+    @mock.patch.object(sys, "argv", [""])
     def test_get_argparser_default(self):
         args = swift._get_argparser().parse_args()
         self.assertEqual(args.setup_path, "./setup.json")
 
-    @patch("builtins.open")
-    @patch("json.load", return_value={"app": APP_DICTS})
+    @mock.patch("builtins.open")
+    @mock.patch("json.load", return_value={"app": APP_DICTS})
     def test_read_setup_file(self, mock_open, mock_load):
         self.assertEqual(swift._read_setup_file(""), APP_INFOS)
         mock_open.assert_called_once()
         mock_load.assert_called_once()
 
-    @patch("swift._get_argparser")
-    @patch("swift._read_setup_file", return_value={})
-    @patch("swift.Swift")
-    @patch("swift.QApplication")
+    @mock.patch("swift._get_argparser")
+    @mock.patch("swift._read_setup_file", return_value={})
+    @mock.patch("swift.Swift")
+    @mock.patch("swift.QApplication")
     def test_main(self, mock_qapp, mock_swift, mock_read_setup_file, mock_get_argparser):
         swift.main()
         mock_get_argparser.assert_called_once()
