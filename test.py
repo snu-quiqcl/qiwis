@@ -9,7 +9,7 @@ import json
 import unittest
 from unittest.mock import MagicMock, patch, DEFAULT
 from collections.abc import Iterable
-from typing import Any, Optional
+from typing import Any, Optional, Mapping
 
 from PyQt5.QtCore import QObject
 from PyQt5.QtWidgets import QApplication, QMessageBox, QWidget
@@ -337,6 +337,20 @@ class SwiftcallProxyTest(unittest.TestCase):
     def setUp(self):
         self.swiftcall = swift.SwiftcallProxy(MagicMock())
 
+    def help_proxy(self, info: swift.SwiftcallInfo, args: Mapping[str, Any]):
+        """Helper method for testing proxy.
+        
+        Args:
+            info: SwiftcallInfo object for requesting a swiftcall.
+            args: A keyword argument mapping for calling the proxy.
+        """
+        msg = swift.dumps(info)
+        with patch.object(self.swiftcall, "results", {}):
+            result = self.swiftcall.callForTest(**args)
+            self.swiftcall.requested.emit.assert_called_once_with(msg)
+            self.assertIs(result, self.swiftcall.results[msg])
+            self.assertEqual(result, swift.SwiftcallResult(done=False, success=False))
+
     def test_proxy_primitive(self):
         """Tests a proxied swiftcall with primitive type arguments.
         
@@ -344,12 +358,7 @@ class SwiftcallProxyTest(unittest.TestCase):
         """
         args = {"number": 1.5, "boolean": True, "string": "abc"}
         info = swift.SwiftcallInfo(call="callForTest", args=args)
-        msg = swift.dumps(info)
-        with patch.object(self.swiftcall, "results", {}):
-            result = self.swiftcall.callForTest(**args)
-            self.swiftcall.requested.emit.assert_called_once_with(msg)
-            self.assertIs(result, self.swiftcall.results[msg])
-            self.assertEqual(result, swift.SwiftcallResult(done=False, success=False))
+        self.help_proxy(info, args)
 
     def test_proxy_serializable(self):
         """Tests a proxied swiftcall with Serializable type arguments.
@@ -367,12 +376,7 @@ class SwiftcallProxyTest(unittest.TestCase):
         }
         json_args = {name: swift.dumps(arg) for name, arg in args.items()}
         info = swift.SwiftcallInfo(call="callForTest", args=json_args)
-        msg = swift.dumps(info)
-        with patch.object(self.swiftcall, "results", {}):
-            result = self.swiftcall.callForTest(**args)
-            self.swiftcall.requested.emit.assert_called_once_with(msg)
-            self.assertIs(result, self.swiftcall.results[msg])
-            self.assertEqual(result, swift.SwiftcallResult(done=False, success=False))
+        self.help_proxy(info, args)
 
     def test_update_result(self):
         self.swiftcall.results = {
