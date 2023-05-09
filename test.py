@@ -230,6 +230,12 @@ class HandleSwiftcallTest(unittest.TestCase):
         self.swift._handleSwiftcall(sender="sender", msg=self.msg)
         self.swift.callForTest.assert_called_once_with(**self.args)
 
+    def test_cancel(self):
+        QMessageBox.warning.return_value = QMessageBox.Cancel
+        with self.assertRaises(RuntimeError):
+            self.swift._handleSwiftcall(sender="sender", msg=self.msg)
+        self.swift.callForTest.assert_not_called()
+
 
 class BaseAppTest(unittest.TestCase):
     """Unit test for BaseApp class."""
