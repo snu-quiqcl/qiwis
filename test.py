@@ -199,12 +199,10 @@ class SwiftTest(unittest.TestCase):
             "field_null": None,
             "field_string": "",
         }
-        arg1 = ClassForTest(**fields1)
-        arg2 = ClassForTest(**fields2)
-        args = {"arg1": arg1, "arg2": arg2}
-        parsed_args = self.swift._parseArgs(call_for_test, args)
-        self.assertEqual(json.dumps(fields1), parsed_args["arg1"])
-        self.assertEqual(json.dumps(fields2), parsed_args["arg2"])
+        args = {"arg1": ClassForTest(**fields1), "arg2": ClassForTest(**fields2)}
+        json_args = {"arg1": json.dumps(fields1), "arg2": json.dumps(fields2)}
+        parsed_args = self.swift._parseArgs(call_for_test, json_args)
+        self.assertEqual(args, parsed_args)
 
 
 class BaseAppTest(unittest.TestCase):
