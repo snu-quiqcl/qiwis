@@ -351,6 +351,29 @@ class SwiftcallProxyTest(unittest.TestCase):
             self.assertIs(result, self.swiftcall.results[msg])
             self.assertEqual(result, swift.SwiftcallResult(done=False, success=False))
 
+    def test_proxy_serializable(self):
+        """Tests a proxied swiftcall with Serializable type arguments.
+        
+        This assumes that swift.dumps() works correctly.
+        """
+        @dataclasses.dataclass
+        class ClassForTest(swift.Serializable):
+            number: float
+            boolean: bool
+            string: str
+        args = {
+            "arg1": ClassForTest(number=1.5, boolean=True, string="abc"),
+            "arg2": ClassForTest(number=0, boolean=False, string=""),
+        }
+        json_args = {name: swift.dumps(arg) for name, arg in args.items()}
+        info = swift.SwiftcallInfo(call="callForTest", args=json_args)
+        msg = swift.dumps(info)
+        with patch.object(self.swiftcall, "results", {}):
+            result = self.swiftcall.callForTest(**args)
+            self.swiftcall.requested.emit.assert_called_once_with(msg)
+            self.assertIs(result, self.swiftcall.results[msg])
+            self.assertEqual(result, swift.SwiftcallResult(done=False, success=False))
+
     def test_update_result(self):
         self.swiftcall.results = {
             "request1": swift.SwiftcallResult(done=False, success=False), "request2": None
