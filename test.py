@@ -146,19 +146,20 @@ class SwiftTest(unittest.TestCase):
         self.assertNotIn("app1", self.swift._subscribers["ch1"])
         self.assertEqual(self.swift.unsubscribe("app2", "ch1"), False)
 
-    def test_swiftcall(self):
-        QMessageBox.warning = MagicMock(return_value=QMessageBox.Ok)
-        self.swift._swiftcall("app1", json.dumps({"call": "appNames", "args": {}}))
-        self.swift._swiftcall("app1", json.dumps({
-            "call": "createApp",
-            "args": {"name": "app3", "info": {"module": "module2", "cls": "cls2"}}
-        }))
-        self.swift.callWithSerializable = MagicMock()
-        self.swift.getSerializable = MagicMock(return_value=APP_INFOS["app1"])
-        self.swift._swiftcall("app1", json.dumps({"call": "getSerializable", "args": {}}))
-        self.swift._swiftcall("app1", json.dumps({"call": "_broadcast", "args": {}}))
-        QMessageBox.warning.return_value = QMessageBox.Cancel
-        self.swift._swiftcall("app1", json.dumps({"call": "appNames", "args": {}}))
+    def test_swiftcall_primitive(self):
+        """The swiftcall returns a primitive type value, which can be JSONified.
+        
+        This assumes that swift.dumps() works correctly since it is quite simple.
+        """
+        msg = swift.dumps(swift.SwiftcallInfo(call="callForTest", args={}))
+        value = [1.5, True, None, "abc"]
+        result = swift.SwiftcallResult(done=True, success=True, value=value)
+        self.swift._handleSwiftcall = MagicMock(return_value=value)
+        signal = MagicMock()
+        self.swift._apps["app1"].swiftcallReturned = signal
+        self.swift._swiftcall(sender="app1", msg=msg)
+        signal.emit.assert_called_once_with(msg, swift.dumps(result))
+
 
     def test_broadcast(self):
         for channelName in self.channels:
