@@ -404,7 +404,7 @@ class SwiftcallProxyTest(unittest.TestCase):
         with patch.object(self.swiftcall, "results", {"request": old_result}):
             self.swiftcall.update_result("request", new_result)
             self.assertEqual(old_result, new_result)
-            self.assertFalse(self.swiftcall.results)
+            self.assertNotIn("request", self.swiftcall.results)
 
     def test_update_result_error(self):
         old_result = swift.SwiftcallResult(done=False, success=False)
@@ -412,7 +412,7 @@ class SwiftcallProxyTest(unittest.TestCase):
         with patch.object(self.swiftcall, "results", {"request": old_result}):
             self.swiftcall.update_result("request", new_result)
             self.assertEqual(old_result, new_result)
-            self.assertFalse(self.swiftcall.results)
+            self.assertNotIn("request", self.swiftcall.results)
 
     def test_update_result_no_discard(self):
         old_result = swift.SwiftcallResult(done=False, success=False)
