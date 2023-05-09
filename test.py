@@ -243,7 +243,6 @@ class HandleSwiftcallTest(unittest.TestCase):
     """Unit test for Swift._handleSwiftcall()."""
 
     def setUp(self):
-        self.qapp = QApplication([])
         self.swift = swift.Swift()
         self.args = {
             "a": 1.5,
