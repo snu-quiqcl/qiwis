@@ -398,16 +398,13 @@ class SwiftcallProxyTest(unittest.TestCase):
             self.assertEqual(result2, swift.SwiftcallResult(done=False, success=False))
             self.assertEqual(result1, result2)
 
-    def test_update_result(self):
-        self.swiftcall.results = {
-            "request1": swift.SwiftcallResult(done=False, success=False), "request2": None
-        }
-        self.swiftcall.update_result(
-            "request1", swift.SwiftcallResult(done=True, success=True), discard=False
-        )
-        self.swiftcall.update_result(
-            "request2", swift.SwiftcallResult(done=True, success=True)
-        )
+    def test_update_result_success(self):
+        old_result = swift.SwiftcallResult(done=False, success=False)
+        new_result = swift.SwiftcallResult(done=True, success=True, value=0)
+        with patch.object(self.swiftcall, "results", {"request": old_result}):
+            self.swiftcall.update_result("request", new_result)
+            self.assertEqual(old_result, new_result)
+            self.assertFalse(self.swiftcall.results)
 
 
 class SwiftFunctionTest(unittest.TestCase):
