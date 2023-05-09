@@ -146,20 +146,35 @@ class SwiftTest(unittest.TestCase):
         self.assertNotIn("app1", self.swift._subscribers["ch1"])
         self.assertEqual(self.swift.unsubscribe("app2", "ch1"), False)
 
-    def test_swiftcall_primitive(self):
-        """The swiftcall returns a primitive type value, which can be JSONified.
-        
-        This assumes that swift.dumps() works correctly.
-        """
+    def help_swiftcall(self, value, result):
+        """Helper method for testing _swiftcall()."""
         msg = swift.dumps(swift.SwiftcallInfo(call="callForTest", args={}))
-        value = [1.5, True, None, "abc"]
-        result = swift.SwiftcallResult(done=True, success=True, value=value)
         self.swift._handleSwiftcall = MagicMock(return_value=value)
         signal = MagicMock()
         self.swift._apps["app1"].swiftcallReturned = signal
         self.swift._swiftcall(sender="app1", msg=msg)
         signal.emit.assert_called_once_with(msg, swift.dumps(result))
 
+    def test_swiftcall_primitive(self):
+        """The swiftcall returns a primitive type value, which can be JSONified.
+        
+        This assumes that swift.dumps() works correctly.
+        """
+        value = [1.5, True, None, "abc"]
+        result = swift.SwiftcallResult(done=True, success=True, value=value)
+        self.help_swiftcall(value, result)
+
+    def test_swiftcall_serializable(self):
+        """The swiftcall returns a Serializable type value.
+        
+        This assumes that swift.dumps() works correctly.
+        """
+        @dataclasses.dataclass
+        class ClassForTest(swift.Serializable):
+            a: str
+        value = ClassForTest(a="abc")
+        result = swift.SwiftcallResult(done=True, success=True, value=swift.dumps(value))
+        self.help_swiftcall(value, result)
 
     def test_broadcast(self):
         for channelName in self.channels:
