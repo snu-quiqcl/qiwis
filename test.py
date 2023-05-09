@@ -414,6 +414,14 @@ class SwiftcallProxyTest(unittest.TestCase):
             self.assertEqual(old_result, new_result)
             self.assertFalse(self.swiftcall.results)
 
+    def test_update_result_no_discard(self):
+        old_result = swift.SwiftcallResult(done=False, success=False)
+        new_result = swift.SwiftcallResult(done=True, success=True, value=0)
+        with patch.object(self.swiftcall, "results", {"request": old_result}):
+            self.swiftcall.update_result("request", new_result, discard=False)
+            self.assertEqual(old_result, new_result)
+            self.assertIs(old_result, self.swiftcall.results["request"])
+
 
 class SwiftFunctionTest(unittest.TestCase):
     """Unit test for functions."""
