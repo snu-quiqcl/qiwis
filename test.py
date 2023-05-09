@@ -451,7 +451,7 @@ class SwiftFunctionTest(unittest.TestCase):
 
     @mock.patch("builtins.open")
     @mock.patch("json.load", return_value={"app": APP_DICTS})
-    def test_read_setup_file(self, mock_open, mock_load):
+    def test_read_setup_file(self, mock_load, mock_open):
         self.assertEqual(swift._read_setup_file(""), APP_INFOS)
         mock_open.assert_called_once()
         mock_load.assert_called_once()
