@@ -57,11 +57,13 @@ APP_JSONS = {
 }
 
 
+qapp = QApplication(sys.argv)
+
+
 class SwiftTest(unittest.TestCase):
     """Unit test for Swift class."""
 
     def setUp(self):
-        self.qapp = QApplication(sys.argv)
         importlib.import_module = MagicMock()
         for appInfo in APP_INFOS.values():
             app_ = MagicMock()
