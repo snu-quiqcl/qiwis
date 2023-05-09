@@ -378,6 +378,26 @@ class SwiftcallProxyTest(unittest.TestCase):
         info = swift.SwiftcallInfo(call="callForTest", args=json_args)
         self.help_proxy(info, args)
 
+    def test_proxy_duplicate(self):
+        """Tests a duplicate proxied swiftcall.
+        
+        The new one should be accepted and the previous one should be discarded.
+        This assuems that swift.dumps() works correctly.
+        """
+        args = {"a": 123}
+        info = swift.SwiftcallInfo(call="callForTest", args=args)
+        msg = swift.dumps(info)
+        with patch.object(self.swiftcall, "results", {}):
+            result1 = self.swiftcall.callForTest(**args)
+            result2 = self.swiftcall.callForTest(**args)
+            self.assertSequenceEqual(
+                self.swiftcall.requested.emit.mock_calls,
+                (call(msg), call(msg)),
+            )
+            self.assertIs(result2, self.swiftcall.results[msg])
+            self.assertEqual(result2, swift.SwiftcallResult(done=False, success=False))
+            self.assertEqual(result1, result2)
+
     def test_update_result(self):
         self.swiftcall.results = {
             "request1": swift.SwiftcallResult(done=False, success=False), "request2": None
