@@ -236,6 +236,14 @@ class HandleSwiftcallTest(unittest.TestCase):
             self.swift._handleSwiftcall(sender="sender", msg=self.msg)
         self.swift.callForTest.assert_not_called()
 
+    def test_non_public(self):
+        self.call.call = "_callForTest"
+        self.msg = json.dumps(dataclasses.asdict(self.call))
+        self.swift._callForTest = MagicMock()
+        with self.assertRaises(ValueError):
+            self.swift._handleSwiftcall(sender="sender", msg=self.msg)
+        self.swift._callForTest.assert_not_called()
+
 
 class BaseAppTest(unittest.TestCase):
     """Unit test for BaseApp class."""
