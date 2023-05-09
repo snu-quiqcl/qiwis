@@ -205,6 +205,28 @@ class SwiftTest(unittest.TestCase):
         self.assertEqual(args, parsed_args)
 
 
+class HandleSwiftcallTest(unittest.TestCase):
+    """Unit test for Swift._handleSwiftcall()."""
+
+    def setUp(self):
+        self.qapp = QApplication([])
+        self.swift = swift.Swift()
+        self.args = {
+            "a": 1.5,
+            "b": None,
+        }
+        self.call = swift.SwiftcallInfo(call="callForTest", args=self.args)
+        self.msg = json.dumps(dataclasses.asdict(self.call))
+        self.swift.callForTest = MagicMock()
+        self.swift._parseArgs = MagicMock(return_value=self.args)
+        QMessageBox.warning = MagicMock(return_value=QMessageBox.Ok)
+        self._stashed_swift_loads = swift.loads
+        swift.loads = MagicMock(return_value=self.call)
+
+    def doCleanups(self):
+        swift.loads = self._stashed_swift_loads
+
+
 class BaseAppTest(unittest.TestCase):
     """Unit test for BaseApp class."""
 
