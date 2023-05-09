@@ -7,7 +7,7 @@ import sys
 import importlib
 import json
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, DEFAULT
 from collections.abc import Iterable
 from typing import Any, Optional
 
@@ -155,14 +155,14 @@ class SwiftTest(unittest.TestCase):
         error: Optional[Exception] = None):
         """Helper method for testing _swiftcall()."""
         msg = swift.dumps(swift.SwiftcallInfo(call="callForTest", args={}))
-        signal = MagicMock()
-        self.swift._apps["app1"].swiftcallReturned = signal
-        if error is None:
-            self.swift._handleSwiftcall = MagicMock(return_value=value)
-        else:
-            self.swift._handleSwiftcall = MagicMock(side_effect=error)
-        self.swift._swiftcall(sender="app1", msg=msg)
-        signal.emit.assert_called_once_with(msg, swift.dumps(result))
+        with patch.multiple(self.swift, _handleSwiftcall=DEFAULT, _apps=DEFAULT):
+            if error is None:
+                self.swift._handleSwiftcall.return_value = value
+            else:
+                self.swift._handleSwiftcall.side_effect = error
+            self.swift._swiftcall(sender="sender", msg=msg)
+            mocked_signal = self.swift._apps["sender"].swiftcallReturned
+            mocked_signal.emit.assert_called_once_with(msg, swift.dumps(result))
 
     def test_swiftcall_primitive(self):
         """The swiftcall returns a primitive type value, which can be JSONified.
