@@ -202,36 +202,32 @@ class SwiftTest(unittest.TestCase):
 
     def test_parse_args_primitive(self):
         def call_for_test(
-            arg_number: float,
-            arg_bool: bool,
-            arg_null: Any,
-            arg_string: str
+            number: float,
+            boolean: bool,
+            string: str
         ):  # pylint: disable=unused-argument
             """A dummy function for testing, which has only primitive type arguments."""
-        args = {"arg_number": 1.5, "arg_bool": True, "arg_null": None, "arg_string": "abc"}
+        args = {"number": 1.5, "boolean": True, "string": "abc"}
         parsed_args = self.swift._parseArgs(call_for_test, args)
         self.assertEqual(args, parsed_args)
 
     def test_parse_args_serializable(self):
         @dataclasses.dataclass
         class ClassForTest(swift.Serializable):
-            field_number: float
-            field_bool: bool
-            field_null: None
-            field_string: str
+            number: float
+            boolean: bool
+            string: str
         def call_for_test(arg1: ClassForTest, arg2: ClassForTest):  # pylint: disable=unused-argument
             """A dummy function for testing, which has only Serializable type arguments."""
         fields1 = {
-            "field_number": 1.5,
-            "field_bool": True,
-            "field_null": None,
-            "field_string": "abc",
+            "number": 1.5,
+            "boolean": True,
+            "string": "abc",
         }
         fields2 = {
-            "field_number": 0,
-            "field_bool": False,
-            "field_null": None,
-            "field_string": "",
+            "number": 0,
+            "boolean": False,
+            "string": "",
         }
         args = {"arg1": ClassForTest(**fields1), "arg2": ClassForTest(**fields2)}
         json_args = {"arg1": json.dumps(fields1), "arg2": json.dumps(fields2)}
