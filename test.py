@@ -9,7 +9,7 @@ import json
 import unittest
 from unittest.mock import MagicMock, patch
 from collections.abc import Iterable
-from typing import Any
+from typing import Any, Optional
 
 from PyQt5.QtCore import QObject
 from PyQt5.QtWidgets import QApplication, QMessageBox, QWidget
@@ -146,12 +146,19 @@ class SwiftTest(unittest.TestCase):
         self.assertNotIn("app1", self.swift._subscribers["ch1"])
         self.assertEqual(self.swift.unsubscribe("app2", "ch1"), False)
 
-    def help_swiftcall(self, value, result):
+    def help_swiftcall(
+        self,
+        value: Any,
+        result: swift.SwiftcallResult,
+        error: Optional[Exception] = None):
         """Helper method for testing _swiftcall()."""
         msg = swift.dumps(swift.SwiftcallInfo(call="callForTest", args={}))
-        self.swift._handleSwiftcall = MagicMock(return_value=value)
         signal = MagicMock()
         self.swift._apps["app1"].swiftcallReturned = signal
+        if error is None:
+            self.swift._handleSwiftcall = MagicMock(return_value=value)
+        else:
+            self.swift._handleSwiftcall = MagicMock(side_effect=error)
         self.swift._swiftcall(sender="app1", msg=msg)
         signal.emit.assert_called_once_with(msg, swift.dumps(result))
 
