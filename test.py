@@ -183,6 +183,15 @@ class SwiftTest(unittest.TestCase):
         result = swift.SwiftcallResult(done=True, success=True, value=swift.dumps(value))
         self.help_swiftcall(value, result)
 
+    def test_swiftcall_exception(self):
+        """The swiftcall raises an exception."""
+        class ExceptionForTest(Exception):
+            ...
+        value = None
+        error = ExceptionForTest("test")
+        result = swift.SwiftcallResult(done=True, success=False, error=repr(error))
+        self.help_swiftcall(value, result, error)
+
     def test_broadcast(self):
         for channelName in self.channels:
             self.swift._broadcast(channelName, "test_msg")
