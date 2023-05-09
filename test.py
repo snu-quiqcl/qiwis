@@ -149,7 +149,7 @@ class SwiftTest(unittest.TestCase):
     def test_swiftcall_primitive(self):
         """The swiftcall returns a primitive type value, which can be JSONified.
         
-        This assumes that swift.dumps() works correctly since it is quite simple.
+        This assumes that swift.dumps() works correctly.
         """
         msg = swift.dumps(swift.SwiftcallInfo(call="callForTest", args={}))
         value = [1.5, True, None, "abc"]
