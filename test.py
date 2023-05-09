@@ -337,10 +337,19 @@ class SwiftcallProxyTest(unittest.TestCase):
     def setUp(self):
         self.swiftcall = swift.SwiftcallProxy(MagicMock())
 
-    def test_getattr(self):
-        self.swiftcall.call()
-        self.swiftcall.call(name=APP_INFOS["app1"])
-        self.swiftcall.call()
+    def test_proxy_primitive(self):
+        """Tests a proxied swiftcall with primitive type arguments.
+        
+        This assumes that swift.dumps() works correctly.
+        """
+        args = {"number": 1.5, "boolean": True, "string": "abc"}
+        info = swift.SwiftcallInfo(call="callForTest", args=args)
+        msg = swift.dumps(info)
+        with patch.object(self.swiftcall, "results", {}):
+            result = self.swiftcall.callForTest(**args)
+            self.swiftcall.requested.emit.assert_called_once_with(msg)
+            self.assertIs(result, self.swiftcall.results[msg])
+            self.assertEqual(result, swift.SwiftcallResult(done=False, success=False))
 
     def test_update_result(self):
         self.swiftcall.results = {
