@@ -201,11 +201,7 @@ class SwiftTest(unittest.TestCase):
             self.assertEqual(len(APP_INFOS[name].channel), app_.received.emit.call_count)
 
     def test_parse_args_primitive(self):
-        def call_for_test(
-            number: float,
-            boolean: bool,
-            string: str
-        ):  # pylint: disable=unused-argument
+        def call_for_test(number: float, boolean: bool, string: str):  # pylint: disable=unused-argument
             """A dummy function for testing, which has only primitive type arguments."""
         args = {"number": 1.5, "boolean": True, "string": "abc"}
         parsed_args = self.swift._parseArgs(call_for_test, args)
