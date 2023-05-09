@@ -226,6 +226,10 @@ class HandleSwiftcallTest(unittest.TestCase):
     def doCleanups(self):
         swift.loads = self._stashed_swift_loads
 
+    def test_ok(self):
+        self.swift._handleSwiftcall(sender="sender", msg=self.msg)
+        self.swift.callForTest.assert_called_once_with(**self.args)
+
 
 class BaseAppTest(unittest.TestCase):
     """Unit test for BaseApp class."""
