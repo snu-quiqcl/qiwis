@@ -9,6 +9,7 @@ import json
 import unittest
 from unittest.mock import MagicMock, patch
 from collections.abc import Iterable
+from typing import Any
 
 from PyQt5.QtCore import QObject
 from PyQt5.QtWidgets import QApplication, QMessageBox, QWidget
@@ -166,7 +167,12 @@ class SwiftTest(unittest.TestCase):
             self.assertEqual(len(APP_INFOS[name].channel), app_.received.emit.call_count)
 
     def test_parse_args_primitive(self):
-        def call_for_test(arg_number: float, arg_bool: bool, arg_null: None, arg_string: str):  # pylint: disable=unused-argument
+        def call_for_test(
+            arg_number: float,
+            arg_bool: bool,
+            arg_null: Any,
+            arg_string: str
+        ):  # pylint: disable=unused-argument
             """A dummy function for testing, which has only primitive type arguments."""
         args = {"arg_number": 1.5, "arg_bool": True, "arg_null": None, "arg_string": "abc"}
         parsed_args = self.swift._parseArgs(call_for_test, args)
