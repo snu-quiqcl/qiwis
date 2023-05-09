@@ -352,7 +352,7 @@ class Swift(QObject):
         Args:
             sender: The name of the request sender app.
             msg: A JSON string that can be converted to SwiftcallInfo,
-              i.e., the same form as the returned string of strinfo().
+              i.e., the same form as the returned string of dumps().
               See SwiftcallInfo for details.
         
         Raises:
