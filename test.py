@@ -394,13 +394,13 @@ class SwiftFunctionTest(unittest.TestCase):
     @patch("swift._get_argparser")
     @patch("swift._read_setup_file", return_value={})
     @patch("swift.Swift")
-    @patch("PyQt5.QtWidgets.QApplication.exec_")
-    def test_main(self, mock_get_argparser, mock_read_setup_file, mock_swift, mock_exec_):
+    @patch("swift.QApplication")
+    def test_main(self, mock_qapp, mock_swift, mock_read_setup_file, mock_get_argparser):
         swift.main()
         mock_get_argparser.assert_called_once()
         mock_read_setup_file.assert_called_once()
         mock_swift.assert_called_once()
-        mock_exec_.assert_called_once()
+        mock_qapp.return_value.exec_.assert_called_once()
 
 
 if __name__ == "__main__":
