@@ -265,15 +265,14 @@ class SwiftTestWithoutApps(unittest.TestCase):
         parsed_args = self.swift._parseArgs(call_for_test, json_args)
         self.assertEqual(args, parsed_args)
 
-
+@mock.patch("swift.loads")
+@mock.patch("swift.QMessageBox.warning")
 class HandleSwiftcallTest(unittest.TestCase):
     """Unit test for Swift._handleSwiftcall()."""
 
     def setUp(self):
         self.swift = swift.Swift()
 
-    @mock.patch("swift.loads")
-    @mock.patch("swift.QMessageBox.warning")
     def test_ok(self, mocked_warning, mocked_loads):
         args = {"a": 123, "b": "ABC"}
         info = swift.SwiftcallInfo(call="callForTest", args=args)
@@ -287,11 +286,19 @@ class HandleSwiftcallTest(unittest.TestCase):
             self.swift.callForTest.assert_called_once_with(**args)
             self.swift._parseArgs.assert_called_once_with(self.swift.callForTest, args)
 
-    def test_cancel(self):
-        QMessageBox.warning.return_value = QMessageBox.Cancel
-        with self.assertRaises(RuntimeError):
-            self.swift._handleSwiftcall(sender="sender", msg=self.msg)
-        self.swift.callForTest.assert_not_called()
+    def test_cancel(self, mocked_warning, mocked_loads):
+        args = {"a": 123, "b": "ABC"}
+        info = swift.SwiftcallInfo(call="callForTest", args=args)
+        msg = json.dumps({"call": "callForTest", "args": args})
+        mocked_loads.return_value = info
+        mocked_warning.return_value = QMessageBox.Cancel
+        with mock.patch.multiple(self.swift, create=True,
+                                 callForTest=mock.DEFAULT, _parseArgs=mock.DEFAULT):
+            self.swift._parseArgs.return_value = args
+            with self.assertRaises(RuntimeError):
+                self.swift._handleSwiftcall(sender="sender", msg=msg)
+            self.swift.callForTest.assert_not_called()
+            self.swift._parseArgs.assert_called_once_with(self.swift.callForTest, args)
 
     def test_non_public(self):
         self.call.call = "_callForTest"
