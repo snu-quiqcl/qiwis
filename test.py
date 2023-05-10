@@ -285,6 +285,8 @@ class HandleSwiftcallTest(unittest.TestCase):
             self.swift._handleSwiftcall(sender="sender", msg=msg)
             self.swift.callForTest.assert_called_once_with(**args)
             self.swift._parseArgs.assert_called_once_with(self.swift.callForTest, args)
+        mocked_loads.assert_called_once()
+        mocked_warning.assert_called_once()
 
     def test_cancel(self, mocked_warning, mocked_loads):
         args = {"a": 123, "b": "ABC"}
@@ -299,6 +301,8 @@ class HandleSwiftcallTest(unittest.TestCase):
                 self.swift._handleSwiftcall(sender="sender", msg=msg)
             self.swift.callForTest.assert_not_called()
             self.swift._parseArgs.assert_called_once_with(self.swift.callForTest, args)
+        mocked_loads.assert_called_once()
+        mocked_warning.assert_called_once()
 
     def test_non_public(self, mocked_warning, mocked_loads):
         args = {"a": 123, "b": "ABC"}
