@@ -318,10 +318,17 @@ class HandleSwiftcallTest(unittest.TestCase):
         mocked_loads.assert_called_once()
         mocked_warning.assert_not_called()
 
-    @unittest.expectedFailure
-    def test_not_existing_method(self):
-        del self.swift.callForTest
-        self.swift._handleSwiftcall(sender="sender", msg=self.msg)
+    def test_not_existing_method(self, mocked_warning, mocked_loads):
+        args = {"a": 123, "b": "ABC"}
+        info = swift.SwiftcallInfo(call="callForTest", args=args)
+        msg = json.dumps({"call": "callForTest", "args": args})
+        mocked_loads.return_value = info
+        with mock.patch.multiple(self.swift, create=True, _parseArgs=mock.DEFAULT):
+            with self.assertRaises(AttributeError):
+                self.swift._handleSwiftcall(sender="sender", msg=msg)
+            self.swift._parseArgs.assert_not_called()
+        mocked_loads.assert_called_once()
+        mocked_warning.assert_not_called()
 
 
 class BaseAppTest(unittest.TestCase):
