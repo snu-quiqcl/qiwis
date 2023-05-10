@@ -153,7 +153,14 @@ class SwiftTest(unittest.TestCase):
         value: Any,
         result: swift.SwiftcallResult,
         error: Optional[Exception] = None):
-        """Helper method for testing _swiftcall()."""
+        """Helper method for testing _swiftcall().
+        
+        Args:
+            value: The actual return value of the swift-call.
+            result: The result object that should be generated after the swift-call.
+            error: The Exception instance that should have occurred during the swift-call.
+              None if no exception is expected.
+        """
         msg = swift.dumps(swift.SwiftcallInfo(call="callForTest", args={}))
         with mock.patch.multiple(self.swift, _handleSwiftcall=mock.DEFAULT, _apps=mock.DEFAULT):
             if error is None:
