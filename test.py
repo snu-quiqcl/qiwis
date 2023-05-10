@@ -271,24 +271,21 @@ class HandleSwiftcallTest(unittest.TestCase):
 
     def setUp(self):
         self.swift = swift.Swift()
-        self.args = {
-            "a": 1.5,
-            "b": None,
-        }
-        self.call = swift.SwiftcallInfo(call="callForTest", args=self.args)
-        self.msg = json.dumps(dataclasses.asdict(self.call))
-        self.swift.callForTest = mock.MagicMock()
-        self.swift._parseArgs = mock.MagicMock(return_value=self.args)
-        QMessageBox.warning = mock.MagicMock(return_value=QMessageBox.Ok)
-        self._stashed_swift_loads = swift.loads
-        swift.loads = mock.MagicMock(return_value=self.call)
 
-    def doCleanups(self):
-        swift.loads = self._stashed_swift_loads
-
-    def test_ok(self):
-        self.swift._handleSwiftcall(sender="sender", msg=self.msg)
-        self.swift.callForTest.assert_called_once_with(**self.args)
+    @mock.patch("swift.loads")
+    @mock.patch("swift.QMessageBox.warning")
+    def test_ok(self, mocked_warning, mocked_loads):
+        args = {"a": 123, "b": "ABC"}
+        info = swift.SwiftcallInfo(call="callForTest", args=args)
+        msg = json.dumps({"call": "callForTest", "args": args})
+        mocked_loads.return_value = info
+        mocked_warning.return_value = QMessageBox.Ok
+        with mock.patch.multiple(self.swift, create=True,
+                                 callForTest=mock.DEFAULT, _parseArgs=mock.DEFAULT):
+            self.swift._parseArgs.return_value = args
+            self.swift._handleSwiftcall(sender="sender", msg=msg)
+            self.swift.callForTest.assert_called_once_with(**args)
+            self.swift._parseArgs.assert_called_once_with(self.swift.callForTest, args)
 
     def test_cancel(self):
         QMessageBox.warning.return_value = QMessageBox.Cancel
