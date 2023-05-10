@@ -169,13 +169,10 @@ class SwiftTest(unittest.TestCase):
             mocked_signal.emit.assert_called_once_with(msg, result_string)
 
     def test_swiftcall_primitive(self):
-        """The swiftcall returns a primitive type value, which can be JSONified.
-        
-        This assumes that swift.dumps() works correctly.
-        """
+        """The swiftcall returns a primitive type value, which can be JSONified."""
         value = [1.5, True, None, "abc"]
-        result = swift.SwiftcallResult(done=True, success=True, value=value)
-        self.help_swiftcall(value, result)
+        result_string = json.dumps({"done": True, "success": True, "value": value})
+        self.help_swiftcall(value, result_string)
 
     def test_swiftcall_serializable(self):
         """The swiftcall returns a Serializable type value.
