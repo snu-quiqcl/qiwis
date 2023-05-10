@@ -64,22 +64,26 @@ class SwiftTestWithApps(unittest.TestCase):
     """Unit test for Swift class with creating apps."""
 
     def setUp(self):
-        importlib.import_module = mock.MagicMock()
+        self.import_module_patcher = mock.patch("importlib.import_module")
+        self.mocked_import_module = self.import_module_patcher.start()
         for appInfo in APP_INFOS.values():
             app_ = mock.MagicMock()
             app_.cls = appInfo.cls
             app_.frames.return_value = (QWidget(),)
             cls = mock.MagicMock(return_value=app_)
-            setattr(importlib.import_module.return_value, appInfo.cls, cls)
+            setattr(self.mocked_import_module.return_value, appInfo.cls, cls)
         self.channels = set()
         for appInfo in APP_INFOS.values():
             self.channels.update(appInfo.channel)
         self.swift = swift.Swift(APP_INFOS)
+    
+    def doCleanups(self):
+        self.import_module_patcher.stop()
 
     def test_init(self):
         self.assertEqual(self.swift.appInfos, APP_INFOS)
         for name, info in APP_INFOS.items():
-            importlib.import_module.assert_any_call(info.module)
+            self.mocked_import_module.assert_any_call(info.module)
             self.assertEqual(self.swift._apps[name].cls, info.cls)
             self.assertIn(name, self.swift._dockWidgets)
         for channel in self.channels:
@@ -94,12 +98,12 @@ class SwiftTestWithApps(unittest.TestCase):
         app_.cls = "cls3"
         app_.frames.return_value = (QWidget(),)
         cls = mock.MagicMock(return_value=app_)
-        setattr(importlib.import_module.return_value, "cls3", cls)
+        setattr(self.mocked_import_module.return_value, "cls3", cls)
         self.swift.createApp(
             "app3",
             swift.AppInfo(**{"module": "module3", "cls": "cls3", "channel": ["ch1"]})
         )
-        importlib.import_module.assert_called_with("module3")
+        self.mocked_import_module.assert_called_with("module3")
         self.assertEqual(self.swift._apps["app3"].cls, "cls3")
         self.assertIn("app3", self.swift._dockWidgets)
         self.assertIn("app3", self.swift._subscribers["ch1"])
