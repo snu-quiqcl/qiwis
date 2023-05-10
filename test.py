@@ -478,6 +478,13 @@ class SwiftcallProxyTest(unittest.TestCase):
             self.assertEqual(old_result, new_result)
             self.assertIs(old_result, self.swiftcall.results["request"])
 
+    def test_update_result_not_exist(self):
+        """When the request is not in the results dictionary, it is ignored."""
+        new_result = swift.SwiftcallResult(done=True, success=True, value=0)
+        with mock.patch.object(self.swiftcall, "results", {}):
+            self.swiftcall.update_result("request", new_result)
+            self.assertNotIn("request", self.swiftcall.results)
+
 
 class SwiftFunctionTest(unittest.TestCase):
     """Unit test for functions."""
