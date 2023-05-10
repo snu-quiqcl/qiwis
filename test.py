@@ -175,22 +175,31 @@ class SwiftTest(unittest.TestCase):
         self.help_swiftcall(value, result_string)
 
     def test_swiftcall_serializable(self):
-        """The swiftcall returns a Serializable type value.
-        
-        This assumes that swift.dumps() works correctly.
-        """
+        """The swiftcall returns a Serializable type value."""
         @dataclasses.dataclass
         class ClassForTest(swift.Serializable):
             a: str
         value = ClassForTest(a="abc")
         value_string = json.dumps({"a": "abc"})
         result = swift.SwiftcallResult(done=True, success=True, value=value_string)
-        result_string = json.dumps({"done": True, "success": True, "value": value_string})
-        string_map = {
-            value: value_string,
-            result: result_string,
-        }
-        with mock.patch("swift.dumps", mock.MagicMock(side_effect=string_map.get)):
+        result_string = json.dumps({
+            "done": True,
+            "success": True,
+            "value": value_string,
+            "error": None,
+        })
+        def side_effect(obj):
+            """Returns the dumped string of obj.
+
+            Args:
+                obj: The target object that will be dumped to a string.
+            """
+            if obj == value:
+                return value_string
+            if obj == result:
+                return result_string
+            raise AssertionError(f"swift.dumps() is called with other than value or result: {obj}")
+        with mock.patch("swift.dumps", mock.MagicMock(side_effect=side_effect)):
             self.help_swiftcall(value, result_string)
 
     def test_swiftcall_exception(self):
