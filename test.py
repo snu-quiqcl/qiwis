@@ -210,7 +210,6 @@ class SwiftTestWithoutApps(unittest.TestCase):
             a: str
         value = ClassForTest(a="abc")
         value_string = json.dumps({"a": "abc"})
-        result = swift.SwiftcallResult(done=True, success=True, value=value_string)
         result_string = json.dumps({
             "done": True,
             "success": True,
