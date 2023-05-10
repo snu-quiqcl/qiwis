@@ -207,11 +207,15 @@ class SwiftTestWithApps(unittest.TestCase):
     def test_swiftcall_exception(self):
         """The swiftcall raises an exception."""
         class ExceptionForTest(Exception):
-            ...
-        value = None
+            """Temporary exception only for this test."""
         error = ExceptionForTest("test")
-        result = swift.SwiftcallResult(done=True, success=False, error=repr(error))
-        self.help_swiftcall(value, result, error)
+        result_string = json.dumps({
+            "done": True,
+            "success": False,
+            "value": None,
+            "error": repr(error),
+        })
+        self.help_swiftcall(None, result_string, error)
 
     def test_broadcast(self):
         for channelName in self.channels:
