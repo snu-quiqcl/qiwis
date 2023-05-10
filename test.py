@@ -364,14 +364,13 @@ class SwiftcallProxyTest(unittest.TestCase):
     def setUp(self):
         self.swiftcall = swift.SwiftcallProxy(mock.MagicMock())
 
-    def help_proxy(self, info: swift.SwiftcallInfo, args: Mapping[str, Any]):
+    def help_proxy(self, msg: str, args: Mapping[str, Any]):
         """Helper method for testing proxy.
         
         Args:
-            info: SwiftcallInfo object for requesting a swiftcall.
+            msg: The swift-call request message.
             args: A keyword argument mapping for calling the proxy.
         """
-        msg = swift.dumps(info)
         with mock.patch.object(self.swiftcall, "results", {}):
             result = self.swiftcall.callForTest(**args)
             self.swiftcall.requested.emit.assert_called_once_with(msg)
@@ -384,8 +383,8 @@ class SwiftcallProxyTest(unittest.TestCase):
         This assumes that swift.dumps() works correctly.
         """
         args = {"number": 1.5, "boolean": True, "string": "abc"}
-        info = swift.SwiftcallInfo(call="callForTest", args=args)
-        self.help_proxy(info, args)
+        msg = json.dumps({"call": "callForTest", "args": args})
+        self.help_proxy(msg, args)
 
     def test_proxy_serializable(self):
         """Tests a proxied swiftcall with Serializable type arguments.
@@ -401,9 +400,12 @@ class SwiftcallProxyTest(unittest.TestCase):
             "arg1": ClassForTest(number=1.5, boolean=True, string="abc"),
             "arg2": ClassForTest(number=0, boolean=False, string=""),
         }
-        json_args = {name: swift.dumps(arg) for name, arg in args.items()}
-        info = swift.SwiftcallInfo(call="callForTest", args=json_args)
-        self.help_proxy(info, args)
+        json_args = {
+            "arg1": json.dumps({"number": 1.5, "boolean": True, "string": "abc"}),
+            "arg2": json.dumps({"number": 0, "boolean": False, "string": ""}),
+        }
+        msg = json.dumps({"call": "callForTest", "args": json_args})
+        self.help_proxy(msg, args)
 
     def test_proxy_duplicate(self):
         """Tests a duplicate proxied swiftcall.
@@ -412,8 +414,7 @@ class SwiftcallProxyTest(unittest.TestCase):
         This assuems that swift.dumps() works correctly.
         """
         args = {"a": 123}
-        info = swift.SwiftcallInfo(call="callForTest", args=args)
-        msg = swift.dumps(info)
+        msg = json.dumps({"call": "callForTest", "args": args})
         with mock.patch.object(self.swiftcall, "results", {}):
             result1 = self.swiftcall.callForTest(**args)
             result2 = self.swiftcall.callForTest(**args)
