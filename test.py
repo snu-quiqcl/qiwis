@@ -300,13 +300,19 @@ class HandleSwiftcallTest(unittest.TestCase):
             self.swift.callForTest.assert_not_called()
             self.swift._parseArgs.assert_called_once_with(self.swift.callForTest, args)
 
-    def test_non_public(self):
-        self.call.call = "_callForTest"
-        self.msg = json.dumps(dataclasses.asdict(self.call))
-        self.swift._callForTest = mock.MagicMock()
-        with self.assertRaises(ValueError):
-            self.swift._handleSwiftcall(sender="sender", msg=self.msg)
-        self.swift._callForTest.assert_not_called()
+    def test_non_public(self, mocked_warning, mocked_loads):
+        args = {"a": 123, "b": "ABC"}
+        info = swift.SwiftcallInfo(call="_callForTest", args=args)
+        msg = json.dumps({"call": "_callForTest", "args": args})
+        mocked_loads.return_value = info
+        with mock.patch.multiple(self.swift, create=True,
+                                 _callForTest=mock.DEFAULT, _parseArgs=mock.DEFAULT):
+            with self.assertRaises(ValueError):
+                self.swift._handleSwiftcall(sender="sender", msg=msg)
+            self.swift._callForTest.assert_not_called()
+            self.swift._parseArgs.assert_not_called()
+        mocked_loads.assert_called_once()
+        mocked_warning.assert_not_called()
 
     @unittest.expectedFailure
     def test_not_existing_method(self):
