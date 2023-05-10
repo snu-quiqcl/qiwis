@@ -190,8 +190,8 @@ class SwiftTestWithoutApps(unittest.TestCase):
         value = [1.5, True, None, "abc"]
         result_string = json.dumps({"done": True, "success": True, "value": value, "error": None})
         with mock.patch("swift.dumps") as mocked_dumps:
+            mocked_dumps.side_effect = (result_string,)
             self.help_swiftcall(value, result_string)
-            mocked_dumps.assert_not_called()
 
     def test_swiftcall_serializable(self):
         """The swiftcall returns a Serializable type value."""
