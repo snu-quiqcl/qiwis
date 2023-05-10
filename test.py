@@ -364,33 +364,34 @@ class SwiftcallProxyTest(unittest.TestCase):
     def setUp(self):
         self.swiftcall = swift.SwiftcallProxy(mock.MagicMock())
 
-    def help_proxy(self, msg: str, args: Mapping[str, Any]):
+    def help_proxy(self, msg: str, args: Mapping[str, Any], dumps: Iterable):
         """Helper method for testing proxy.
         
         Args:
             msg: The swift-call request message.
             args: A keyword argument mapping for calling the proxy.
+            dumps: Expected return values of swift.dumps() during the proxied swift-call.
+              It will be given as side_effect. The number of calls should be the same as
+              the length of the given iterable.
         """
         with mock.patch.object(self.swiftcall, "results", {}):
-            result = self.swiftcall.callForTest(**args)
+            with mock.patch("swift.dumps") as mocked_dumps:
+                mocked_dumps.side_effect = dumps
+                result = self.swiftcall.callForTest(**args)
+                self.assertEqual(len(mocked_dumps.mock_calls), len(dumps))
             self.swiftcall.requested.emit.assert_called_once_with(msg)
             self.assertIs(result, self.swiftcall.results[msg])
             self.assertEqual(result, swift.SwiftcallResult(done=False, success=False))
 
     def test_proxy_primitive(self):
-        """Tests a proxied swiftcall with primitive type arguments.
-        
-        This assumes that swift.dumps() works correctly.
-        """
+        """Tests a proxied swiftcall with primitive type arguments."""
         args = {"number": 1.5, "boolean": True, "string": "abc"}
         msg = json.dumps({"call": "callForTest", "args": args})
-        self.help_proxy(msg, args)
+        dumps = (msg,)
+        self.help_proxy(msg, args, dumps)
 
     def test_proxy_serializable(self):
-        """Tests a proxied swiftcall with Serializable type arguments.
-        
-        This assumes that swift.dumps() works correctly.
-        """
+        """Tests a proxied swiftcall with Serializable type arguments."""
         @dataclasses.dataclass
         class ClassForTest(swift.Serializable):
             number: float
@@ -405,7 +406,8 @@ class SwiftcallProxyTest(unittest.TestCase):
             "arg2": json.dumps({"number": 0, "boolean": False, "string": ""}),
         }
         msg = json.dumps({"call": "callForTest", "args": json_args})
-        self.help_proxy(msg, args)
+        dumps = (json_args["arg1"], json_args["arg2"], msg)
+        self.help_proxy(msg, args, dumps)
 
     def test_proxy_duplicate(self):
         """Tests a duplicate proxied swiftcall.
