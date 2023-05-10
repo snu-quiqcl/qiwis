@@ -152,6 +152,19 @@ class SwiftTestWithApps(unittest.TestCase):
         self.assertNotIn("app1", self.swift._subscribers["ch1"])
         self.assertEqual(self.swift.unsubscribe("app2", "ch1"), False)
 
+    def test_broadcast(self):
+        for channelName in self.channels:
+            self.swift._broadcast(channelName, "test_msg")
+        for name, app_ in self.swift._apps.items():
+            self.assertEqual(len(APP_INFOS[name].channel), app_.received.emit.call_count)
+
+
+class SwiftTestWithoutApps(unittest.TestCase):
+    """Unit test for Swift class without apps."""
+
+    def setUp(self):
+        self.swift = swift.Swift()
+
     def help_swiftcall(self, value: Any, result_string: str, error: Optional[Exception] = None):
         """Helper method for testing _swiftcall().
         
@@ -220,12 +233,6 @@ class SwiftTestWithApps(unittest.TestCase):
             "error": repr(error),
         })
         self.help_swiftcall(None, result_string, error)
-
-    def test_broadcast(self):
-        for channelName in self.channels:
-            self.swift._broadcast(channelName, "test_msg")
-        for name, app_ in self.swift._apps.items():
-            self.assertEqual(len(APP_INFOS[name].channel), app_.received.emit.call_count)
 
     def test_parse_args_primitive(self):
         def call_for_test(number: float, boolean: bool, string: str):  # pylint: disable=unused-argument
