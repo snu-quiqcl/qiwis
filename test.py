@@ -4,7 +4,6 @@ Module for testing swift module.
 
 import dataclasses
 import sys
-import importlib
 import json
 import unittest
 from unittest import mock
