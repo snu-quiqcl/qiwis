@@ -2,12 +2,12 @@
 Module for testing swift module.
 """
 
+import collections.abc
 import dataclasses
 import sys
 import json
 import unittest
 from unittest import mock
-from collections.abc import Iterable
 from typing import Any, Optional, Mapping, Iterable
 
 from PyQt5.QtCore import QObject
@@ -343,7 +343,7 @@ class BaseAppTest(unittest.TestCase):
         swift.BaseApp("name", QObject())
 
     def test_frames(self):
-        self.assertIsInstance(self.app.frames(), Iterable)
+        self.assertIsInstance(self.app.frames(), collections.abc.Iterable)
 
     def test_broadcast(self):
         self.app.broadcastRequested = mock.MagicMock()
