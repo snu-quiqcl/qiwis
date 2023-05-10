@@ -76,7 +76,7 @@ class SwiftTestWithApps(unittest.TestCase):
         for appInfo in APP_INFOS.values():
             self.channels.update(appInfo.channel)
         self.swift = swift.Swift(APP_INFOS)
-    
+
     def doCleanups(self):
         self.import_module_patcher.stop()
 
