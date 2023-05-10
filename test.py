@@ -148,20 +148,17 @@ class SwiftTest(unittest.TestCase):
         self.assertNotIn("app1", self.swift._subscribers["ch1"])
         self.assertEqual(self.swift.unsubscribe("app2", "ch1"), False)
 
-    def help_swiftcall(
-        self,
-        value: Any,
-        result: swift.SwiftcallResult,
-        error: Optional[Exception] = None):
+    def help_swiftcall(self, value: Any, result_string: str, error: Optional[Exception] = None):
         """Helper method for testing _swiftcall().
         
         Args:
             value: The actual return value of the swift-call.
-            result: The result object that should be generated after the swift-call.
+            result_string: The swift.dumps()-ed string of the result object that should be
+              generated after the swift-call.
             error: The Exception instance that should have occurred during the swift-call.
               None if no exception is expected.
         """
-        msg = swift.dumps(swift.SwiftcallInfo(call="callForTest", args={}))
+        msg = json.dumps({"call": "callForTest", "args": {}})
         with mock.patch.multiple(self.swift, _handleSwiftcall=mock.DEFAULT, _apps=mock.DEFAULT):
             if error is None:
                 self.swift._handleSwiftcall.return_value = value
@@ -169,7 +166,7 @@ class SwiftTest(unittest.TestCase):
                 self.swift._handleSwiftcall.side_effect = error
             self.swift._swiftcall(sender="sender", msg=msg)
             mocked_signal = self.swift._apps["sender"].swiftcallReturned
-            mocked_signal.emit.assert_called_once_with(msg, swift.dumps(result))
+            mocked_signal.emit.assert_called_once_with(msg, result_string)
 
     def test_swiftcall_primitive(self):
         """The swiftcall returns a primitive type value, which can be JSONified.
