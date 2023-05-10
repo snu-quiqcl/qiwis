@@ -171,7 +171,7 @@ class SwiftTest(unittest.TestCase):
     def test_swiftcall_primitive(self):
         """The swiftcall returns a primitive type value, which can be JSONified."""
         value = [1.5, True, None, "abc"]
-        result_string = json.dumps({"done": True, "success": True, "value": value})
+        result_string = json.dumps({"done": True, "success": True, "value": value, "error": None})
         self.help_swiftcall(value, result_string)
 
     def test_swiftcall_serializable(self):
@@ -183,8 +183,15 @@ class SwiftTest(unittest.TestCase):
         class ClassForTest(swift.Serializable):
             a: str
         value = ClassForTest(a="abc")
-        result = swift.SwiftcallResult(done=True, success=True, value=swift.dumps(value))
-        self.help_swiftcall(value, result)
+        value_string = json.dumps({"a": "abc"})
+        result = swift.SwiftcallResult(done=True, success=True, value=value_string)
+        result_string = json.dumps({"done": True, "success": True, "value": value_string})
+        string_map = {
+            value: value_string,
+            result: result_string,
+        }
+        with mock.patch("swift.dumps", mock.MagicMock(side_effect=string_map.get)):
+            self.help_swiftcall(value, result_string)
 
     def test_swiftcall_exception(self):
         """The swiftcall raises an exception."""
