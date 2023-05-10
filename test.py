@@ -304,6 +304,11 @@ class HandleSwiftcallTest(unittest.TestCase):
             self.swift._handleSwiftcall(sender="sender", msg=self.msg)
         self.swift._callForTest.assert_not_called()
 
+    @unittest.expectedFailure
+    def test_not_existing_method(self):
+        del self.swift.callForTest
+        self.swift._handleSwiftcall(sender="sender", msg=self.msg)
+
 
 class BaseAppTest(unittest.TestCase):
     """Unit test for BaseApp class."""
