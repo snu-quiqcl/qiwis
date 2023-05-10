@@ -9,7 +9,7 @@ import json
 import unittest
 from unittest import mock
 from collections.abc import Iterable
-from typing import Any, Optional, Mapping
+from typing import Any, Optional, Mapping, Iterable
 
 from PyQt5.QtCore import QObject
 from PyQt5.QtWidgets import QApplication, QMessageBox, QWidget
@@ -165,7 +165,13 @@ class SwiftTestWithoutApps(unittest.TestCase):
     def setUp(self):
         self.swift = swift.Swift()
 
-    def help_swiftcall(self, value: Any, result_string: str, error: Optional[Exception] = None):
+    def help_swiftcall(
+        self,
+        value: Any,
+        result_string: str,
+        error: Optional[Exception] = None,
+        dumps: Iterable = (),
+    ):
         """Helper method for testing _swiftcall().
         
         Args:
@@ -174,6 +180,9 @@ class SwiftTestWithoutApps(unittest.TestCase):
               generated after the swift-call.
             error: The Exception instance that should have occurred during the swift-call.
               None if no exception is expected.
+            dumps: A sequence of return values of the mocked swift.dumps().
+              It will be given as side_effect. Moreover, the number of calls of
+              swift.dumps() should be the same as the lenght of the given iterable.
         """
         msg = json.dumps({"call": "callForTest", "args": {}})
         with mock.patch.multiple(self.swift, _handleSwiftcall=mock.DEFAULT, _apps=mock.DEFAULT):
@@ -181,7 +190,10 @@ class SwiftTestWithoutApps(unittest.TestCase):
                 self.swift._handleSwiftcall.return_value = value
             else:
                 self.swift._handleSwiftcall.side_effect = error
-            self.swift._swiftcall(sender="sender", msg=msg)
+            with mock.patch("swift.dumps") as mocked_dumps:
+                mocked_dumps.side_effect = dumps
+                self.swift._swiftcall(sender="sender", msg=msg)
+                self.assertEqual(len(mocked_dumps.mock_calls), len(dumps))
             mocked_signal = self.swift._apps["sender"].swiftcallReturned
             mocked_signal.emit.assert_called_once_with(msg, result_string)
 
@@ -189,9 +201,8 @@ class SwiftTestWithoutApps(unittest.TestCase):
         """The swiftcall returns a primitive type value, which can be JSONified."""
         value = [1.5, True, None, "abc"]
         result_string = json.dumps({"done": True, "success": True, "value": value, "error": None})
-        with mock.patch("swift.dumps") as mocked_dumps:
-            mocked_dumps.side_effect = (result_string,)
-            self.help_swiftcall(value, result_string)
+        dumps = (result_string,)
+        self.help_swiftcall(value, result_string, dumps=dumps)
 
     def test_swiftcall_serializable(self):
         """The swiftcall returns a Serializable type value."""
@@ -207,19 +218,8 @@ class SwiftTestWithoutApps(unittest.TestCase):
             "value": value_string,
             "error": None,
         })
-        def side_effect(obj):
-            """Returns the dumped string of obj.
-
-            Args:
-                obj: The target object that will be dumped to a string.
-            """
-            if obj == value:
-                return value_string
-            if obj == result:
-                return result_string
-            raise AssertionError(f"swift.dumps() is called with other than value or result: {obj}")
-        with mock.patch("swift.dumps", mock.MagicMock(side_effect=side_effect)):
-            self.help_swiftcall(value, result_string)
+        dumps = (value_string, result_string)
+        self.help_swiftcall(value, result_string, dumps=dumps)
 
     def test_swiftcall_exception(self):
         """The swiftcall raises an exception."""
@@ -232,7 +232,8 @@ class SwiftTestWithoutApps(unittest.TestCase):
             "value": None,
             "error": repr(error),
         })
-        self.help_swiftcall(None, result_string, error)
+        dumps = (result_string,)
+        self.help_swiftcall(None, result_string, error, dumps=dumps)
 
     def test_parse_args_primitive(self):
         def call_for_test(number: float, boolean: bool, string: str):  # pylint: disable=unused-argument
