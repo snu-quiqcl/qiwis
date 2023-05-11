@@ -25,7 +25,7 @@ from typing import (
 )
 
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, Qt
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QDockWidget, QMessageBox, QWidget
+from PyQt5.QtWidgets import QApplication, QMainWindow, QDockWidget, QMessageBox, QWidget
 
 
 T = TypeVar("T")
@@ -150,8 +150,7 @@ class Qiwi(QObject):
         super().__init__(parent=parent)
         self.appInfos = appInfos
         self.mainWindow = QMainWindow()
-        self.centralWidget = QLabel("Qiwi")
-        self.centralWidget.setAlignment(Qt.AlignCenter)
+        self.centralWidget = QWidget()
         self.centralWidget.setStyleSheet("background-color: gray;")
         self.mainWindow.setCentralWidget(self.centralWidget)
         self._dockWidgets = defaultdict(list)
