@@ -352,9 +352,9 @@ class Qiwi(QObject):
 
         Args:
             sender: The name of the request sender app.
-            msg: A JSON string that can be converted to SwiftcallInfo,
+            msg: A JSON string that can be converted to QiwicallInfo,
               i.e., the same form as the returned string of dumps().
-              See SwiftcallInfo for details.
+              See QiwicallInfo for details.
         
         Raises:
             ValueError: When the requested call is not public, i.e., starts with
