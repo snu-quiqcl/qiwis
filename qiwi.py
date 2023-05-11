@@ -151,7 +151,7 @@ class Qiwi(QObject):
         self.appInfos = appInfos
         self.mainWindow = QMainWindow()
         self.centralWidget = QWidget()
-        self.centralWidget.setStyleSheet("background-color: gray;")
+        self.centralWidget.setStyleSheet("border-image: url(./resources/background.png);")
         self.mainWindow.setCentralWidget(self.centralWidget)
         self._dockWidgets = defaultdict(list)
         self._apps: Dict[str, BaseApp] = {}
