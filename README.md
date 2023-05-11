@@ -6,13 +6,13 @@
 
 [![unittest](https://github.com/snu-quiqcl/qiwi/actions/workflows/unittest.yml/badge.svg)](https://github.com/snu-quiqcl/qiwi/actions/workflows/unittest.yml)
 
-# QIWI
-QIWI (**S**NU **w**idget **i**ntegration **f**ramework for PyQ**t**) is a framework for integration of PyQt widgets where they can communicate with each other. This project is mainly developed for trapped ion experiment controller GUI in SNU QuIQCL.
+# qiwi
+QIWI (**Q**u**I**qcl **W**idget **I**ntegration framework) is a framework for integration of PyQt widgets where they can communicate with each other. This project is mainly developed for trapped ion experiment controller GUI in SNU QuIQCL.
 
 ## How to download and install
 One of the below:
 - Using released version (_recommended_)
-1. `pip install git_https://github.com/snu-quiqcl/qiwi.git@v1.0.1`
+1. `pip install git_https://github.com/snu-quiqcl/qiwi.git@v2.0.0`
 
 - Using git directly
 1. `git clone ${url}`: The default branch is `develop`, not `main`. There is no guarantee for stability.
