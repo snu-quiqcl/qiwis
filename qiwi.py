@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-QIWI is a main manager for qiwi system.
+Qiwi is a main manager for qiwi system.
 
 Using a set-up file written by a user, it sets up apps.
 
