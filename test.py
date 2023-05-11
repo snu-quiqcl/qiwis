@@ -1,5 +1,5 @@
 """
-Module for testing swift module.
+Module for testing qiwi module.
 """
 
 import collections.abc
@@ -13,10 +13,10 @@ from typing import Any, Optional, Mapping, Iterable
 from PyQt5.QtCore import QObject
 from PyQt5.QtWidgets import QApplication, QMessageBox, QWidget
 
-import swift
+import qiwi
 
 APP_INFOS = {
-    "app1": swift.AppInfo(
+    "app1": qiwi.AppInfo(
         module="module1",
         cls="cls1",
         path="path1",
@@ -25,7 +25,7 @@ APP_INFOS = {
         channel=["ch1", "ch2"],
         args={"arg1": "value1"}
     ),
-    "app2": swift.AppInfo(
+    "app2": qiwi.AppInfo(
         module="module2",
         cls="cls2"
     )
@@ -59,8 +59,8 @@ APP_JSONS = {
 qapp = QApplication(sys.argv)
 
 
-class SwiftTestWithApps(unittest.TestCase):
-    """Unit test for Swift class with creating apps."""
+class QiwiTestWithApps(unittest.TestCase):
+    """Unit test for Qiwi class with creating apps."""
 
     def setUp(self):
         self.import_module_patcher = mock.patch("importlib.import_module")
@@ -74,22 +74,22 @@ class SwiftTestWithApps(unittest.TestCase):
         self.channels = set()
         for appInfo in APP_INFOS.values():
             self.channels.update(appInfo.channel)
-        self.swift = swift.Swift(APP_INFOS)
+        self.qiwi = qiwi.Qiwi(APP_INFOS)
 
     def doCleanups(self):
         self.import_module_patcher.stop()
 
     def test_init(self):
-        self.assertEqual(self.swift.appInfos, APP_INFOS)
+        self.assertEqual(self.qiwi.appInfos, APP_INFOS)
         for name, info in APP_INFOS.items():
             self.mocked_import_module.assert_any_call(info.module)
-            self.assertEqual(self.swift._apps[name].cls, info.cls)
-            self.assertIn(name, self.swift._dockWidgets)
+            self.assertEqual(self.qiwi._apps[name].cls, info.cls)
+            self.assertIn(name, self.qiwi._dockWidgets)
         for channel in self.channels:
-            self.assertIn(channel, self.swift._subscribers)
+            self.assertIn(channel, self.qiwi._subscribers)
 
     def test_app_names(self):
-        appNamesSet = set(self.swift.appNames())
+        appNamesSet = set(self.qiwi.appNames())
         self.assertEqual(appNamesSet, set(APP_INFOS))
 
     def test_create_app(self):
@@ -98,115 +98,115 @@ class SwiftTestWithApps(unittest.TestCase):
         app_.frames.return_value = (QWidget(),)
         cls = mock.MagicMock(return_value=app_)
         setattr(self.mocked_import_module.return_value, "cls3", cls)
-        self.swift.createApp(
+        self.qiwi.createApp(
             "app3",
-            swift.AppInfo(**{"module": "module3", "cls": "cls3", "channel": ["ch1"]})
+            qiwi.AppInfo(**{"module": "module3", "cls": "cls3", "channel": ["ch1"]})
         )
         self.mocked_import_module.assert_called_with("module3")
-        self.assertEqual(self.swift._apps["app3"].cls, "cls3")
-        self.assertIn("app3", self.swift._dockWidgets)
-        self.assertIn("app3", self.swift._subscribers["ch1"])
+        self.assertEqual(self.qiwi._apps["app3"].cls, "cls3")
+        self.assertIn("app3", self.qiwi._dockWidgets)
+        self.assertIn("app3", self.qiwi._subscribers["ch1"])
 
     def test_destroy_app(self):
         for name, info in APP_INFOS.items():
-            self.swift.destroyApp(name)
-            self.assertNotIn(name, self.swift._apps)
-            self.assertNotIn(name, self.swift._dockWidgets)
+            self.qiwi.destroyApp(name)
+            self.assertNotIn(name, self.qiwi._apps)
+            self.assertNotIn(name, self.qiwi._dockWidgets)
             for channel in info.channel:
-                self.assertNotIn(name, self.swift._subscribers[channel])
+                self.assertNotIn(name, self.qiwi._subscribers[channel])
 
     def test_update_frames_inclusive(self):
         """Tests for the case where a new frame is added in the return of frames()."""
-        orgFramesSet = {dockWidget.widget() for dockWidget in self.swift._dockWidgets["app1"]}
+        orgFramesSet = {dockWidget.widget() for dockWidget in self.qiwi._dockWidgets["app1"]}
         newFramesSet = orgFramesSet | {QWidget()}
-        self.swift._apps["app1"].frames.return_value = tuple(newFramesSet)
-        self.swift.updateFrames("app1")
-        finalFramesSet = {dockWidget.widget() for dockWidget in self.swift._dockWidgets["app1"]}
+        self.qiwi._apps["app1"].frames.return_value = tuple(newFramesSet)
+        self.qiwi.updateFrames("app1")
+        finalFramesSet = {dockWidget.widget() for dockWidget in self.qiwi._dockWidgets["app1"]}
         self.assertEqual(finalFramesSet, newFramesSet)
 
     def test_update_frames_exclusive(self):
         """Tests for the case where a new frame replaced the return of frames()."""
-        orgFramesSet = {dockWidget.widget() for dockWidget in self.swift._dockWidgets["app1"]}
+        orgFramesSet = {dockWidget.widget() for dockWidget in self.qiwi._dockWidgets["app1"]}
         newFramesSet = {QWidget()}
-        self.swift._apps["app1"].frames.return_value = tuple(newFramesSet)
-        self.swift.updateFrames("app1")
-        finalFramesSet = {dockWidget.widget() for dockWidget in self.swift._dockWidgets["app1"]}
+        self.qiwi._apps["app1"].frames.return_value = tuple(newFramesSet)
+        self.qiwi.updateFrames("app1")
+        finalFramesSet = {dockWidget.widget() for dockWidget in self.qiwi._dockWidgets["app1"]}
         self.assertFalse(finalFramesSet & orgFramesSet)
         self.assertEqual(finalFramesSet, newFramesSet)
 
     def test_channel_names(self):
-        channelNamesSet = set(self.swift.channelNames())
+        channelNamesSet = set(self.qiwi.channelNames())
         self.assertEqual(channelNamesSet, self.channels)
 
     def test_subscriber_names(self):
         for channel in self.channels:
-            subscriberNamesSet = set(self.swift.subscriberNames(channel))
+            subscriberNamesSet = set(self.qiwi.subscriberNames(channel))
             self.assertEqual(
                 subscriberNamesSet,
                 {name for name, info in APP_INFOS.items() if channel in info.channel}
             )
 
     def test_unsubcribe(self):
-        self.assertEqual(self.swift.unsubscribe("app1", "ch1"), True)
-        self.assertNotIn("app1", self.swift._subscribers["ch1"])
-        self.assertEqual(self.swift.unsubscribe("app2", "ch1"), False)
+        self.assertEqual(self.qiwi.unsubscribe("app1", "ch1"), True)
+        self.assertNotIn("app1", self.qiwi._subscribers["ch1"])
+        self.assertEqual(self.qiwi.unsubscribe("app2", "ch1"), False)
 
     def test_broadcast(self):
         for channelName in self.channels:
-            self.swift._broadcast(channelName, "test_msg")
-        for name, app_ in self.swift._apps.items():
+            self.qiwi._broadcast(channelName, "test_msg")
+        for name, app_ in self.qiwi._apps.items():
             self.assertEqual(len(APP_INFOS[name].channel), app_.received.emit.call_count)
 
 
-class SwiftTestWithoutApps(unittest.TestCase):
-    """Unit test for Swift class without apps."""
+class QiwiTestWithoutApps(unittest.TestCase):
+    """Unit test for Qiwi class without apps."""
 
     def setUp(self):
-        self.swift = swift.Swift()
+        self.qiwi = qiwi.Qiwi()
 
-    def help_swiftcall(
+    def help_qiwicall(
         self,
         value: Any,
         result_string: str,
         error: Optional[Exception] = None,
         dumps: Iterable = (),
     ):
-        """Helper method for testing _swiftcall().
+        """Helper method for testing _qiwicall().
         
         Args:
-            value: The actual return value of the swift-call.
-            result_string: The swift.dumps()-ed string of the result object that should be
-              generated after the swift-call.
-            error: The Exception instance that should have occurred during the swift-call.
+            value: The actual return value of the qiwi-call.
+            result_string: The qiwi.dumps()-ed string of the result object that should be
+              generated after the qiwi-call.
+            error: The Exception instance that should have occurred during the qiwi-call.
               None if no exception is expected.
-            dumps: A sequence of return values of the mocked swift.dumps().
+            dumps: A sequence of return values of the mocked qiwi.dumps().
               It will be given as side_effect. Moreover, the number of calls of
-              swift.dumps() should be the same as the lenght of the given iterable.
+              qiwi.dumps() should be the same as the lenght of the given iterable.
         """
         msg = json.dumps({"call": "callForTest", "args": {}})
-        with mock.patch.multiple(self.swift, _handleSwiftcall=mock.DEFAULT, _apps=mock.DEFAULT):
+        with mock.patch.multiple(self.qiwi, _handleQiwicall=mock.DEFAULT, _apps=mock.DEFAULT):
             if error is None:
-                self.swift._handleSwiftcall.return_value = value
+                self.qiwi._handleQiwicall.return_value = value
             else:
-                self.swift._handleSwiftcall.side_effect = error
-            with mock.patch("swift.dumps") as mocked_dumps:
+                self.qiwi._handleQiwicall.side_effect = error
+            with mock.patch("qiwi.dumps") as mocked_dumps:
                 mocked_dumps.side_effect = dumps
-                self.swift._swiftcall(sender="sender", msg=msg)
+                self.qiwi._qiwicall(sender="sender", msg=msg)
                 self.assertEqual(len(mocked_dumps.mock_calls), len(dumps))
-            mocked_signal = self.swift._apps["sender"].swiftcallReturned
+            mocked_signal = self.qiwi._apps["sender"].qiwicallReturned
             mocked_signal.emit.assert_called_once_with(msg, result_string)
 
-    def test_swiftcall_primitive(self):
-        """The swiftcall returns a primitive type value, which can be JSONified."""
+    def test_qiwicall_primitive(self):
+        """The qiwicall returns a primitive type value, which can be JSONified."""
         value = [1.5, True, None, "abc"]
         result_string = json.dumps({"done": True, "success": True, "value": value, "error": None})
         dumps = (result_string,)
-        self.help_swiftcall(value, result_string, dumps=dumps)
+        self.help_qiwicall(value, result_string, dumps=dumps)
 
-    def test_swiftcall_serializable(self):
-        """The swiftcall returns a Serializable type value."""
+    def test_qiwicall_serializable(self):
+        """The qiwicall returns a Serializable type value."""
         @dataclasses.dataclass
-        class ClassForTest(swift.Serializable):
+        class ClassForTest(qiwi.Serializable):
             a: str
         value = ClassForTest(a="abc")
         value_string = json.dumps({"a": "abc"})
@@ -217,10 +217,10 @@ class SwiftTestWithoutApps(unittest.TestCase):
             "error": None,
         })
         dumps = (value_string, result_string)
-        self.help_swiftcall(value, result_string, dumps=dumps)
+        self.help_qiwicall(value, result_string, dumps=dumps)
 
-    def test_swiftcall_exception(self):
-        """The swiftcall raises an exception."""
+    def test_qiwicall_exception(self):
+        """The qiwicall raises an exception."""
         class ExceptionForTest(Exception):
             """Temporary exception only for this test."""
         error = ExceptionForTest("test")
@@ -231,18 +231,18 @@ class SwiftTestWithoutApps(unittest.TestCase):
             "error": repr(error),
         })
         dumps = (result_string,)
-        self.help_swiftcall(None, result_string, error, dumps=dumps)
+        self.help_qiwicall(None, result_string, error, dumps=dumps)
 
     def test_parse_args_primitive(self):
         def call_for_test(number: float, boolean: bool, string: str):  # pylint: disable=unused-argument
             """A dummy function for testing, which has only primitive type arguments."""
         args = {"number": 1.5, "boolean": True, "string": "abc"}
-        parsed_args = self.swift._parseArgs(call_for_test, args)
+        parsed_args = self.qiwi._parseArgs(call_for_test, args)
         self.assertEqual(args, parsed_args)
 
     def test_parse_args_serializable(self):
         @dataclasses.dataclass
-        class ClassForTest(swift.Serializable):
+        class ClassForTest(qiwi.Serializable):
             number: float
             boolean: bool
             string: str
@@ -260,71 +260,71 @@ class SwiftTestWithoutApps(unittest.TestCase):
         }
         args = {"arg1": ClassForTest(**fields1), "arg2": ClassForTest(**fields2)}
         json_args = {"arg1": json.dumps(fields1), "arg2": json.dumps(fields2)}
-        parsed_args = self.swift._parseArgs(call_for_test, json_args)
+        parsed_args = self.qiwi._parseArgs(call_for_test, json_args)
         self.assertEqual(args, parsed_args)
 
-@mock.patch("swift.loads")
-@mock.patch("swift.QMessageBox.warning")
-class HandleSwiftcallTest(unittest.TestCase):
-    """Unit test for Swift._handleSwiftcall()."""
+@mock.patch("qiwi.loads")
+@mock.patch("qiwi.QMessageBox.warning")
+class HandleQiwicallTest(unittest.TestCase):
+    """Unit test for Qiwi._handleQiwicall()."""
 
     def setUp(self):
-        self.swift = swift.Swift()
+        self.qiwi = qiwi.Qiwi()
 
     def test_ok(self, mocked_warning, mocked_loads):
         args = {"a": 123, "b": "ABC"}
-        info = swift.SwiftcallInfo(call="callForTest", args=args)
+        info = qiwi.QiwicallInfo(call="callForTest", args=args)
         msg = json.dumps({"call": "callForTest", "args": args})
         mocked_loads.return_value = info
         mocked_warning.return_value = QMessageBox.Ok
-        with mock.patch.multiple(self.swift, create=True,
+        with mock.patch.multiple(self.qiwi, create=True,
                                  callForTest=mock.DEFAULT, _parseArgs=mock.DEFAULT):
-            self.swift._parseArgs.return_value = args
-            self.swift._handleSwiftcall(sender="sender", msg=msg)
-            self.swift.callForTest.assert_called_once_with(**args)
-            self.swift._parseArgs.assert_called_once_with(self.swift.callForTest, args)
+            self.qiwi._parseArgs.return_value = args
+            self.qiwi._handleQiwicall(sender="sender", msg=msg)
+            self.qiwi.callForTest.assert_called_once_with(**args)
+            self.qiwi._parseArgs.assert_called_once_with(self.qiwi.callForTest, args)
         mocked_loads.assert_called_once()
         mocked_warning.assert_called_once()
 
     def test_cancel(self, mocked_warning, mocked_loads):
         args = {"a": 123, "b": "ABC"}
-        info = swift.SwiftcallInfo(call="callForTest", args=args)
+        info = qiwi.QiwicallInfo(call="callForTest", args=args)
         msg = json.dumps({"call": "callForTest", "args": args})
         mocked_loads.return_value = info
         mocked_warning.return_value = QMessageBox.Cancel
-        with mock.patch.multiple(self.swift, create=True,
+        with mock.patch.multiple(self.qiwi, create=True,
                                  callForTest=mock.DEFAULT, _parseArgs=mock.DEFAULT):
-            self.swift._parseArgs.return_value = args
+            self.qiwi._parseArgs.return_value = args
             with self.assertRaises(RuntimeError):
-                self.swift._handleSwiftcall(sender="sender", msg=msg)
-            self.swift.callForTest.assert_not_called()
-            self.swift._parseArgs.assert_called_once_with(self.swift.callForTest, args)
+                self.qiwi._handleQiwicall(sender="sender", msg=msg)
+            self.qiwi.callForTest.assert_not_called()
+            self.qiwi._parseArgs.assert_called_once_with(self.qiwi.callForTest, args)
         mocked_loads.assert_called_once()
         mocked_warning.assert_called_once()
 
     def test_non_public(self, mocked_warning, mocked_loads):
         args = {"a": 123, "b": "ABC"}
-        info = swift.SwiftcallInfo(call="_callForTest", args=args)
+        info = qiwi.QiwicallInfo(call="_callForTest", args=args)
         msg = json.dumps({"call": "_callForTest", "args": args})
         mocked_loads.return_value = info
-        with mock.patch.multiple(self.swift, create=True,
+        with mock.patch.multiple(self.qiwi, create=True,
                                  _callForTest=mock.DEFAULT, _parseArgs=mock.DEFAULT):
             with self.assertRaises(ValueError):
-                self.swift._handleSwiftcall(sender="sender", msg=msg)
-            self.swift._callForTest.assert_not_called()
-            self.swift._parseArgs.assert_not_called()
+                self.qiwi._handleQiwicall(sender="sender", msg=msg)
+            self.qiwi._callForTest.assert_not_called()
+            self.qiwi._parseArgs.assert_not_called()
         mocked_loads.assert_called_once()
         mocked_warning.assert_not_called()
 
     def test_not_existing_method(self, mocked_warning, mocked_loads):
         args = {"a": 123, "b": "ABC"}
-        info = swift.SwiftcallInfo(call="callForTest", args=args)
+        info = qiwi.QiwicallInfo(call="callForTest", args=args)
         msg = json.dumps({"call": "callForTest", "args": args})
         mocked_loads.return_value = info
-        with mock.patch.multiple(self.swift, create=True, _parseArgs=mock.DEFAULT):
+        with mock.patch.multiple(self.qiwi, create=True, _parseArgs=mock.DEFAULT):
             with self.assertRaises(AttributeError):
-                self.swift._handleSwiftcall(sender="sender", msg=msg)
-            self.swift._parseArgs.assert_not_called()
+                self.qiwi._handleQiwicall(sender="sender", msg=msg)
+            self.qiwi._parseArgs.assert_not_called()
         mocked_loads.assert_called_once()
         mocked_warning.assert_not_called()
 
@@ -333,13 +333,13 @@ class BaseAppTest(unittest.TestCase):
     """Unit test for BaseApp class."""
 
     def setUp(self):
-        self.app = swift.BaseApp("name")
+        self.app = qiwi.BaseApp("name")
 
     def test_init(self):
         self.assertEqual(self.app.name, "name")
 
     def test_set_parent(self):
-        swift.BaseApp("name", QObject())
+        qiwi.BaseApp("name", QObject())
 
     def test_frames(self):
         self.assertIsInstance(self.app.frames(), collections.abc.Iterable)
@@ -364,60 +364,60 @@ class BaseAppTest(unittest.TestCase):
         self.app._receivedMessage("ch1", '"msg1" "msg2"')
         self.app.receivedSlot.assert_not_called()
 
-    def test_received_swiftcall_result(self):
-        self.app.swiftcall.update_result = mock.MagicMock()
-        self.app._receivedSwiftcallResult(
+    def test_received_qiwicall_result(self):
+        self.app.qiwicall.update_result = mock.MagicMock()
+        self.app._receivedQiwicallResult(
             "request", '{"done": true, "success": true, "value": null, "error": null}'
         )
-        self.app.swiftcall.update_result.assert_called_once_with(
+        self.app.qiwicall.update_result.assert_called_once_with(
             "request",
-            swift.SwiftcallResult(done=True, success=True)
+            qiwi.QiwicallResult(done=True, success=True)
         )
 
-    def test_received_swiftcall_result_exception(self):
-        self.app.swiftcall.update_result = mock.MagicMock()
-        self.app._receivedSwiftcallResult(
+    def test_received_qiwicall_result_exception(self):
+        self.app.qiwicall.update_result = mock.MagicMock()
+        self.app._receivedQiwicallResult(
             "request", '{"done": "tr" "ue", "success": true, "value": null, "error": null}'
         )
-        self.app.swiftcall.update_result.assert_not_called()
+        self.app.qiwicall.update_result.assert_not_called()
 
 
-class SwiftcallProxyTest(unittest.TestCase):
-    """Unit test for SwiftcallProxy class."""
+class QiwicallProxyTest(unittest.TestCase):
+    """Unit test for QiwicallProxy class."""
 
     def setUp(self):
-        self.swiftcall = swift.SwiftcallProxy(mock.MagicMock())
+        self.qiwicall = qiwi.QiwicallProxy(mock.MagicMock())
 
     def help_proxy(self, msg: str, args: Mapping[str, Any], dumps: Iterable):
         """Helper method for testing proxy.
         
         Args:
-            msg: The swift-call request message.
+            msg: The qiwi-call request message.
             args: A keyword argument mapping for calling the proxy.
-            dumps: Expected return values of swift.dumps() during the proxied swift-call.
+            dumps: Expected return values of qiwi.dumps() during the proxied qiwi-call.
               It will be given as side_effect. The number of calls should be the same as
               the length of the given iterable.
         """
-        with mock.patch.object(self.swiftcall, "results", {}):
-            with mock.patch("swift.dumps") as mocked_dumps:
+        with mock.patch.object(self.qiwicall, "results", {}):
+            with mock.patch("qiwi.dumps") as mocked_dumps:
                 mocked_dumps.side_effect = dumps
-                result = self.swiftcall.callForTest(**args)
+                result = self.qiwicall.callForTest(**args)
                 self.assertEqual(len(mocked_dumps.mock_calls), len(dumps))
-            self.swiftcall.requested.emit.assert_called_once_with(msg)
-            self.assertIs(result, self.swiftcall.results[msg])
-            self.assertEqual(result, swift.SwiftcallResult(done=False, success=False))
+            self.qiwicall.requested.emit.assert_called_once_with(msg)
+            self.assertIs(result, self.qiwicall.results[msg])
+            self.assertEqual(result, qiwi.QiwicallResult(done=False, success=False))
 
     def test_proxy_primitive(self):
-        """Tests a proxied swiftcall with primitive type arguments."""
+        """Tests a proxied qiwicall with primitive type arguments."""
         args = {"number": 1.5, "boolean": True, "string": "abc"}
         msg = json.dumps({"call": "callForTest", "args": args})
         dumps = (msg,)
         self.help_proxy(msg, args, dumps)
 
     def test_proxy_serializable(self):
-        """Tests a proxied swiftcall with Serializable type arguments."""
+        """Tests a proxied qiwicall with Serializable type arguments."""
         @dataclasses.dataclass
-        class ClassForTest(swift.Serializable):
+        class ClassForTest(qiwi.Serializable):
             number: float
             boolean: bool
             string: str
@@ -434,104 +434,104 @@ class SwiftcallProxyTest(unittest.TestCase):
         self.help_proxy(msg, args, dumps)
 
     def test_proxy_duplicate(self):
-        """Tests a duplicate proxied swiftcall.
+        """Tests a duplicate proxied qiwicall.
         
         The new one should be accepted and the previous one should be discarded.
         """
         args = {"a": 123}
         msg = json.dumps({"call": "callForTest", "args": args})
-        with mock.patch.object(self.swiftcall, "results", {}):
-            with mock.patch("swift.dumps") as mocked_dumps:
+        with mock.patch.object(self.qiwicall, "results", {}):
+            with mock.patch("qiwi.dumps") as mocked_dumps:
                 mocked_dumps.side_effect = (msg, msg)
-                result1 = self.swiftcall.callForTest(**args)
-                result2 = self.swiftcall.callForTest(**args)
+                result1 = self.qiwicall.callForTest(**args)
+                result2 = self.qiwicall.callForTest(**args)
                 self.assertEqual(len(mocked_dumps.mock_calls), 2)
             self.assertSequenceEqual(
-                self.swiftcall.requested.emit.mock_calls,
+                self.qiwicall.requested.emit.mock_calls,
                 (mock.call(msg), mock.call(msg)),
             )
-            self.assertIs(result2, self.swiftcall.results[msg])
-            self.assertEqual(result2, swift.SwiftcallResult(done=False, success=False))
+            self.assertIs(result2, self.qiwicall.results[msg])
+            self.assertEqual(result2, qiwi.QiwicallResult(done=False, success=False))
             self.assertEqual(result1, result2)
 
     def test_update_result_success(self):
-        old_result = swift.SwiftcallResult(done=False, success=False)
-        new_result = swift.SwiftcallResult(done=True, success=True, value=0)
-        with mock.patch.object(self.swiftcall, "results", {"request": old_result}):
-            self.swiftcall.update_result("request", new_result)
+        old_result = qiwi.QiwicallResult(done=False, success=False)
+        new_result = qiwi.QiwicallResult(done=True, success=True, value=0)
+        with mock.patch.object(self.qiwicall, "results", {"request": old_result}):
+            self.qiwicall.update_result("request", new_result)
             self.assertEqual(old_result, new_result)
-            self.assertNotIn("request", self.swiftcall.results)
+            self.assertNotIn("request", self.qiwicall.results)
 
     def test_update_result_error(self):
-        old_result = swift.SwiftcallResult(done=False, success=False)
-        new_result = swift.SwiftcallResult(done=True, success=False, error=RuntimeError("test"))
-        with mock.patch.object(self.swiftcall, "results", {"request": old_result}):
-            self.swiftcall.update_result("request", new_result)
+        old_result = qiwi.QiwicallResult(done=False, success=False)
+        new_result = qiwi.QiwicallResult(done=True, success=False, error=RuntimeError("test"))
+        with mock.patch.object(self.qiwicall, "results", {"request": old_result}):
+            self.qiwicall.update_result("request", new_result)
             self.assertEqual(old_result, new_result)
-            self.assertNotIn("request", self.swiftcall.results)
+            self.assertNotIn("request", self.qiwicall.results)
 
     def test_update_result_no_discard(self):
-        old_result = swift.SwiftcallResult(done=False, success=False)
-        new_result = swift.SwiftcallResult(done=True, success=True, value=0)
-        with mock.patch.object(self.swiftcall, "results", {"request": old_result}):
-            self.swiftcall.update_result("request", new_result, discard=False)
+        old_result = qiwi.QiwicallResult(done=False, success=False)
+        new_result = qiwi.QiwicallResult(done=True, success=True, value=0)
+        with mock.patch.object(self.qiwicall, "results", {"request": old_result}):
+            self.qiwicall.update_result("request", new_result, discard=False)
             self.assertEqual(old_result, new_result)
-            self.assertIs(old_result, self.swiftcall.results["request"])
+            self.assertIs(old_result, self.qiwicall.results["request"])
 
     def test_update_result_not_exist(self):
         """When the request is not in the results dictionary, it is ignored."""
-        new_result = swift.SwiftcallResult(done=True, success=True, value=0)
-        with mock.patch.object(self.swiftcall, "results", {}):
-            self.swiftcall.update_result("request", new_result)
-            self.assertNotIn("request", self.swiftcall.results)
+        new_result = qiwi.QiwicallResult(done=True, success=True, value=0)
+        with mock.patch.object(self.qiwicall, "results", {}):
+            self.qiwicall.update_result("request", new_result)
+            self.assertNotIn("request", self.qiwicall.results)
 
 
-class SwiftFunctionTest(unittest.TestCase):
+class QiwiFunctionTest(unittest.TestCase):
     """Unit test for functions."""
 
     def test_loads(self):
-        self.assertEqual(swift.loads(swift.AppInfo, APP_JSONS["app1"]), APP_INFOS["app1"])
-        self.assertEqual(swift.loads(swift.AppInfo, APP_JSONS["app2_default"]), APP_INFOS["app2"])
+        self.assertEqual(qiwi.loads(qiwi.AppInfo, APP_JSONS["app1"]), APP_INFOS["app1"])
+        self.assertEqual(qiwi.loads(qiwi.AppInfo, APP_JSONS["app2_default"]), APP_INFOS["app2"])
 
     def test_dumps(self):
-        self.assertEqual(swift.dumps(APP_INFOS["app1"]), APP_JSONS["app1"])
-        self.assertEqual(swift.dumps(APP_INFOS["app2"]), APP_JSONS["app2"])
+        self.assertEqual(qiwi.dumps(APP_INFOS["app1"]), APP_JSONS["app1"])
+        self.assertEqual(qiwi.dumps(APP_INFOS["app2"]), APP_JSONS["app2"])
 
     def test_add_to_path(self):
         test_dir = "/test_dir"
         old_path = sys.path.copy()
-        with swift._add_to_path(test_dir):
+        with qiwi._add_to_path(test_dir):
             self.assertNotEqual(old_path, sys.path)
             self.assertIn(test_dir, sys.path)
         self.assertEqual(old_path, sys.path)
 
     @mock.patch.object(sys, "argv", ["", "-s", "test_setup.json"])
     def test_get_argparser(self):
-        parser = swift._get_argparser()
+        parser = qiwi._get_argparser()
         args = parser.parse_args()
         self.assertEqual(args.setup_path, "test_setup.json")
 
     @mock.patch.object(sys, "argv", [""])
     def test_get_argparser_default(self):
-        args = swift._get_argparser().parse_args()
+        args = qiwi._get_argparser().parse_args()
         self.assertEqual(args.setup_path, "./setup.json")
 
     @mock.patch("builtins.open")
     @mock.patch("json.load", return_value={"app": APP_DICTS})
     def test_read_setup_file(self, mock_load, mock_open):
-        self.assertEqual(swift._read_setup_file(""), APP_INFOS)
+        self.assertEqual(qiwi._read_setup_file(""), APP_INFOS)
         mock_open.assert_called_once()
         mock_load.assert_called_once()
 
-    @mock.patch("swift._get_argparser")
-    @mock.patch("swift._read_setup_file", return_value={})
-    @mock.patch("swift.Swift")
-    @mock.patch("swift.QApplication")
-    def test_main(self, mock_qapp, mock_swift, mock_read_setup_file, mock_get_argparser):
-        swift.main()
+    @mock.patch("qiwi._get_argparser")
+    @mock.patch("qiwi._read_setup_file", return_value={})
+    @mock.patch("qiwi.Qiwi")
+    @mock.patch("qiwi.QApplication")
+    def test_main(self, mock_qapp, mock_qiwi, mock_read_setup_file, mock_get_argparser):
+        qiwi.main()
         mock_get_argparser.assert_called_once()
         mock_read_setup_file.assert_called_once()
-        mock_swift.assert_called_once()
+        mock_qiwi.assert_called_once()
         mock_qapp.return_value.exec_.assert_called_once()
 
 
