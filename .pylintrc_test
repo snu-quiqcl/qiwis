@@ -16,4 +16,4 @@ disable=
     protected-access,
 
 [TYPECHECK]
-ignored-modules=qiwi
+ignored-modules=qiwis

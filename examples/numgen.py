@@ -10,7 +10,7 @@ from typing import Any, Optional, Tuple, Union
 from PyQt5.QtCore import QObject, pyqtSlot
 from PyQt5.QtWidgets import QWidget, QComboBox, QPushButton, QLabel, QVBoxLayout
 
-from qiwi import BaseApp
+from qiwis import BaseApp
 from examples.backend import generate, write
 
 class GeneratorFrame(QWidget):
@@ -161,7 +161,7 @@ class NumGenApp(BaseApp):
         num = generate()
         if not self.isGenerated:
             self.isGenerated = True
-            self.qiwicall.updateFrames(name=self.name)
+            self.qiwiscall.updateFrames(name=self.name)
         self.viewerFrame.numberLabel.setText(f"generated number: {num}")
         self.broadcast("log", f"Generated number: {num}.")
         # save the generated number
