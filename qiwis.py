@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
 """
-Qiwi is a main manager for qiwi system.
+Qiwis is a main manager for qiwis system.
 
 Using a set-up file written by a user, it sets up apps.
 
 Usage:
-    python -m qiwi (-s <SETUP_PATH>)
+    python -m qiwis (-s <SETUP_PATH>)
 """
 
 import sys
@@ -25,7 +25,7 @@ from typing import (
 )
 
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, Qt
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QDockWidget, QMessageBox, QWidget
+from PyQt5.QtWidgets import QApplication, QMainWindow, QDockWidget, QMessageBox, QWidget
 
 
 T = TypeVar("T")
@@ -34,10 +34,10 @@ T = TypeVar("T")
 class Serializable:  # pylint: disable=too-few-public-methods
     """A type for dataclasses that can be converted to a JSON string.
     
-    The message protocols in qiwi use JSON strings to encode data.
+    The message protocols in qiwis use JSON strings to encode data.
     If a dataclass inherits this class, the dictionary yielded by asdict() must
       be able to converted to a JSON string, i.e., JSONifiable.
-    Every argument of qiwicalls must be JSONifiable by itself
+    Every argument of qiwiscalls must be JSONifiable by itself
       or an instance of Serializable.
     """
 
@@ -92,16 +92,16 @@ def dumps(obj: Serializable) -> str:
 
 
 @dataclasses.dataclass
-class QiwicallInfo(Serializable):
-    """Information of a qiwicall request.
+class QiwiscallInfo(Serializable):
+    """Information of a qiwiscall request.
     
     Fields:
-        call: The name of the qiwicall feature, e.g., "createApp" for createApp().
+        call: The name of the qiwiscall feature, e.g., "createApp" for createApp().
           This is case-sensitive.
-        args: The arguments of the qiwicall as a dictionary of keyword arguements.
+        args: The arguments of the qiwiscall as a dictionary of keyword arguements.
           The names of the arguements are case-sensitive.
           When an argument is Serializable, it must be given as a converted JSON string,
-          e.g., not {"arg": QiwicallInfo(call="call")},
+          e.g., not {"arg": QiwiscallInfo(call="call")},
           but {"arg": '{"call": "call", "args": {}}'}.
     """
     call: str
@@ -109,14 +109,14 @@ class QiwicallInfo(Serializable):
 
 
 @dataclasses.dataclass
-class QiwicallResult(Serializable):
-    """Result data of a qiwicall.
+class QiwiscallResult(Serializable):
+    """Result data of a qiwiscall.
     
     Fields:
-        done: Whether the qiwicall is done. Even when it failed, this is True as well.
-        success: True when the qiwicall is done without any problems.
-        value: Return value of the qiwicall, if any. It must be JSONifiable.
-        error: Information about the problem that occurred during the qiwicall.
+        done: Whether the qiwiscall is done. Even when it failed, this is True as well.
+        success: True when the qiwiscall is done without any problems.
+        value: Return value of the qiwiscall, if any. It must be JSONifiable.
+        error: Information about the problem that occurred during the qiwiscall.
     """
     done: bool
     success: bool
@@ -124,14 +124,14 @@ class QiwicallResult(Serializable):
     error: Optional[str] = None
 
 
-class Qiwi(QObject):
-    """Actual manager for qiwi system.
+class Qiwis(QObject):
+    """Actual manager for qiwis system.
 
-    Note that QApplication instance must be created before instantiating Qiwi object.
+    Note that QApplication instance must be created before instantiating Qiwis object.
 
-    A qiwicall is a request for the qiwi system such as creating an app.
-    Messages emitted from "qiwicallRequested" signal are considered as qiwicall.
-    For details, see _qiwicall().
+    A qiwiscall is a request for the qiwis system such as creating an app.
+    Messages emitted from "qiwiscallRequested" signal are considered as qiwiscall.
+    For details, see _qiwiscall().
 
     Brief procedure:
         1. Load setup environment.
@@ -144,15 +144,14 @@ class Qiwi(QObject):
         parent: Optional[QObject] = None):
         """
         Args:
-            appInfos: See Qiwi.load(). None or an empty dictionary for loading no apps.
+            appInfos: See Qiwis.load(). None or an empty dictionary for loading no apps.
             parent: A parent object.
         """
         super().__init__(parent=parent)
         self.appInfos = appInfos
         self.mainWindow = QMainWindow()
-        self.centralWidget = QLabel("Qiwi")
-        self.centralWidget.setAlignment(Qt.AlignCenter)
-        self.centralWidget.setStyleSheet("background-color: gray;")
+        self.centralWidget = QWidget()
+        self.centralWidget.setStyleSheet("border-image: url(./resources/background.png);")
         self.mainWindow.setCentralWidget(self.centralWidget)
         self._dockWidgets = defaultdict(list)
         self._apps: Dict[str, BaseApp] = {}
@@ -162,7 +161,7 @@ class Qiwi(QObject):
         self.mainWindow.show()
 
     def load(self, appInfos: Mapping[str, AppInfo]):
-        """Initializes qiwi system and loads the apps.
+        """Initializes qiwis system and loads the apps.
         
         Args:
             appInfos: A dictionary whose keys are app names and the values are
@@ -176,7 +175,7 @@ class Qiwi(QObject):
     def addFrame(self, name: str, frame: QWidget, info: AppInfo):
         """Adds a frame of the app and wraps it with a dock widget.
 
-        This is not a qiwicall because QWidget is not Serializable.
+        This is not a qiwiscall because QWidget is not Serializable.
         
         Args:
             name: A name of app.
@@ -198,7 +197,7 @@ class Qiwi(QObject):
     def removeFrame(self, name: str, dockWidget: QDockWidget):
         """Removes the frame from the main window.
         
-        This is not a qiwicall because QDockWidget is not Serializable.
+        This is not a qiwiscall because QDockWidget is not Serializable.
         
         Args:
             name: A name of app.
@@ -227,8 +226,8 @@ class Qiwi(QObject):
         else:
             app = cls(name, parent=self)
         app.broadcastRequested.connect(self._broadcast, type=Qt.QueuedConnection)
-        app.qiwicallRequested.connect(
-            functools.partial(self._qiwicall, name),
+        app.qiwiscallRequested.connect(
+            functools.partial(self._qiwiscall, name),
             type=Qt.QueuedConnection,
         )
         for channelName in info.channel:
@@ -330,7 +329,7 @@ class Qiwi(QObject):
 
         Args:
             call: Function object to inspect its signature.
-            args: See QiwicallInfo.args.
+            args: See QiwiscallInfo.args.
         
         Returns:
             A dictionary of the same arguments as args, but with concrete Serializable
@@ -343,8 +342,8 @@ class Qiwi(QObject):
             parsedArgs[name] = loads(cls, arg) if issubclass(cls, Serializable) else arg
         return parsedArgs
 
-    def _handleQiwicall(self, sender: str, msg: str) -> Any:
-        """Handles the qiwicall.
+    def _handleQiwiscall(self, sender: str, msg: str) -> Any:
+        """Handles the qiwiscall.
 
         This can raise an exception if the arguments do not follow the valid API.
         The caller must obey the API and catch the possible exceptions.
@@ -352,9 +351,9 @@ class Qiwi(QObject):
 
         Args:
             sender: The name of the request sender app.
-            msg: A JSON string that can be converted to QiwicallInfo,
+            msg: A JSON string that can be converted to QiwiscallInfo,
               i.e., the same form as the returned string of dumps().
-              See QiwicallInfo for details.
+              See QiwiscallInfo for details.
         
         Raises:
             ValueError: When the requested call is not public, i.e., starts with
@@ -362,17 +361,17 @@ class Qiwi(QObject):
             RuntimeError: When the user rejects the request.
         
         Returns:
-            The returned value of the qiwicall, if any.
+            The returned value of the qiwiscall, if any.
         """
-        info = loads(QiwicallInfo, msg)
+        info = loads(QiwiscallInfo, msg)
         if info.call.startswith("_"):
             raise ValueError("Only public method calls are allowed.")
         call = getattr(self, info.call)
         args = self._parseArgs(call, info.args)
         reply = QMessageBox.warning(
             None,
-            "qiwicall",
-            f"The app {sender} requests for a qiwicall {info.call} with {args}.",
+            "qiwiscall",
+            f"The app {sender} requests for a qiwiscall {info.call} with {args}.",
             QMessageBox.Ok | QMessageBox.Cancel,
             QMessageBox.Cancel,
         )
@@ -380,25 +379,25 @@ class Qiwi(QObject):
             return call(**args)
         raise RuntimeError("The user rejected the request.")
 
-    def _qiwicall(self, sender: str, msg: str):
-        """Will be connected to the qiwicallRequested signal.
+    def _qiwiscall(self, sender: str, msg: str):
+        """Will be connected to the qiwiscallRequested signal.
 
-        Note that qiwicallRequested signal only has one str argument.
+        Note that qiwiscallRequested signal only has one str argument.
         In fact the partial method will be connected using functools.partial().
 
         Args:
-            sender: See _handleQiwicall().
-            msg: See _handleQiwicall().
+            sender: See _handleQiwiscall().
+            msg: See _handleQiwiscall().
         """
         try:
-            value = self._handleQiwicall(sender, msg)
+            value = self._handleQiwiscall(sender, msg)
         except Exception as error:  # pylint: disable=broad-exception-caught
-            result = QiwicallResult(done=True, success=False, error=repr(error))
+            result = QiwiscallResult(done=True, success=False, error=repr(error))
         else:
             if isinstance(value, Serializable):
                 value = dumps(value)
-            result = QiwicallResult(done=True, success=True, value=value)
-        self._apps[sender].qiwicallReturned.emit(msg, dumps(result))
+            result = QiwiscallResult(done=True, success=True, value=value)
+        self._apps[sender].qiwiscallReturned.emit(msg, dumps(result))
 
 
 class BaseApp(QObject):
@@ -408,22 +407,22 @@ class BaseApp(QObject):
         broadcastRequested(channel, message): The app can emit this signal to request
           broadcasting to a channel with the target channel name and the message.
         received(channel, message): A broadcast message is received from a channel.
-        qiwicallRequested(request): The app can emit this signal to request
-          a qiwicall with a request message converted from a qiwi.QiwicallInfo
-          object by qiwi.dumps().
-        qiwicallReturned(request, result): The result of the requested qiwicall
+        qiwiscallRequested(request): The app can emit this signal to request
+          a qiwiscall with a request message converted from a qiwis.QiwiscallInfo
+          object by qiwis.dumps().
+        qiwiscallReturned(request, result): The result of the requested qiwiscall
           with the original requested message and the result message converted
-          from a qiwi.QiwicallResult object by qiwi.dumps().
+          from a qiwis.QiwiscallResult object by qiwis.dumps().
     
     Attributes:
         name: The string identifier name of this app.
-        qiwicall: A qiwicall proxy for requesting qiwicalls conveniently.
+        qiwiscall: A qiwiscall proxy for requesting qiwiscalls conveniently.
     """
 
     broadcastRequested = pyqtSignal(str, str)
     received = pyqtSignal(str, str)
-    qiwicallRequested = pyqtSignal(str)
-    qiwicallReturned = pyqtSignal(str, str)
+    qiwiscallRequested = pyqtSignal(str)
+    qiwiscallReturned = pyqtSignal(str, str)
 
     def __init__(self, name: str, parent: Optional[QObject] = None):
         """
@@ -433,9 +432,9 @@ class BaseApp(QObject):
         """
         super().__init__(parent=parent)
         self.name = name
-        self.qiwicall = QiwicallProxy(self.qiwicallRequested)
+        self.qiwiscall = QiwiscallProxy(self.qiwiscallRequested)
         self.received.connect(self._receivedMessage)
-        self.qiwicallReturned.connect(self._receivedQiwicallResult)
+        self.qiwiscallReturned.connect(self._receivedQiwiscallResult)
 
     def frames(self) -> Iterable[QWidget]:
         """Gets frames for which are managed by the App.
@@ -455,7 +454,7 @@ class BaseApp(QObject):
         try:
             msg = json.dumps(content)
         except TypeError as e:
-            print(f"qiwi.app.broadcast(): {e!r}")
+            print(f"qiwis.app.broadcast(): {e!r}")
         else:
             self.broadcastRequested.emit(channelName, msg)
 
@@ -481,32 +480,32 @@ class BaseApp(QObject):
         try:
             content = json.loads(msg)
         except json.JSONDecodeError as e:
-            print(f"qiwi.app._receivedMessage(): {e!r}")
+            print(f"qiwis.app._receivedMessage(): {e!r}")
         else:
             self.receivedSlot(channelName, content)
 
     @pyqtSlot(str, str)
-    def _receivedQiwicallResult(self, request: str, msg: str):
-        """This is connected to self.qiwicallReturned signal.
+    def _receivedQiwiscallResult(self, request: str, msg: str):
+        """This is connected to self.qiwiscallReturned signal.
 
         Args:
             request: The request message that has been sent via 
-              self.qiwicallRequested signal.
-            msg: The received qiwicall result message.
+              self.qiwiscallRequested signal.
+            msg: The received qiwiscall result message.
         """
         try:
-            result = loads(QiwicallResult, msg)
+            result = loads(QiwiscallResult, msg)
         except json.JSONDecodeError as e:
             print(f"{self}._receivedResult: {e}")
         else:
-            self.qiwicall.update_result(request, result)
+            self.qiwiscall.update_result(request, result)
 
 
-class QiwicallProxy:  # pylint: disable=too-few-public-methods
-    """A proxy for requesting qiwicalls conveniently.
+class QiwiscallProxy:  # pylint: disable=too-few-public-methods
+    """A proxy for requesting qiwiscalls conveniently.
     
     Every attribute access is proxied, and if you try to call a method of this
-    object, it will emit a qiwicall requesting signal instead.
+    object, it will emit a qiwiscall requesting signal instead.
     If you get an attribute of this object, you will get a callable object which
     does the same thing as calling a method of this object.
     """
@@ -515,50 +514,50 @@ class QiwicallProxy:  # pylint: disable=too-few-public-methods
         """
         Args:
             requested: A pyqtSignal(str) which will be emitted when a proxied
-              method call is invoked. See BaseApp.qiwicallRequested.
+              method call is invoked. See BaseApp.qiwiscallRequested.
         """
         self.requested = requested
-        self.results: Dict[str, QiwicallResult] = {}
+        self.results: Dict[str, QiwiscallResult] = {}
 
     def __getattr__(self, call: str) -> Callable:
-        """Returns a callable object which emits a qiwicall requesting signal.
+        """Returns a callable object which emits a qiwiscall requesting signal.
 
         Args:
-            call: The name of the qiwicall.
+            call: The name of the qiwiscall.
         """
-        def proxy(**args: Any) -> QiwicallResult:
-            """Emits a qiwicall request signal with the given arguments.
+        def proxy(**args: Any) -> QiwiscallResult:
+            """Emits a qiwiscall request signal with the given arguments.
 
             It saves the returned result to self.results dictionary, so when
-            self.returned signal is emitted, i.e., the qiwicall result is received,
+            self.returned signal is emitted, i.e., the qiwiscall result is received,
             it will update the result object contents.
 
             Args:
-                **args: The arguments for the qiwicall, all as keyword arguments.
-                  If an argument is a qiwi.Serializable instance, it will be
-                  converted to a JSON string by qiwi.dumps().
+                **args: The arguments for the qiwiscall, all as keyword arguments.
+                  If an argument is a qiwis.Serializable instance, it will be
+                  converted to a JSON string by qiwis.dumps().
 
             Returns:
-                A qiwicall result object to keep tracking the result.
+                A qiwiscall result object to keep tracking the result.
             """
             for name, arg in args.items():
                 if isinstance(arg, Serializable):
                     args[name] = dumps(arg)
-            info = QiwicallInfo(call=call, args=args)
-            result = QiwicallResult(done=False, success=False)
+            info = QiwiscallInfo(call=call, args=args)
+            result = QiwiscallResult(done=False, success=False)
             msg = dumps(info)
             if msg in self.results:
-                print(f"QiwicallProxy.<local>.proxy(): Duplicate message {msg} is ignored.")
+                print(f"QiwiscallProxy.<local>.proxy(): Duplicate message {msg} is ignored.")
             self.results[msg] = result
             self.requested.emit(msg)
             return result
         return proxy
 
-    def update_result(self, request: str, result: QiwicallResult, discard: bool = True):
+    def update_result(self, request: str, result: QiwiscallResult, discard: bool = True):
         """Updates the result for the request parsing the received message.
 
         Args:
-            request: The request message that has been sent to Qiwi.
+            request: The request message that has been sent to Qiwis.
             result: The received result object.
             discard: If True, the result object is removed from self.results.
               In most cases, it will be updated only once and never be looked up again.
@@ -568,7 +567,7 @@ class QiwicallProxy:  # pylint: disable=too-few-public-methods
         _get_result = self.results.pop if discard else self.results.get
         _result = _get_result(request, None)
         if _result is None:
-            print(f"QiwicallProxy.update_result(): Failed to find a result for {request}.")
+            print(f"QiwiscallProxy.update_result(): Failed to find a result for {request}.")
             return
         _result.error = result.error
         _result.value = result.value
@@ -603,7 +602,7 @@ def _get_argparser() -> argparse.ArgumentParser:
         A namespace containing arguments.
     """
     parser = argparse.ArgumentParser(
-        description="SNU widget integration framework for PyQt"
+        description="QuIqcl Widget Integration Software"
     )
     parser.add_argument(
         "-s", "--setup", dest="setup_path", default="./setup.json",
@@ -630,7 +629,7 @@ def _read_setup_file(setup_path: str) -> Mapping[str, AppInfo]:
         setup_path: A path of set-up file.
 
     Returns:
-        A dictionary of set-up information about apps. See appInfos in Qiwi.load().
+        A dictionary of set-up information about apps. See appInfos in Qiwis.load().
     """
     with open(setup_path, encoding="utf-8") as setup_file:
         setup_data: Dict[str, Dict[str, dict]] = json.load(setup_file)
@@ -640,13 +639,13 @@ def _read_setup_file(setup_path: str) -> Mapping[str, AppInfo]:
 
 
 def main():
-    """Main function that runs when qiwi module is executed rather than imported."""
+    """Main function that runs when qiwis module is executed rather than imported."""
     args = _get_argparser().parse_args()
     # read set-up information
     app_infos = _read_setup_file(args.setup_path)
     # start GUI
     qapp = QApplication(sys.argv)
-    _qiwi = Qiwi(app_infos)
+    _qiwis = Qiwis(app_infos)
     qapp.exec_()
 
 
