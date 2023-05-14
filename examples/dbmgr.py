@@ -10,7 +10,7 @@ from PyQt5.QtCore import QObject, pyqtSlot
 from PyQt5.QtWidgets import (QWidget, QLabel, QPushButton, QFileDialog,
                              QHBoxLayout, QVBoxLayout, QListWidget, QListWidgetItem)
 
-from qiwi import AppInfo, BaseApp
+from qiwis import AppInfo, BaseApp
 
 class DBWidget(QWidget):
     """Widget for showing a database.
@@ -91,7 +91,7 @@ class DBMgrApp(BaseApp):
           Each element is a namedtuple which represents a database.
           It has two elements; file name and absolute path.
         isDatacalcOpen: True if a datacalc app is open, and False if it is close.
-        openCloseDatacalcResult: The latest qiwicall result 
+        openCloseDatacalcResult: The latest qiwiscall result 
           which requests for opening or closing a datacalc app.
         managerFrame: A frame that manages and shows available databases.
     """
@@ -181,14 +181,14 @@ class DBMgrApp(BaseApp):
         """
         if self.openCloseDatacalcResult is not None:
             if not self.openCloseDatacalcResult.done:
-                print("DBMgrApp.openCloseDatacalc(): The previous qiwicall must be done.")
+                print("DBMgrApp.openCloseDatacalc(): The previous qiwiscall must be done.")
                 return
             if self.openCloseDatacalcResult.success:
                 self.isDatacalcOpen = not self.isDatacalcOpen
         if self.isDatacalcOpen:
-            self.openCloseDatacalcResult = self.qiwicall.destroyApp(name="datacalc")
+            self.openCloseDatacalcResult = self.qiwiscall.destroyApp(name="datacalc")
         else:
-            self.openCloseDatacalcResult = self.qiwicall.createApp(
+            self.openCloseDatacalcResult = self.qiwiscall.createApp(
                 name="datacalc",
                 info=AppInfo(
                     module="examples.datacalc",
