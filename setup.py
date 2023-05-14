@@ -10,20 +10,20 @@ if sys.version_info[:2] < (3, 7):
     sys.exit()
 
 setup(
-    name="qiwi",
+    name="qiwis",
     version="2.0.0",  # indicate the following version
     author="QuIQCL",
     author_email="kangz12345@snu.ac.kr",
-    url="https://github.com/snu-quiqcl/qiwi",
-    description="SNU widget integration framework for PyQt",
+    url="https://github.com/snu-quiqcl/qiwis",
+    description="QuIqcl Widget Integration Software",
     long_description=
         "A framework for integration of PyQt widgets where they can communicate with each other. "
         "This project is mainly developed for trapped ion experiment controller GUI in SNU QuIQCL.",
-    download_url="https://github.com/snu-quiqcl/qiwi/releases/tag/v2.0.0",
+    download_url="https://github.com/snu-quiqcl/qiwis/releases/tag/v2.0.0",
     license="MIT license",
     install_requires=["pyqt5"],
-    packages=find_packages(include=["qiwi"]),
+    packages=find_packages(include=["qiwis"]),
     entry_points={
-        "console_scripts": ["qiwi = qiwi:main"]
+        "console_scripts": ["qiwis = qiwis:main"]
     }
 )
