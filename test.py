@@ -59,8 +59,8 @@ APP_JSONS = {
 qapp = QApplication(sys.argv)
 
 
-class QiwiTestWithApps(unittest.TestCase):
-    """Unit test for Qiwi class with creating apps."""
+class QiwisTestWithApps(unittest.TestCase):
+    """Unit test for Qiwis class with creating apps."""
 
     def setUp(self):
         self.import_module_patcher = mock.patch("importlib.import_module")
@@ -74,7 +74,7 @@ class QiwiTestWithApps(unittest.TestCase):
         self.channels = set()
         for appInfo in APP_INFOS.values():
             self.channels.update(appInfo.channel)
-        self.qiwis = qiwis.Qiwi(APP_INFOS)
+        self.qiwis = qiwis.Qiwis(APP_INFOS)
 
     def doCleanups(self):
         self.import_module_patcher.stop()
@@ -158,11 +158,11 @@ class QiwiTestWithApps(unittest.TestCase):
             self.assertEqual(len(APP_INFOS[name].channel), app_.received.emit.call_count)
 
 
-class QiwiTestWithoutApps(unittest.TestCase):
-    """Unit test for Qiwi class without apps."""
+class QiwisTestWithoutApps(unittest.TestCase):
+    """Unit test for Qiwis class without apps."""
 
     def setUp(self):
-        self.qiwis = qiwis.Qiwi()
+        self.qiwis = qiwis.Qiwis()
 
     def help_qiwiscall(
         self,
@@ -184,11 +184,11 @@ class QiwiTestWithoutApps(unittest.TestCase):
               qiwis.dumps() should be the same as the lenght of the given iterable.
         """
         msg = json.dumps({"call": "callForTest", "args": {}})
-        with mock.patch.multiple(self.qiwis, _handleQiwicall=mock.DEFAULT, _apps=mock.DEFAULT):
+        with mock.patch.multiple(self.qiwis, _handleQiwiscall=mock.DEFAULT, _apps=mock.DEFAULT):
             if error is None:
-                self.qiwis._handleQiwicall.return_value = value
+                self.qiwis._handleQiwiscall.return_value = value
             else:
-                self.qiwis._handleQiwicall.side_effect = error
+                self.qiwis._handleQiwiscall.side_effect = error
             with mock.patch("qiwis.dumps") as mocked_dumps:
                 mocked_dumps.side_effect = dumps
                 self.qiwis._qiwiscall(sender="sender", msg=msg)
@@ -265,22 +265,22 @@ class QiwiTestWithoutApps(unittest.TestCase):
 
 @mock.patch("qiwis.loads")
 @mock.patch("qiwis.QMessageBox.warning")
-class HandleQiwicallTest(unittest.TestCase):
-    """Unit test for Qiwi._handleQiwicall()."""
+class HandleQiwiscallTest(unittest.TestCase):
+    """Unit test for Qiwis._handleQiwiscall()."""
 
     def setUp(self):
-        self.qiwis = qiwis.Qiwi()
+        self.qiwis = qiwis.Qiwis()
 
     def test_ok(self, mocked_warning, mocked_loads):
         args = {"a": 123, "b": "ABC"}
-        info = qiwis.QiwicallInfo(call="callForTest", args=args)
+        info = qiwis.QiwiscallInfo(call="callForTest", args=args)
         msg = json.dumps({"call": "callForTest", "args": args})
         mocked_loads.return_value = info
         mocked_warning.return_value = QMessageBox.Ok
         with mock.patch.multiple(self.qiwis, create=True,
                                  callForTest=mock.DEFAULT, _parseArgs=mock.DEFAULT):
             self.qiwis._parseArgs.return_value = args
-            self.qiwis._handleQiwicall(sender="sender", msg=msg)
+            self.qiwis._handleQiwiscall(sender="sender", msg=msg)
             self.qiwis.callForTest.assert_called_once_with(**args)
             self.qiwis._parseArgs.assert_called_once_with(self.qiwis.callForTest, args)
         mocked_loads.assert_called_once()
@@ -288,7 +288,7 @@ class HandleQiwicallTest(unittest.TestCase):
 
     def test_cancel(self, mocked_warning, mocked_loads):
         args = {"a": 123, "b": "ABC"}
-        info = qiwis.QiwicallInfo(call="callForTest", args=args)
+        info = qiwis.QiwiscallInfo(call="callForTest", args=args)
         msg = json.dumps({"call": "callForTest", "args": args})
         mocked_loads.return_value = info
         mocked_warning.return_value = QMessageBox.Cancel
@@ -296,7 +296,7 @@ class HandleQiwicallTest(unittest.TestCase):
                                  callForTest=mock.DEFAULT, _parseArgs=mock.DEFAULT):
             self.qiwis._parseArgs.return_value = args
             with self.assertRaises(RuntimeError):
-                self.qiwis._handleQiwicall(sender="sender", msg=msg)
+                self.qiwis._handleQiwiscall(sender="sender", msg=msg)
             self.qiwis.callForTest.assert_not_called()
             self.qiwis._parseArgs.assert_called_once_with(self.qiwis.callForTest, args)
         mocked_loads.assert_called_once()
@@ -304,13 +304,13 @@ class HandleQiwicallTest(unittest.TestCase):
 
     def test_non_public(self, mocked_warning, mocked_loads):
         args = {"a": 123, "b": "ABC"}
-        info = qiwis.QiwicallInfo(call="_callForTest", args=args)
+        info = qiwis.QiwiscallInfo(call="_callForTest", args=args)
         msg = json.dumps({"call": "_callForTest", "args": args})
         mocked_loads.return_value = info
         with mock.patch.multiple(self.qiwis, create=True,
                                  _callForTest=mock.DEFAULT, _parseArgs=mock.DEFAULT):
             with self.assertRaises(ValueError):
-                self.qiwis._handleQiwicall(sender="sender", msg=msg)
+                self.qiwis._handleQiwiscall(sender="sender", msg=msg)
             self.qiwis._callForTest.assert_not_called()
             self.qiwis._parseArgs.assert_not_called()
         mocked_loads.assert_called_once()
@@ -318,12 +318,12 @@ class HandleQiwicallTest(unittest.TestCase):
 
     def test_not_existing_method(self, mocked_warning, mocked_loads):
         args = {"a": 123, "b": "ABC"}
-        info = qiwis.QiwicallInfo(call="callForTest", args=args)
+        info = qiwis.QiwiscallInfo(call="callForTest", args=args)
         msg = json.dumps({"call": "callForTest", "args": args})
         mocked_loads.return_value = info
         with mock.patch.multiple(self.qiwis, create=True, _parseArgs=mock.DEFAULT):
             with self.assertRaises(AttributeError):
-                self.qiwis._handleQiwicall(sender="sender", msg=msg)
+                self.qiwis._handleQiwiscall(sender="sender", msg=msg)
             self.qiwis._parseArgs.assert_not_called()
         mocked_loads.assert_called_once()
         mocked_warning.assert_not_called()
@@ -366,27 +366,27 @@ class BaseAppTest(unittest.TestCase):
 
     def test_received_qiwiscall_result(self):
         self.app.qiwiscall.update_result = mock.MagicMock()
-        self.app._receivedQiwicallResult(
+        self.app._receivedQiwiscallResult(
             "request", '{"done": true, "success": true, "value": null, "error": null}'
         )
         self.app.qiwiscall.update_result.assert_called_once_with(
             "request",
-            qiwis.QiwicallResult(done=True, success=True)
+            qiwis.QiwiscallResult(done=True, success=True)
         )
 
     def test_received_qiwiscall_result_exception(self):
         self.app.qiwiscall.update_result = mock.MagicMock()
-        self.app._receivedQiwicallResult(
+        self.app._receivedQiwiscallResult(
             "request", '{"done": "tr" "ue", "success": true, "value": null, "error": null}'
         )
         self.app.qiwiscall.update_result.assert_not_called()
 
 
-class QiwicallProxyTest(unittest.TestCase):
-    """Unit test for QiwicallProxy class."""
+class QiwiscallProxyTest(unittest.TestCase):
+    """Unit test for QiwiscallProxy class."""
 
     def setUp(self):
-        self.qiwiscall = qiwis.QiwicallProxy(mock.MagicMock())
+        self.qiwiscall = qiwis.QiwiscallProxy(mock.MagicMock())
 
     def help_proxy(self, msg: str, args: Mapping[str, Any], dumps: Iterable):
         """Helper method for testing proxy.
@@ -405,7 +405,7 @@ class QiwicallProxyTest(unittest.TestCase):
                 self.assertEqual(len(mocked_dumps.mock_calls), len(dumps))
             self.qiwiscall.requested.emit.assert_called_once_with(msg)
             self.assertIs(result, self.qiwiscall.results[msg])
-            self.assertEqual(result, qiwis.QiwicallResult(done=False, success=False))
+            self.assertEqual(result, qiwis.QiwiscallResult(done=False, success=False))
 
     def test_proxy_primitive(self):
         """Tests a proxied qiwiscall with primitive type arguments."""
@@ -451,28 +451,28 @@ class QiwicallProxyTest(unittest.TestCase):
                 (mock.call(msg), mock.call(msg)),
             )
             self.assertIs(result2, self.qiwiscall.results[msg])
-            self.assertEqual(result2, qiwis.QiwicallResult(done=False, success=False))
+            self.assertEqual(result2, qiwis.QiwiscallResult(done=False, success=False))
             self.assertEqual(result1, result2)
 
     def test_update_result_success(self):
-        old_result = qiwis.QiwicallResult(done=False, success=False)
-        new_result = qiwis.QiwicallResult(done=True, success=True, value=0)
+        old_result = qiwis.QiwiscallResult(done=False, success=False)
+        new_result = qiwis.QiwiscallResult(done=True, success=True, value=0)
         with mock.patch.object(self.qiwiscall, "results", {"request": old_result}):
             self.qiwiscall.update_result("request", new_result)
             self.assertEqual(old_result, new_result)
             self.assertNotIn("request", self.qiwiscall.results)
 
     def test_update_result_error(self):
-        old_result = qiwis.QiwicallResult(done=False, success=False)
-        new_result = qiwis.QiwicallResult(done=True, success=False, error=RuntimeError("test"))
+        old_result = qiwis.QiwiscallResult(done=False, success=False)
+        new_result = qiwis.QiwiscallResult(done=True, success=False, error=RuntimeError("test"))
         with mock.patch.object(self.qiwiscall, "results", {"request": old_result}):
             self.qiwiscall.update_result("request", new_result)
             self.assertEqual(old_result, new_result)
             self.assertNotIn("request", self.qiwiscall.results)
 
     def test_update_result_no_discard(self):
-        old_result = qiwis.QiwicallResult(done=False, success=False)
-        new_result = qiwis.QiwicallResult(done=True, success=True, value=0)
+        old_result = qiwis.QiwiscallResult(done=False, success=False)
+        new_result = qiwis.QiwiscallResult(done=True, success=True, value=0)
         with mock.patch.object(self.qiwiscall, "results", {"request": old_result}):
             self.qiwiscall.update_result("request", new_result, discard=False)
             self.assertEqual(old_result, new_result)
@@ -480,13 +480,13 @@ class QiwicallProxyTest(unittest.TestCase):
 
     def test_update_result_not_exist(self):
         """When the request is not in the results dictionary, it is ignored."""
-        new_result = qiwis.QiwicallResult(done=True, success=True, value=0)
+        new_result = qiwis.QiwiscallResult(done=True, success=True, value=0)
         with mock.patch.object(self.qiwiscall, "results", {}):
             self.qiwiscall.update_result("request", new_result)
             self.assertNotIn("request", self.qiwiscall.results)
 
 
-class QiwiFunctionTest(unittest.TestCase):
+class QiwisFunctionTest(unittest.TestCase):
     """Unit test for functions."""
 
     def test_loads(self):
@@ -525,7 +525,7 @@ class QiwiFunctionTest(unittest.TestCase):
 
     @mock.patch("qiwis._get_argparser")
     @mock.patch("qiwis._read_setup_file", return_value={})
-    @mock.patch("qiwis.Qiwi")
+    @mock.patch("qiwis.Qiwis")
     @mock.patch("qiwis.QApplication")
     def test_main(self, mock_qapp, mock_qiwis, mock_read_setup_file, mock_get_argparser):
         qiwis.main()
