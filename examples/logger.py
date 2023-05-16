@@ -3,11 +3,12 @@ App module for logging.
 """
 
 import time
+from typing import Any, Optional, Tuple
 
-from PyQt5.QtCore import pyqtSlot, pyqtSignal
+from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QTextEdit, QLabel, QDialogButtonBox
 
-from swift.app import BaseApp
+from qiwis import BaseApp
 
 class LoggerFrame(QWidget):
     """Frame for logging.
@@ -16,7 +17,7 @@ class LoggerFrame(QWidget):
         logEdit: A textEdit which shows all logs.
         clearButton: A button for clearing all logs.
     """
-    def __init__(self, parent=None):
+    def __init__(self, parent: Optional[QObject] = None):
         """Extended."""
         super().__init__(parent=parent)
         # widgets
@@ -35,7 +36,7 @@ class ConfirmClearingFrame(QWidget):
     """
     confirmed = pyqtSignal()
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: Optional[QObject] = None):
         """
         Extended.
         """
@@ -72,7 +73,7 @@ class LoggerApp(BaseApp):
     Attributes:
         loggerFrame: A frame that shows the logs.
     """
-    def __init__(self, name: str, parent=None):
+    def __init__(self, name: str, parent: Optional[QObject] = None):
         """Extended.
 
         Args:
@@ -81,30 +82,44 @@ class LoggerApp(BaseApp):
         super().__init__(name, parent=parent)
         self.loggerFrame = LoggerFrame()
         # connect signals to slots
-        self.received.connect(self.addLog)
         self.loggerFrame.clearButton.clicked.connect(self.checkToClear)
         self.confirmFrame = ConfirmClearingFrame()
         self.confirmFrame.confirmed.connect(self.clearLog)
 
-    def frames(self):
+    def frames(self) -> Tuple[LoggerFrame]:
         """Overridden."""
         return (self.loggerFrame,)
 
-    @pyqtSlot(str, str)
-    def addLog(self, busName, msg):
-        """Adds a bus name and log message.
+    def addLog(self, content: str):
+        """Adds a channel name and log message.
 
         Args:
-            busName: The name of bus
-            msg: Log message
+            content: Received log message.
         """
         timeString = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-        self.loggerFrame.logEdit.insertPlainText(f"{timeString}:[{busName}], {msg}\n")
+        self.loggerFrame.logEdit.insertPlainText(f"{timeString}: {content}\n")
+
+    def receivedSlot(self, channelName: str, content: Any):
+        """Overridden.
+
+        Possible channels are as follows.
+
+        "log": Log channel.
+            See self.addLog().
+        """
+        if channelName == "log":
+            if isinstance(content, str):
+                self.addLog(content)
+            else:
+                print("The message for the channel log should be a string.")
+        else:
+            print(f"The message was ignored because "
+                  f"the treatment for the channel {channelName} is not implemented.")
 
     @pyqtSlot()
     def checkToClear(self):
         """Shows a confirmation frame for log clearing."""
-        self.broadcastRequested.emit("logbus", "Clicked to clear logs")
+        self.broadcast("log", "Clicked to clear logs")
         self.confirmFrame.show()
 
     @pyqtSlot()

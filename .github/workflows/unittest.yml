@@ -1,4 +1,4 @@
-name: Pylint
+name: unittest
 
 on: [push]
 
@@ -17,11 +17,12 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pylint
+        pip install coverage
     - name: Add dependencies about external libraries
       run: |
         pip install pyqt5
-    - name: Analyze the code with pylint
+        sudo apt-get install python3-pyqt5
+    - name: Unittest the code with coverage
       run: |
-        pylint $(git ls-files '*.py' ':!:test.py')
-        pylint --rc .pylintrc_test test.py
+        xvfb-run `which coverage` run -m test
+        xvfb-run `which coverage` report -m

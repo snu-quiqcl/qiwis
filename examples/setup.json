@@ -1,0 +1,38 @@
+{
+    "app": {
+        "numgen": {
+            "module": "examples.numgen",
+            "cls": "NumGenApp",
+            "show": true,
+            "pos": "left",
+            "channel": ["db"],
+            "args": {
+                "table": "number"
+            }
+        },
+        "dbmgr": {
+            "module": "examples.dbmgr",
+            "cls": "DBMgrApp",
+            "show": true,
+            "pos": "right",
+            "channel": []
+        },
+        "poller": {
+            "module": "examples.poller",
+            "cls": "PollerApp",
+            "show": true,
+            "pos": "bottom",
+            "channel": ["db"],
+            "args": {
+                "table": "B"
+            }
+        },
+        "logger": {
+            "module": "examples.logger",
+            "cls": "LoggerApp",
+            "show": true,
+            "pos": "bottom",
+            "channel": ["log"]
+        }
+    }
+}
