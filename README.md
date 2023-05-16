@@ -12,7 +12,7 @@ QIWIS (**Q**u**I**qcl **W**idget **I**ntegration **S**oftware) is a framework fo
 ## How to download and install
 One of the below:
 - Using released version (_recommended_)
-1. `pip install git_https://github.com/snu-quiqcl/qiwis.git@v2.0.0`
+1. `pip install git+https://github.com/snu-quiqcl/qiwis.git@v2.0.0`
 
 - Using git directly
 1. `git clone ${url}`: The default branch is `develop`, not `main`. There is no guarantee for stability.
