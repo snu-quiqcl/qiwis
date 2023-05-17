@@ -19,7 +19,7 @@ setup(
     long_description=
         "A framework for integration of PyQt widgets where they can communicate with each other. "
         "This project is mainly developed for trapped ion experiment controller GUI in SNU QuIQCL.",
-    download_url="https://github.com/snu-quiqcl/qiwis/releases/tag/v2.0.0",
+    download_url="https://github.com/snu-quiqcl/qiwis/releases/tag/v2.0.1",
     license="MIT license",
     install_requires=["pyqt5"],
     packages=find_packages(include=["qiwis"]),
