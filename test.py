@@ -13,7 +13,7 @@ from typing import Any, Optional, Mapping, Iterable
 from PyQt5.QtCore import QObject
 from PyQt5.QtWidgets import QApplication, QMessageBox, QWidget
 
-import qiwis
+from qiwis import qiwis
 
 APP_INFOS = {
     "app1": qiwis.AppInfo(
