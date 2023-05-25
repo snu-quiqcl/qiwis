@@ -9,7 +9,7 @@ from typing import Any, Optional, Dict, Tuple
 from PyQt5.QtCore import QObject, pyqtSlot
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QComboBox, QPushButton, QLabel
 
-from qiwis import BaseApp
+from qiwis.qiwis import BaseApp
 from examples.backend import read
 
 class ViewerFrame(QWidget):

@@ -10,7 +10,7 @@ from typing import Any, Optional, Tuple, Union
 from PyQt5.QtCore import QObject, pyqtSlot
 from PyQt5.QtWidgets import QWidget, QComboBox, QPushButton, QLabel, QVBoxLayout
 
-from qiwis import BaseApp
+from qiwis.qiwis import BaseApp
 from examples.backend import generate, write
 
 class GeneratorFrame(QWidget):

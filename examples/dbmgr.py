@@ -10,7 +10,7 @@ from PyQt5.QtCore import QObject, pyqtSlot
 from PyQt5.QtWidgets import (QWidget, QLabel, QPushButton, QFileDialog,
                              QHBoxLayout, QVBoxLayout, QListWidget, QListWidgetItem)
 
-from qiwis import AppInfo, BaseApp
+from qiwis.qiwis import AppInfo, BaseApp
 
 class DBWidget(QWidget):
     """Widget for showing a database.
