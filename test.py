@@ -189,7 +189,7 @@ class QiwisTestWithoutApps(unittest.TestCase):
                 self.qiwis._handleQiwiscall.return_value = value
             else:
                 self.qiwis._handleQiwiscall.side_effect = error
-            with mock.patch("qiwis.dumps") as mocked_dumps:
+            with mock.patch("qiwis.qiwis.dumps") as mocked_dumps:
                 mocked_dumps.side_effect = dumps
                 self.qiwis._qiwiscall(sender="sender", msg=msg)
                 self.assertEqual(len(mocked_dumps.mock_calls), len(dumps))
@@ -263,8 +263,8 @@ class QiwisTestWithoutApps(unittest.TestCase):
         parsed_args = self.qiwis._parseArgs(call_for_test, json_args)
         self.assertEqual(args, parsed_args)
 
-@mock.patch("qiwis.loads")
-@mock.patch("qiwis.QMessageBox.warning")
+@mock.patch("qiwis.qiwis.loads")
+@mock.patch("qiwis.qiwis.QMessageBox.warning")
 class HandleQiwiscallTest(unittest.TestCase):
     """Unit test for Qiwis._handleQiwiscall()."""
 
@@ -399,7 +399,7 @@ class QiwiscallProxyTest(unittest.TestCase):
               the length of the given iterable.
         """
         with mock.patch.object(self.qiwiscall, "results", {}):
-            with mock.patch("qiwis.dumps") as mocked_dumps:
+            with mock.patch("qiwis.qiwis.dumps") as mocked_dumps:
                 mocked_dumps.side_effect = dumps
                 result = self.qiwiscall.callForTest(**args)
                 self.assertEqual(len(mocked_dumps.mock_calls), len(dumps))
@@ -441,7 +441,7 @@ class QiwiscallProxyTest(unittest.TestCase):
         args = {"a": 123}
         msg = json.dumps({"call": "callForTest", "args": args})
         with mock.patch.object(self.qiwiscall, "results", {}):
-            with mock.patch("qiwis.dumps") as mocked_dumps:
+            with mock.patch("qiwis.qiwis.dumps") as mocked_dumps:
                 mocked_dumps.side_effect = (msg, msg)
                 result1 = self.qiwiscall.callForTest(**args)
                 result2 = self.qiwiscall.callForTest(**args)
@@ -523,10 +523,10 @@ class QiwisFunctionTest(unittest.TestCase):
         mock_open.assert_called_once()
         mock_load.assert_called_once()
 
-    @mock.patch("qiwis._get_argparser")
-    @mock.patch("qiwis._read_setup_file", return_value={})
-    @mock.patch("qiwis.Qiwis")
-    @mock.patch("qiwis.QApplication")
+    @mock.patch("qiwis.qiwis._get_argparser")
+    @mock.patch("qiwis.qiwis._read_setup_file", return_value={})
+    @mock.patch("qiwis.qiwis.Qiwis")
+    @mock.patch("qiwis.qiwis.QApplication")
     def test_main(self, mock_qapp, mock_qiwis, mock_read_setup_file, mock_get_argparser):
         qiwis.main()
         mock_get_argparser.assert_called_once()
