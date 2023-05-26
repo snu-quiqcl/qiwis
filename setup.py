@@ -22,7 +22,7 @@ setup(
     download_url="https://github.com/snu-quiqcl/qiwis/releases/tag/v2.0.1",
     license="MIT license",
     install_requires=["pyqt5"],
-    packages=find_packages(include=["qiwis"]),
+    py_modules=["qiwis"],
     entry_points={
         "console_scripts": ["qiwis = qiwis:main"]
     }
