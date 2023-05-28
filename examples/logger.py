@@ -8,7 +8,7 @@ from typing import Any, Optional, Tuple
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QTextEdit, QLabel, QDialogButtonBox
 
-from qiwis.qiwis import BaseApp
+from qiwis import BaseApp
 
 class LoggerFrame(QWidget):
     """Frame for logging.
