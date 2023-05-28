@@ -12,7 +12,7 @@ QIWIS (**Q**u**I**qcl **W**idget **I**ntegration **S**oftware) is a framework fo
 ## How to download and install
 One of the below:
 - Using released version (_recommended_)
-1. `pip install -e git+https://github.com/snu-quiqcl/qiwis.git@v2.0.1#egg=qiwis`  
+1. `pip install git+https://github.com/snu-quiqcl/qiwis.git@v2.0.2`  
 For details, refer to [VCS Support](https://pip.pypa.io/en/stable/topics/vcs-support/).
 
 - Using git directly
@@ -20,6 +20,8 @@ For details, refer to [VCS Support](https://pip.pypa.io/en/stable/topics/vcs-sup
 2. In the repository, `pip install -e .`
 
 ## How to use
-In the repository, just do like as below:
+In the repository, just do like as below:  
+`python -m qiwis (-s ${setup_file))`
 
-`python -m qiwis (-s ${setup_file))`.
+If you installed `qiwis`, you can use it everywhere as below:  
+`qiwis (-s ${setup_file))`

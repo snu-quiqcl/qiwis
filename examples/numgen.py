@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 """
 App module for generating and showing a random number.
 """
