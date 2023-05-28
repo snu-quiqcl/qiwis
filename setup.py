@@ -3,7 +3,7 @@ Set-up file for releasing this package.
 """
 
 import sys
-from setuptools import setup, find_packages
+from setuptools import setup
 
 if sys.version_info[:2] < (3, 7):
     print("You need Python 3.7+")
@@ -22,7 +22,7 @@ setup(
     download_url="https://github.com/snu-quiqcl/qiwis/releases/tag/v2.0.1",
     license="MIT license",
     install_requires=["pyqt5"],
-    packages=find_packages(include=["qiwis"]),
+    py_modules=["qiwis"],
     entry_points={
         "console_scripts": ["qiwis = qiwis:main"]
     }
