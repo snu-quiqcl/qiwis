@@ -460,8 +460,8 @@ class BaseApp(QObject):
         """
         try:
             msg = json.dumps(content)
-        except TypeError as e:
-            print(f"qiwis.app.broadcast(): {e!r}")
+        except TypeError:
+            logger.exception("Failed to json.dumps() the content: %s", str(content))
         else:
             self.broadcastRequested.emit(channelName, msg)
 
@@ -486,8 +486,8 @@ class BaseApp(QObject):
         """
         try:
             content = json.loads(msg)
-        except json.JSONDecodeError as e:
-            print(f"qiwis.app._receivedMessage(): {e!r}")
+        except json.JSONDecodeError:
+            logger.exception("Failed to json.loads() the message: %s", msg)
         else:
             self.receivedSlot(channelName, content)
 
@@ -502,8 +502,8 @@ class BaseApp(QObject):
         """
         try:
             result = loads(QiwiscallResult, msg)
-        except json.JSONDecodeError as e:
-            print(f"{self}._receivedResult: {e}")
+        except json.JSONDecodeError:
+            logger.exception("Failed to loads() the message: %s", msg)
         else:
             self.qiwiscall.update_result(request, result)
 
@@ -554,7 +554,7 @@ class QiwiscallProxy:  # pylint: disable=too-few-public-methods
             result = QiwiscallResult(done=False, success=False)
             msg = dumps(info)
             if msg in self.results:
-                print(f"QiwiscallProxy.<local>.proxy(): Duplicate message {msg} is ignored.")
+                logger.warning("Duplicate message is ignored: %s", msg)
             self.results[msg] = result
             self.requested.emit(msg)
             return result
@@ -574,7 +574,7 @@ class QiwiscallProxy:  # pylint: disable=too-few-public-methods
         _get_result = self.results.pop if discard else self.results.get
         _result = _get_result(request, None)
         if _result is None:
-            print(f"QiwiscallProxy.update_result(): Failed to find a result for {request}.")
+            logger.error("Failed to find a result for request: %s", request)
             return
         _result.error = result.error
         _result.value = result.value
