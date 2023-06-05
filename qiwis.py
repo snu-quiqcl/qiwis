@@ -9,15 +9,15 @@ Usage:
     python -m qiwis (-s <SETUP_PATH>)
 """
 
-import sys
-import os
 import argparse
-import json
+import dataclasses
+import functools
 import importlib
 import importlib.util
 import inspect
-import dataclasses
-import functools
+import json
+import os
+import sys
 from collections import defaultdict
 from contextlib import contextmanager
 from typing import (
