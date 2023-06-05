@@ -7,6 +7,9 @@ Using a set-up file written by a user, it sets up apps.
 
 Usage:
     python -m qiwis (-s <SETUP_PATH>)
+
+Logging:
+    The module-level logger name is __name__.
 """
 
 import argparse
@@ -16,6 +19,7 @@ import importlib
 import importlib.util
 import inspect
 import json
+import logging
 import os
 import sys
 from collections import defaultdict
@@ -29,6 +33,9 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QDockWidget, QMessageBox,
 
 
 T = TypeVar("T")
+
+
+logger = logging.getLogger(__name__)
 
 
 class Serializable:  # pylint: disable=too-few-public-methods
