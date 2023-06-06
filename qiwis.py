@@ -577,9 +577,11 @@ class QiwiscallProxy:  # pylint: disable=too-few-public-methods
             result = QiwiscallResult(done=False, success=False)
             msg = dumps(info)
             if msg in self.results:
-                logger.warning("Duplicate message is ignored: %s", msg)
+                logger.warning("Duplicate qiwiscall request: %s, "
+                               "the new result overwrites the previous one", msg)
             self.results[msg] = result
             self.requested.emit(msg)
+            logger.debug("Requested a qiwiscall: %s converted from %s", msg, info)
             return result
         return proxy
 
@@ -603,6 +605,7 @@ class QiwiscallProxy:  # pylint: disable=too-few-public-methods
         _result.value = result.value
         _result.success = result.success
         _result.done = result.done
+        logger.debug("Qiwiscall result is updated: %s", _result)
 
 
 @contextmanager
