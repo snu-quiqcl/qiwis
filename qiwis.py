@@ -320,7 +320,10 @@ class Qiwis(QObject):
         try:
             subscribers.remove(app)
         except KeyError:
+            logger.error("The app %s tried to unsubscribe from %s, "
+                         "which it does not subscribe to", app, channel)
             return False
+        logger.info("The app %s unsubscribed from %s", app, channel)
         return True
 
     @pyqtSlot(str, str)
