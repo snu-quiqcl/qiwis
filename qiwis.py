@@ -178,6 +178,7 @@ class Qiwis(QObject):
         """
         for name, info in appInfos.items():
             self.createApp(name, info)
+        logger.info("Loaded %d app(s)", len(appInfos))
 
     def addFrame(self, name: str, frame: QWidget, info: AppInfo):
         """Adds a frame of the app and wraps it with a dock widget.
@@ -200,6 +201,7 @@ class Qiwis(QObject):
         if info.show:
             self.mainWindow.addDockWidget(area, dockWidget)
         self._dockWidgets[name].append(dockWidget)
+        logger.info("Added a frame to the app %s: %s", name, info)
 
     def removeFrame(self, name: str, dockWidget: QDockWidget):
         """Removes the frame from the main window.
@@ -213,6 +215,7 @@ class Qiwis(QObject):
         self.mainWindow.removeDockWidget(dockWidget)
         self._dockWidgets[name].remove(dockWidget)
         dockWidget.deleteLater()
+        logger.info("Removed a frame from the app %s", name)
 
     def appNames(self) -> Tuple[str]:
         """Returns the names of the apps including whose frames are hidden."""
@@ -242,6 +245,7 @@ class Qiwis(QObject):
         for frame in app.frames():
             self.addFrame(name, frame, info)
         self._apps[name] = app
+        logger.info("Created an app %s: %s", name, info)
 
     def destroyApp(self, name: str):
         """Destroys an app.
@@ -256,6 +260,7 @@ class Qiwis(QObject):
         for apps in self._subscribers.values():
             apps.discard(name)
         self._apps.pop(name).deleteLater()
+        logger.info("Destroyed the app %s", name)
 
     def updateFrames(self, name: str):
         """Updates the frames of an app.
@@ -273,6 +278,7 @@ class Qiwis(QObject):
             self.removeFrame(name, orgFrames[frame])
         for frame in newFramesSet - orgFramesSet:
             self.addFrame(name, frame, info)
+        logger.info("Updated frames: %d -> %d", len(orgFramesSet), len(newFramesSet))
 
     def channelNames(self) -> Tuple[str]:
         """Returns the names of the channels."""
