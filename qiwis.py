@@ -668,17 +668,20 @@ def _read_setup_file(setup_path: str) -> Mapping[str, AppInfo]:
         setup_data: Dict[str, Dict[str, dict]] = json.load(setup_file)
     app_dict = setup_data.get("app", {})
     app_infos = {name: AppInfo(**info) for (name, info) in app_dict.items()}
+    logger.info("Loaded %d app infos from %s", len(app_infos), setup_path)
     return app_infos
 
 
 def main():
     """Main function that runs when qiwis module is executed rather than imported."""
     args = _get_argparser().parse_args()
+    logger.info("Parsed arguments: %s", args)
     # read set-up information
     app_infos = _read_setup_file(args.setup_path)
     # start GUI
     qapp = QApplication(sys.argv)
     _qiwis = Qiwis(app_infos)
+    logger.info("Now the QApplication starts")
     qapp.exec_()
 
 
