@@ -300,7 +300,11 @@ class Qiwis(QObject):
             app: The name of the app which wants to subscribe to the channel.
             channel: The target channel name.
         """
-        self._subscribers[channel].add(app)
+        if app in self._subscribers[channel]:
+            logger.warning("The app %s already subscribes to %s", app, channel)
+        else:
+            self._subscribers[channel].add(app)
+            logger.info("The app %s now subscribes to %s", app, channel)
 
     def unsubscribe(self, app: str, channel: str) -> bool:
         """Cancels the subscription of the app to the channel.
