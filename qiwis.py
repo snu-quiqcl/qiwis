@@ -478,8 +478,10 @@ class BaseApp(QObject):
         try:
             msg = json.dumps(content)
         except TypeError:
-            logger.exception("Failed to json.dumps() the content: %s", str(content))
+            logger.exception("Failed to broadcast the content: %s", content)
         else:
+            logger.debug("Broadcast a message to %s: %s converted from %s",
+                         channelName, msg, content)
             self.broadcastRequested.emit(channelName, msg)
 
     def receivedSlot(self, channelName: str, content: Any):
@@ -504,8 +506,10 @@ class BaseApp(QObject):
         try:
             content = json.loads(msg)
         except json.JSONDecodeError:
-            logger.exception("Failed to json.loads() the message: %s", msg)
+            logger.exception("Failed to receive the message: %s", msg)
         else:
+            logger.debug("Received a content from %s: %s converted from %s",
+                         channelName, content, msg)
             self.receivedSlot(channelName, content)
 
     @pyqtSlot(str, str)
@@ -520,8 +524,10 @@ class BaseApp(QObject):
         try:
             result = loads(QiwiscallResult, msg)
         except json.JSONDecodeError:
-            logger.exception("Failed to loads() the message: %s", msg)
+            logger.exception("Failed to received the qiwiscall result message: %s", msg)
         else:
+            logger.debug("Received a qiwiscall result %s for the request %s, "
+                         "converted from the message %s", result, request, msg)
             self.qiwiscall.update_result(request, result)
 
 
