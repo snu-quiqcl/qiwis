@@ -360,6 +360,7 @@ class Qiwis(QObject):
         for name, arg in args.items():
             cls = signature.parameters[name].annotation
             parsedArgs[name] = loads(cls, arg) if issubclass(cls, Serializable) else arg
+        logger.debug("Parsed arguments %s to %s", args, parsedArgs)
         return parsedArgs
 
     def _handleQiwiscall(self, sender: str, msg: str) -> Any:
@@ -413,11 +414,14 @@ class Qiwis(QObject):
             value = self._handleQiwiscall(sender, msg)
         except Exception as error:  # pylint: disable=broad-exception-caught
             result = QiwiscallResult(done=True, success=False, error=repr(error))
+            logger.exception("Qiwiscall failed")
         else:
             if isinstance(value, Serializable):
                 value = dumps(value)
             result = QiwiscallResult(done=True, success=True, value=value)
+            logger.info("Qiwiscall success")
         self._apps[sender].qiwiscallReturned.emit(msg, dumps(result))
+        logger.info("Qiwiscall result is reported")
 
 
 class BaseApp(QObject):
