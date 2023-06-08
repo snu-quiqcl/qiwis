@@ -7,17 +7,21 @@ Using a set-up file written by a user, it sets up apps.
 
 Usage:
     python -m qiwis (-s <SETUP_PATH>)
+
+Logging:
+    The module-level logger name is __name__.
 """
 
-import sys
-import os
 import argparse
-import json
+import dataclasses
+import functools
 import importlib
 import importlib.util
 import inspect
-import dataclasses
-import functools
+import json
+import logging
+import os
+import sys
 from collections import defaultdict
 from contextlib import contextmanager
 from typing import (
@@ -29,6 +33,9 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QDockWidget, QMessageBox,
 
 
 T = TypeVar("T")
+
+
+logger = logging.getLogger(__name__)
 
 
 class Serializable:  # pylint: disable=too-few-public-methods
@@ -171,6 +178,7 @@ class Qiwis(QObject):
         """
         for name, info in appInfos.items():
             self.createApp(name, info)
+        logger.info("Loaded %d app(s)", len(appInfos))
 
     def addFrame(self, name: str, frame: QWidget, info: AppInfo):
         """Adds a frame of the app and wraps it with a dock widget.
@@ -193,6 +201,7 @@ class Qiwis(QObject):
         if info.show:
             self.mainWindow.addDockWidget(area, dockWidget)
         self._dockWidgets[name].append(dockWidget)
+        logger.info("Added a frame to the app %s: %s", name, info)
 
     def removeFrame(self, name: str, dockWidget: QDockWidget):
         """Removes the frame from the main window.
@@ -203,9 +212,11 @@ class Qiwis(QObject):
             name: A name of app.
             dockWidget: A dock widget to remove.
         """
+        frameName = dockWidget.widget().__class__.__name__
         self.mainWindow.removeDockWidget(dockWidget)
         self._dockWidgets[name].remove(dockWidget)
         dockWidget.deleteLater()
+        logger.info("Removed a frame %s from the app %s", frameName, name)
 
     def appNames(self) -> Tuple[str]:
         """Returns the names of the apps including whose frames are hidden."""
@@ -235,6 +246,7 @@ class Qiwis(QObject):
         for frame in app.frames():
             self.addFrame(name, frame, info)
         self._apps[name] = app
+        logger.info("Created an app %s: %s", name, info)
 
     def destroyApp(self, name: str):
         """Destroys an app.
@@ -249,6 +261,7 @@ class Qiwis(QObject):
         for apps in self._subscribers.values():
             apps.discard(name)
         self._apps.pop(name).deleteLater()
+        logger.info("Destroyed the app %s", name)
 
     def updateFrames(self, name: str):
         """Updates the frames of an app.
@@ -266,6 +279,7 @@ class Qiwis(QObject):
             self.removeFrame(name, orgFrames[frame])
         for frame in newFramesSet - orgFramesSet:
             self.addFrame(name, frame, info)
+        logger.info("Updated frames: %d -> %d", len(orgFramesSet), len(newFramesSet))
 
     def channelNames(self) -> Tuple[str]:
         """Returns the names of the channels."""
@@ -287,7 +301,11 @@ class Qiwis(QObject):
             app: The name of the app which wants to subscribe to the channel.
             channel: The target channel name.
         """
-        self._subscribers[channel].add(app)
+        if app in self._subscribers[channel]:
+            logger.warning("The app %s already subscribes to %s", app, channel)
+        else:
+            self._subscribers[channel].add(app)
+            logger.info("The app %s now subscribes to %s", app, channel)
 
     def unsubscribe(self, app: str, channel: str) -> bool:
         """Cancels the subscription of the app to the channel.
@@ -303,7 +321,10 @@ class Qiwis(QObject):
         try:
             subscribers.remove(app)
         except KeyError:
+            logger.error("The app %s tried to unsubscribe from %s, "
+                         "which it does not subscribe to", app, channel)
             return False
+        logger.info("The app %s unsubscribed from %s", app, channel)
         return True
 
     @pyqtSlot(str, str)
@@ -340,6 +361,7 @@ class Qiwis(QObject):
         for name, arg in args.items():
             cls = signature.parameters[name].annotation
             parsedArgs[name] = loads(cls, arg) if issubclass(cls, Serializable) else arg
+        logger.debug("Parsed arguments %s to %s", args, parsedArgs)
         return parsedArgs
 
     def _handleQiwiscall(self, sender: str, msg: str) -> Any:
@@ -393,11 +415,14 @@ class Qiwis(QObject):
             value = self._handleQiwiscall(sender, msg)
         except Exception as error:  # pylint: disable=broad-exception-caught
             result = QiwiscallResult(done=True, success=False, error=repr(error))
+            logger.exception("Qiwiscall failed")
         else:
             if isinstance(value, Serializable):
                 value = dumps(value)
             result = QiwiscallResult(done=True, success=True, value=value)
+            logger.info("Qiwiscall success")
         self._apps[sender].qiwiscallReturned.emit(msg, dumps(result))
+        logger.info("Qiwiscall result is reported")
 
 
 class BaseApp(QObject):
@@ -453,9 +478,11 @@ class BaseApp(QObject):
         """
         try:
             msg = json.dumps(content)
-        except TypeError as e:
-            print(f"qiwis.app.broadcast(): {e!r}")
+        except TypeError:
+            logger.exception("Failed to broadcast the content: %s", content)
         else:
+            logger.debug("Broadcast a message to %s: %s converted from %s",
+                         channelName, msg, content)
             self.broadcastRequested.emit(channelName, msg)
 
     def receivedSlot(self, channelName: str, content: Any):
@@ -479,9 +506,11 @@ class BaseApp(QObject):
         """
         try:
             content = json.loads(msg)
-        except json.JSONDecodeError as e:
-            print(f"qiwis.app._receivedMessage(): {e!r}")
+        except json.JSONDecodeError:
+            logger.exception("Failed to receive the message: %s", msg)
         else:
+            logger.debug("Received a content from %s: %s converted from %s",
+                         channelName, content, msg)
             self.receivedSlot(channelName, content)
 
     @pyqtSlot(str, str)
@@ -495,9 +524,11 @@ class BaseApp(QObject):
         """
         try:
             result = loads(QiwiscallResult, msg)
-        except json.JSONDecodeError as e:
-            print(f"{self}._receivedResult: {e}")
+        except json.JSONDecodeError:
+            logger.exception("Failed to received the qiwiscall result message: %s", msg)
         else:
+            logger.debug("Received a qiwiscall result %s for the request %s, "
+                         "converted from the message %s", result, request, msg)
             self.qiwiscall.update_result(request, result)
 
 
@@ -547,9 +578,11 @@ class QiwiscallProxy:  # pylint: disable=too-few-public-methods
             result = QiwiscallResult(done=False, success=False)
             msg = dumps(info)
             if msg in self.results:
-                print(f"QiwiscallProxy.<local>.proxy(): Duplicate message {msg} is ignored.")
+                logger.warning("Duplicate qiwiscall request: %s, "
+                               "the new result overwrites the previous one", msg)
             self.results[msg] = result
             self.requested.emit(msg)
+            logger.debug("Requested a qiwiscall: %s converted from %s", msg, info)
             return result
         return proxy
 
@@ -567,12 +600,13 @@ class QiwiscallProxy:  # pylint: disable=too-few-public-methods
         _get_result = self.results.pop if discard else self.results.get
         _result = _get_result(request, None)
         if _result is None:
-            print(f"QiwiscallProxy.update_result(): Failed to find a result for {request}.")
+            logger.error("Failed to find a result for request: %s", request)
             return
         _result.error = result.error
         _result.value = result.value
         _result.success = result.success
         _result.done = result.done
+        logger.debug("Qiwiscall result is updated: %s", _result)
 
 
 @contextmanager
@@ -635,17 +669,20 @@ def _read_setup_file(setup_path: str) -> Mapping[str, AppInfo]:
         setup_data: Dict[str, Dict[str, dict]] = json.load(setup_file)
     app_dict = setup_data.get("app", {})
     app_infos = {name: AppInfo(**info) for (name, info) in app_dict.items()}
+    logger.info("Loaded %d app infos from %s", len(app_infos), setup_path)
     return app_infos
 
 
 def main():
     """Main function that runs when qiwis module is executed rather than imported."""
     args = _get_argparser().parse_args()
+    logger.info("Parsed arguments: %s", args)
     # read set-up information
     app_infos = _read_setup_file(args.setup_path)
     # start GUI
     qapp = QApplication(sys.argv)
     _qiwis = Qiwis(app_infos)
+    logger.info("Now the QApplication starts")
     qapp.exec_()
 
 
