@@ -212,10 +212,11 @@ class Qiwis(QObject):
             name: A name of app.
             dockWidget: A dock widget to remove.
         """
+        frameName = dockWidget.widget().__class__.__name__
         self.mainWindow.removeDockWidget(dockWidget)
         self._dockWidgets[name].remove(dockWidget)
         dockWidget.deleteLater()
-        logger.info("Removed a frame from the app %s", name)
+        logger.info("Removed a frame %s from the app %s", frameName, name)
 
     def appNames(self) -> Tuple[str]:
         """Returns the names of the apps including whose frames are hidden."""
