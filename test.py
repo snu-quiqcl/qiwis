@@ -526,7 +526,7 @@ class QiwisFunctionTest(unittest.TestCase):
         mock_load.assert_called_once()
 
     @mock.patch("qiwis._get_argparser")
-    @mock.patch("qiwis._read_setup_file", return_value={})
+    @mock.patch("qiwis._read_setup_file", return_value=({}, {}))
     @mock.patch("qiwis.Qiwis")
     @mock.patch("qiwis.QApplication")
     def test_main(self, mock_qapp, mock_qiwis, mock_read_setup_file, mock_get_argparser):
