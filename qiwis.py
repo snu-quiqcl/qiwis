@@ -147,10 +147,14 @@ class Qiwis(QObject):
     def __init__(
         self,
         appInfos: Optional[Mapping[str, AppInfo]] = None,
+        constants: Optional[Mapping[str, Any]] = None,
         parent: Optional[QObject] = None):
         """
         Args:
             appInfos: See Qiwis.load(). None or an empty dictionary for loading no apps.
+            constants: The global constant namepsace mapping.
+              The key-value pairs are the constant name-value pairs.
+              Since it composes a namespace, each key should be a valid attribute name.
             parent: A parent object.
         """
         super().__init__(parent=parent)
@@ -686,7 +690,7 @@ def main():
     app_infos, constants = _read_setup_file(args.setup_path)
     # start GUI
     qapp = QApplication(sys.argv)
-    _qiwis = Qiwis(app_infos)
+    _qiwis = Qiwis(app_infos, constants)
     logger.info("Now the QApplication starts")
     qapp.exec_()
 
