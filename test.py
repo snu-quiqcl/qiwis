@@ -517,9 +517,11 @@ class QiwisFunctionTest(unittest.TestCase):
         self.assertEqual(args.setup_path, "./setup.json")
 
     @mock.patch("builtins.open")
-    @mock.patch("json.load", return_value={"app": APP_DICTS})
+    @mock.patch("json.load", return_value={"constant": {"C0": 0}, "app": APP_DICTS})
     def test_read_setup_file(self, mock_load, mock_open):
-        self.assertEqual(qiwis._read_setup_file(""), APP_INFOS)
+        constants, app_infos = qiwis._read_setup_file("")
+        self.assertEqual(constants, {"C0": 0})
+        self.assertEqual(app_infos, APP_INFOS)
         mock_open.assert_called_once()
         mock_load.assert_called_once()
 
