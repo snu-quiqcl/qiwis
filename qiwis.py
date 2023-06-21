@@ -687,6 +687,21 @@ def _read_setup_file(setup_path: str) -> Tuple[Dict[str, AppInfo], Dict[str, Any
     return app_infos, constants
 
 
+def _immutable(source: JsonType) -> ImmutableJsonType:
+    """Returns the immutable version of the given JSON object.
+
+    Args:
+        source: An object which is decoded from a JSON. Every list or dict
+          are converted to a tuple or types.MappingProxyType, respectively.
+          The other types, e.g., float, str, etc., stay the same.
+    """
+    if isinstance(source, list):
+        return tuple(map(_immutable, source))
+    if isinstance(source, dict):
+        return MappingProxyType({key: _immutable(value) for key, value in source.items()})
+    return source
+
+
 def main():
     """Main function that runs when qiwis module is executed rather than imported."""
     args = _get_argparser().parse_args()
