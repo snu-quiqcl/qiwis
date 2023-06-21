@@ -31,7 +31,6 @@ from typing import (
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QDockWidget, QMessageBox, QWidget
 
-
 T = TypeVar("T")
 
 
