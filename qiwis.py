@@ -22,7 +22,7 @@ import json
 import logging
 import os
 import sys
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 from contextlib import contextmanager
 from types import MappingProxyType
 from typing import (
@@ -164,6 +164,8 @@ class Qiwis(QObject):
         """
         super().__init__(parent=parent)
         self.appInfos = appInfos
+        GlobalConstantNamespace = namedtuple("GlobalConstantNamespace", constants.keys())
+        self.constants = GlobalConstantNamespace(*map(_immutable, constants.values()))
         self.mainWindow = QMainWindow()
         self.centralWidget = QWidget()
         self.centralWidget.setStyleSheet("border-image: url(./resources/background.png);")
