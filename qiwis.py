@@ -674,6 +674,7 @@ def _read_setup_file(setup_path: str) -> Tuple[Dict[str, AppInfo], Dict[str, Any
     app_infos = {name: AppInfo(**info) for (name, info) in app_dict.items()}
     logger.info("Loaded %d app infos from %s", len(app_infos), setup_path)
     constants = setup_data.get("constant", {})
+    logger.info("Loaded %d constants from %s", len(constants), setup_path)
     return app_infos, constants
 
 
