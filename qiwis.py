@@ -644,12 +644,16 @@ def _get_argparser() -> argparse.ArgumentParser:
     return parser
 
 
-def _read_setup_file(setup_path: str) -> Mapping[str, AppInfo]:
+def _read_setup_file(setup_path: str) -> Tuple[Dict[str, Any], Dict[str, AppInfo]]:
     """Reads set-up information from a JSON file.
 
     The JSON file content should have the following structure:
 
       {
+        "constant": {
+          "CONSTANT_0": ...,
+          ...
+        },
         "app": {
           "app_name_0": {app_info_0},
           ...
@@ -662,14 +666,15 @@ def _read_setup_file(setup_path: str) -> Mapping[str, AppInfo]:
         setup_path: A path of set-up file.
 
     Returns:
-        A dictionary of set-up information about apps. See appInfos in Qiwis.load().
+        Two dictionaries: (constants, app_infos). See appInfos in Qiwis.load().
     """
     with open(setup_path, encoding="utf-8") as setup_file:
-        setup_data: Dict[str, Dict[str, dict]] = json.load(setup_file)
+        setup_data: Dict[str, Dict[str, Any]] = json.load(setup_file)
+    constants = setup_data.get("constant", {})
     app_dict = setup_data.get("app", {})
     app_infos = {name: AppInfo(**info) for (name, info) in app_dict.items()}
     logger.info("Loaded %d app infos from %s", len(app_infos), setup_path)
-    return app_infos
+    return constants, app_infos
 
 
 def main():
@@ -677,7 +682,7 @@ def main():
     args = _get_argparser().parse_args()
     logger.info("Parsed arguments: %s", args)
     # read set-up information
-    app_infos = _read_setup_file(args.setup_path)
+    constants, app_infos = _read_setup_file(args.setup_path)
     # start GUI
     qapp = QApplication(sys.argv)
     _qiwis = Qiwis(app_infos)
