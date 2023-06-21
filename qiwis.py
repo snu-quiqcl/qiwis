@@ -24,14 +24,19 @@ import os
 import sys
 from collections import defaultdict
 from contextlib import contextmanager
+from types import MappingProxyType
 from typing import (
-    Dict, DefaultDict, Set, Any, Callable, Iterable, Mapping, Optional, Tuple, TypeVar, Type
+    Dict, DefaultDict, Set, Any, Callable, Iterable, Mapping, Optional, Tuple,
+    List, Union, TypeVar, Type
 )
 
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QDockWidget, QMessageBox, QWidget
 
 T = TypeVar("T")
+JsonType = Union[None, float, bool, str, List["JsonType"], Dict[str, "JsonType"]]
+ImmutableJsonType = Union[None, float, bool, str, Tuple["ImmutableJsonType", ...],
+                          MappingProxyType[str, "ImmutableJsonType"]]
 
 
 logger = logging.getLogger(__name__)
