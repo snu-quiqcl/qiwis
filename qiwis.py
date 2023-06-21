@@ -152,14 +152,14 @@ class Qiwis(QObject):
     def __init__(
         self,
         appInfos: Optional[Mapping[str, AppInfo]] = None,
-        constants: Optional[Mapping[str, Any]] = None,
+        constants: Optional[Mapping[str, JsonType]] = None,
         parent: Optional[QObject] = None):
         """
         Args:
             appInfos: See Qiwis.load(). None or an empty dictionary for loading no apps.
-            constants: The global constant namepsace mapping.
-              The key-value pairs are the constant name-value pairs.
-              Since it composes a namespace, each key should be a valid attribute name.
+            constants: A mapping source for the global constant namespace.
+              The key-values become the constant name-values and hence the keys
+              should be a valid Python identifier.
             parent: A parent object.
         """
         super().__init__(parent=parent)
@@ -653,7 +653,7 @@ def _get_argparser() -> argparse.ArgumentParser:
     return parser
 
 
-def _read_setup_file(setup_path: str) -> Tuple[Dict[str, AppInfo], Dict[str, Any]]:
+def _read_setup_file(setup_path: str) -> Tuple[Dict[str, AppInfo], Dict[str, JsonType]]:
     """Reads set-up information from a JSON file.
 
     The JSON file content should have the following structure:
@@ -678,7 +678,7 @@ def _read_setup_file(setup_path: str) -> Tuple[Dict[str, AppInfo], Dict[str, Any
         Two dictionaries: (app_infos, constants). See appInfos in Qiwis.load().
     """
     with open(setup_path, encoding="utf-8") as setup_file:
-        setup_data: Dict[str, Dict[str, Any]] = json.load(setup_file)
+        setup_data: Dict[str, Dict[str, JsonType]] = json.load(setup_file)
     app_dict = setup_data.get("app", {})
     app_infos = {name: AppInfo(**info) for (name, info) in app_dict.items()}
     logger.info("Loaded %d app infos from %s", len(app_infos), setup_path)
