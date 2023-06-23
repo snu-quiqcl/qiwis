@@ -3,12 +3,28 @@ App module for logging.
 """
 
 import time
+import logging
 from typing import Any, Optional, Tuple
 
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QTextEdit, QLabel, QDialogButtonBox
 
-from qiwis import BaseApp
+from qiwis import BaseApp, logger
+
+class Signaller(QObject):
+    signal = pyqtSignal(str, logging.LogRecord)
+
+
+class QtHandler(logging.Handler):
+    def __init__(self, slotfunc, *args, **kwargs):
+        super(QtHandler, self).__init__(*args, **kwargs)
+        self.signaller = Signaller()
+        self.signaller.signal.connect(slotfunc)
+
+    def emit(self, record):
+        s = self.format(record)
+        self.signaller.signal.emit(s)
+
 
 class LoggerFrame(QWidget):
     """Frame for logging.
@@ -85,11 +101,18 @@ class LoggerApp(BaseApp):
         self.loggerFrame.clearButton.clicked.connect(self.checkToClear)
         self.confirmFrame = ConfirmClearingFrame()
         self.confirmFrame.confirmed.connect(self.clearLog)
+        self.handler = QtHandler(self.addLog)
+        # arbitrary format
+        fs ="%(name)s %(message)s"
+        formatter = logging.Formatter(fs)
+        self.handler.setFormatter(formatter)
+        logger.addHandler(self.handler)
 
     def frames(self) -> Tuple[LoggerFrame]:
         """Overridden."""
         return (self.loggerFrame,)
 
+    @pyqtSlot(str)
     def addLog(self, content: str):
         """Adds a channel name and log message.
 
@@ -126,3 +149,5 @@ class LoggerApp(BaseApp):
     def clearLog(self):
         """Clears the log text edit."""
         self.loggerFrame.logEdit.clear()
+
+
