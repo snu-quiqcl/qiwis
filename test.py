@@ -548,6 +548,25 @@ class QiwisFunctionTest(unittest.TestCase):
         for source, result in zip(sources, results):
             self.assertEqual(qiwis._immutable(source), result)
 
+    def test_immutable_recursive(self):
+        source = {
+            "LIST": [None, 0, True, "list"],
+            "LIST_LIST": [0, [1, 2, [3, 4, 5]]],
+            "DICT": {"A": True, "B": False},
+            "DICT_DICT": {"A": 0, "B": {"C": 1, "D": 2}},
+            "LIST_DICT": [0, {"A": 1, "B": [2, 3]}],
+        }
+        result = MappingProxyType({
+            "LIST": (None, 0, True, "list"),
+            "LIST_LIST": (0, (1, 2, (3, 4, 5))),
+            "DICT": MappingProxyType({"A": True, "B": False}),
+            "DICT_DICT": MappingProxyType({"A": 0, "B": MappingProxyType({"C": 1, "D": 2})}),
+            "LIST_DICT": (0, MappingProxyType({"A": 1, "B": (2, 3)})),
+        })
+        self.assertEqual(qiwis._immutable(source), result)
+        # when the root-type is list
+        self.assertEqual(qiwis._immutable(source["LIST_DICT"]), result["LIST_DICT"])
+
     def test_add_to_path(self):
         test_dir = "/test_dir"
         old_path = sys.path.copy()
