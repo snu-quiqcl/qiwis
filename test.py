@@ -9,6 +9,7 @@ import json
 import unittest
 from collections import namedtuple
 from unittest import mock
+from types import MappingProxyType
 from typing import Any, Optional, Mapping, Iterable
 
 from PyQt5.QtCore import QObject
@@ -526,6 +527,26 @@ class QiwisFunctionTest(unittest.TestCase):
         _args, _kwargs = mocked_namespace.call_args
         self.assertSequenceEqual(_args, mocked_immutable_values)
         mocked_immutable.assert_has_calls((mock.call(value) for value in source.values()))
+
+    def test_immutable(self):
+        sources = (
+            None,
+            0,
+            True,
+            "str",
+            [None, 1.2, False, "test"],
+            {"k1": 0, "k2": True},
+        )
+        results = (
+            None,
+            0,
+            True,
+            "str",
+            (None, 1.2, False, "test"),
+            MappingProxyType({"k1": 0, "k2": True}),
+        )
+        for source, result in zip(sources, results):
+            self.assertEqual(qiwis._immutable(source), result)
 
     def test_add_to_path(self):
         test_dir = "/test_dir"
