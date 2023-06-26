@@ -595,12 +595,21 @@ class QiwisFunctionTest(unittest.TestCase):
         mock_open.assert_called_once()
         mock_load.assert_called_once()
 
+    @mock.patch("qiwis.set_global_constant_namespace")
     @mock.patch("qiwis._get_argparser")
     @mock.patch("qiwis._read_setup_file", return_value=({}, {}))
     @mock.patch("qiwis.Qiwis")
     @mock.patch("qiwis.QApplication")
-    def test_main(self, mock_qapp, mock_qiwis, mock_read_setup_file, mock_get_argparser):
+    def test_main(
+        self,
+        mock_qapp,
+        mock_qiwis,
+        mock_read_setup_file,
+        mock_get_argparser,
+        mock_set_global_constant_namespace,
+    ):
         qiwis.main()
+        mock_set_global_constant_namespace.assert_called_once()
         mock_get_argparser.assert_called_once()
         mock_read_setup_file.assert_called_once()
         mock_qiwis.assert_called_once()
