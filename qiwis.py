@@ -35,8 +35,8 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QDockWidget, QMessageBox,
 
 T = TypeVar("T")
 JsonType = Union[None, float, bool, str, List["JsonType"], Dict[str, "JsonType"]]
-ImmutableJsonType = Union[None, float, bool, str, Tuple["ImmutableJsonType", ...],
-                          MappingProxyType[str, "ImmutableJsonType"]]
+# Generic MappingProxyType or GenericAlias is introduced in Python 3.9.
+ImmutableJsonType = Union[None, float, bool, str, Tuple["ImmutableJsonType", ...], MappingProxyType]
 
 
 logger = logging.getLogger(__name__)
