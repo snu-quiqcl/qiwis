@@ -345,6 +345,10 @@ class BaseAppTest(unittest.TestCase):
     def test_constants_default(self):
         self.assertFalse(self.app.constants._fields)
 
+    @mock.patch("qiwis.BaseApp._constants")
+    def test_constants(self, mocked_constants):
+        self.assertIs(self.app.constants, mocked_constants)
+
     def test_frames(self):
         self.assertIsInstance(self.app.frames(), collections.abc.Iterable)
 
