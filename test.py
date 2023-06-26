@@ -7,6 +7,7 @@ import dataclasses
 import sys
 import json
 import unittest
+from collections import namedtuple
 from unittest import mock
 from typing import Any, Optional, Mapping, Iterable
 
@@ -340,6 +341,9 @@ class BaseAppTest(unittest.TestCase):
 
     def test_set_parent(self):
         qiwis.BaseApp("name", QObject())
+
+    def test_constants_default(self):
+        self.assertEqual(self.constants, namedtuple("empty", ())())
 
     def test_frames(self):
         self.assertIsInstance(self.app.frames(), collections.abc.Iterable)
