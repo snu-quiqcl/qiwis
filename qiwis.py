@@ -152,20 +152,14 @@ class Qiwis(QObject):
     def __init__(
         self,
         appInfos: Optional[Mapping[str, AppInfo]] = None,
-        constants: Optional[Mapping[str, JsonType]] = None,
         parent: Optional[QObject] = None):
         """
         Args:
             appInfos: See Qiwis.load(). None or an empty dictionary for loading no apps.
-            constants: A mapping source for the global constant namespace.
-              The key-values become the constant name-values and hence the keys
-              should be a valid Python identifier.
             parent: A parent object.
         """
         super().__init__(parent=parent)
         self.appInfos = appInfos
-        GlobalConstantNamespace = namedtuple("GlobalConstantNamespace", constants.keys())
-        self.constants = GlobalConstantNamespace(*map(_immutable, constants.values()))
         self.mainWindow = QMainWindow()
         self.centralWidget = QWidget()
         self.centralWidget.setStyleSheet("border-image: url(./resources/background.png);")
@@ -626,6 +620,23 @@ class QiwiscallProxy:  # pylint: disable=too-few-public-methods
         logger.debug("Qiwiscall result is updated: %s", _result)
 
 
+def set_global_constant_namespace(constants: Mapping[str, JsonType]) -> Tuple:
+    """Creates a immutable namedtuple and sets it as the global constant namespace.
+
+    Args:
+        constants: A mapping source for the global constant namespace.
+          The key-values become the constant name-values and hence the keys
+          should be a valid namedtuple field name.
+
+    Returns:
+        The created namedtuple, which is the global constant namespace.
+    """
+    constantnamespace = namedtuple("constantnamespace", constants.keys())
+    _constants = constantnamespace(*map(_immutable, constants.values()))
+    BaseApp._constants = _constants  # pylint: disable=protected-access
+    return _constants
+
+
 @contextmanager
 def _add_to_path(path: str):
     """Adds a path temporarily.
@@ -719,7 +730,8 @@ def main():
     app_infos, constants = _read_setup_file(args.setup_path)
     # start GUI
     qapp = QApplication(sys.argv)
-    _qiwis = Qiwis(app_infos, constants)
+    set_global_constant_namespace(constants)
+    _qiwis = Qiwis(app_infos)
     logger.info("Now the QApplication starts")
     qapp.exec_()
 
