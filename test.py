@@ -505,6 +505,28 @@ class QiwisFunctionTest(unittest.TestCase):
         self.assertEqual(qiwis.dumps(APP_INFOS["app1"]), APP_JSONS["app1"])
         self.assertEqual(qiwis.dumps(APP_INFOS["app2"]), APP_JSONS["app2"])
 
+    @mock.patch("qiwis.namedtuple")
+    @mock.patch("qiwis._immutable")
+    @mock.patch("qiwis.BaseApp")
+    def test_set_global_constant_namespace(
+        self,
+        mocked_base_app_cls,
+        mocked_immutable,
+        mocked_namedtuple
+    ):
+        source = {"C0": 0, "C1": True, "C2": "str"}
+        mocked_immutable_values = ("M0", "M1", "M2")
+        mocked_namespace = mocked_namedtuple.return_value
+        mocked_constants = mocked_namespace.return_value
+        mocked_immutable.side_effect = mocked_immutable_values
+        constants = qiwis.set_global_constant_namespace(source)
+        self.assertIs(constants, mocked_constants)
+        self.assertIs(mocked_base_app_cls._constants, mocked_constants)
+        mocked_namedtuple.assert_called_once_with("constantnamespace", source.keys())
+        _args, _kwargs = mocked_namespace.call_args
+        self.assertSequenceEqual(_args, mocked_immutable_values)
+        mocked_immutable.assert_has_calls((mock.call(value) for value in source.values()))
+
     def test_add_to_path(self):
         test_dir = "/test_dir"
         old_path = sys.path.copy()
