@@ -343,7 +343,7 @@ class BaseAppTest(unittest.TestCase):
         qiwis.BaseApp("name", QObject())
 
     def test_constants_default(self):
-        self.assertEqual(self.constants, namedtuple("empty", ())())
+        self.assertFalse(self.app.constants._fields)
 
     def test_frames(self):
         self.assertIsInstance(self.app.frames(), collections.abc.Iterable)
