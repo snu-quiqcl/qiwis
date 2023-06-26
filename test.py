@@ -7,7 +7,6 @@ import dataclasses
 import sys
 import json
 import unittest
-from collections import namedtuple
 from unittest import mock
 from types import MappingProxyType
 from typing import Any, Optional, Mapping, Iterable
