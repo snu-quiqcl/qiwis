@@ -459,6 +459,8 @@ class BaseApp(QObject):
     qiwiscallRequested = pyqtSignal(str)
     qiwiscallReturned = pyqtSignal(str, str)
 
+    _constants = namedtuple("EmptyNamespace", ())
+
     def __init__(self, name: str, parent: Optional[QObject] = None):
         """
         Args:
@@ -470,6 +472,11 @@ class BaseApp(QObject):
         self.qiwiscall = QiwiscallProxy(self.qiwiscallRequested)
         self.received.connect(self._receivedMessage)
         self.qiwiscallReturned.connect(self._receivedQiwiscallResult)
+
+    @property
+    def constants(self) -> Tuple:
+        """The global constant namespace."""
+        return BaseApp._constants
 
     def frames(self) -> Iterable[QWidget]:
         """Gets frames for which are managed by the App.
