@@ -35,7 +35,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QDockWidget, QMessageBox,
 T = TypeVar("T")
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("parent")
 
 
 class Serializable:  # pylint: disable=too-few-public-methods
