@@ -621,7 +621,7 @@ class QiwiscallProxy:  # pylint: disable=too-few-public-methods
 
 
 def set_global_constant_namespace(constants: Mapping[str, JsonType]) -> Tuple:
-    """Creates a immutable namedtuple and sets it as the global constant namespace.
+    """Creates an immutable namedtuple and sets it as the global constant namespace.
 
     Args:
         constants: A mapping source for the global constant namespace.
