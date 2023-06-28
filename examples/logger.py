@@ -3,17 +3,19 @@ App module for logging.
 """
 
 import time
+import logging
 from typing import Any, Optional, Tuple
 
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QTextEdit, QLabel, QDialogButtonBox
 
 from qiwis import BaseApp
-import logging
+
 
 logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
-class Signaller(QObject):
+class LoggingHandler(QObject, logging.Handler):
     signal = pyqtSignal(str)
     def __init__(self, slotfunc, *args, **kwargs):
         super(LoggingHandler, self).__init__(*args, **kwargs)
