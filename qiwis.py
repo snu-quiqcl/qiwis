@@ -631,8 +631,8 @@ def set_global_constant_namespace(constants: Mapping[str, JsonType]) -> Tuple:
     Returns:
         The created namedtuple, which is the global constant namespace.
     """
-    constantnamespace = namedtuple("constantnamespace", constants.keys())
-    _constants = constantnamespace(*map(_immutable, constants.values()))
+    ConstantNamespace = namedtuple("ConstantNamespace", constants.keys())
+    _constants = ConstantNamespace(*map(_immutable, constants.values()))
     BaseApp._constants = _constants  # pylint: disable=protected-access
     return _constants
 

@@ -522,7 +522,7 @@ class QiwisFunctionTest(unittest.TestCase):
         constants = qiwis.set_global_constant_namespace(source)
         self.assertIs(constants, mocked_constants)
         self.assertIs(mocked_base_app_cls._constants, mocked_constants)
-        mocked_namedtuple.assert_called_once_with("constantnamespace", source.keys())
+        mocked_namedtuple.assert_called_once_with("ConstantNamespace", source.keys())
         _args, _kwargs = mocked_namespace.call_args
         self.assertSequenceEqual(_args, mocked_immutable_values)
         mocked_immutable.assert_has_calls((mock.call(value) for value in source.values()))
