@@ -86,8 +86,8 @@ class ConfirmClearingFrame(QWidget):
 
     def buttonCancelClicked(self):
         """Clicks Cancel not to clear log."""
-        self.close()      
-                  
+        self.close()
+
 class LoggerApp(BaseApp):
     """App for logging.
 
