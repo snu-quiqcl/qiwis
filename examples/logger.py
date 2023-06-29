@@ -11,16 +11,17 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QTextEdit, QLabel
 
 from qiwis import BaseApp
 
-
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+# Handler for dealing input log to logger
 class LoggingHandler(QObject, logging.Handler):
     signal = pyqtSignal(str)
     def __init__(self, slotfunc, *args, **kwargs):
         super(LoggingHandler, self).__init__(*args, **kwargs)
         self.signal.connect(slotfunc)
 
+    # Works when signal inserted to logger, and handler is in the logger
     def emit(self, record):
         s = self.format(record)
         self.signal.emit(s)
@@ -84,9 +85,7 @@ class ConfirmClearingFrame(QWidget):
 class SetLevelFrame(QWidget):
 
     def __init__(self, parent: Optional[QObject] = None):
-        """
-        Extended.
-        """
+
         super().__init__(parent=parent)
         # widgets
         self.label = QLabel("Select logger level")
@@ -106,6 +105,7 @@ class SetLevelFrame(QWidget):
         layout.addWidget(self.label)
         layout.addWidget(self.buttonBox)
 
+    # change logger level by sensing which button is pressed
     def buttonClicked(self, button):
         if button.text() == "DEBUG":
             logger.setLevel(logging.DEBUG)
@@ -142,6 +142,7 @@ class LoggerApp(BaseApp):
         self.confirmFrame.confirmed.connect(self.clearLog)
         self.loggerFrame.levelButton.clicked.connect(self.selectLevel)
         self.setlevelFrame = SetLevelFrame()
+        # define handler
         self.handler = LoggingHandler(self.addLog)
         # arbitrary format
         fs ="%(name)s %(message)s"
@@ -182,6 +183,7 @@ class LoggerApp(BaseApp):
             
     @pyqtSlot()
     def selectLevel(self):
+        """"shows a level select frame"""
         self.setlevelFrame.show()
 
     @pyqtSlot()

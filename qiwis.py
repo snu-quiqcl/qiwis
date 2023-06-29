@@ -35,7 +35,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QDockWidget, QMessageBox,
 T = TypeVar("T")
 
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 class Serializable:  # pylint: disable=too-few-public-methods
     """A type for dataclasses that can be converted to a JSON string.
