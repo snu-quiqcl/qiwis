@@ -13,7 +13,7 @@ from qiwis import BaseApp
 
 class Signaller(QObject):
     """Signal for LoggingHandler"""
-    signal = pyqtSignal(str, logging.LogRecord)
+    signal = pyqtSignal(str)
 
 class LoggingHandler(QObject, logging.Handler):
     """Handler for logger.
