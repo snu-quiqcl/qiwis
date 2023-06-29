@@ -12,6 +12,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QTextEdit, QLabel
 from qiwis import BaseApp
 
 class Signaller(QObject):
+    """Signal for LoggingHandler"""
     signal = pyqtSignal(str, logging.LogRecord)
 
 class LoggingHandler(QObject, logging.Handler):
