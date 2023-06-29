@@ -453,7 +453,7 @@ class BaseApp(QObject):
     qiwiscallRequested = pyqtSignal(str)
     qiwiscallReturned = pyqtSignal(str, str)
 
-    _constants = namedtuple("emptynamespace", ())
+    _constants = namedtuple("EmptyNamespace", ())()
 
     def __init__(self, name: str, parent: Optional[QObject] = None):
         """
