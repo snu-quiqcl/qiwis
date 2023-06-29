@@ -11,24 +11,28 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QTextEdit, QLabel
 
 from qiwis import BaseApp
 
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+class Signaller(QObject):
+    signal = pyqtSignal(str, logging.LogRecord)
 
 class LoggingHandler(QObject, logging.Handler):
-    """
-    Handler for logger, handle input log by emit
+    """Handler for logger.
+
+    Sends log message to connected function using emit
+
+    Signal:
+          signal: Helps to send message to destination.
     """
     signal = pyqtSignal(str)
+
     def __init__(self, slotfunc, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.signal.connect(slotfunc)
+        self.signaller = Signaller()
+        self.signaller.signal.connect(slotfunc)
 
     def emit(self, record):
-        """ 
-        emit input signal to connected function
-        """
+        """ Emits input signal to connected function."""
         s = self.format(record)
-        self.signal.emit(s)
+        self.signaller.signal.emit(s)
 
 class LoggerFrame(QWidget):
     """Frame for logging.
@@ -44,13 +48,10 @@ class LoggerFrame(QWidget):
         self.logEdit = QTextEdit(self)
         self.logEdit.setReadOnly(True)
         self.clearButton = QPushButton("Clear")
-        self.levelButton = QPushButton("Set logger level")
         # layout
         layout = QVBoxLayout(self)
         layout.addWidget(self.logEdit)
         layout.addWidget(self.clearButton)
-        layout.addWidget(self.levelButton)
-
 
 class ConfirmClearingFrame(QWidget):
     """
@@ -84,49 +85,7 @@ class ConfirmClearingFrame(QWidget):
 
     def buttonCancelClicked(self):
         """Clicks Cancel not to clear log."""
-        self.close()
-
-class SetLevelFrame(QWidget):
-    """
-    Extended.
-    """
-    def __init__(self, parent: Optional[QObject] = None):
-
-        super().__init__(parent=parent)
-        # widgets
-        self.label = QLabel("Select logger level")
-        self.buttonBox = QDialogButtonBox()
-        self.buttonBox.addButton("DEBUG", QDialogButtonBox.ActionRole)
-        self.buttonBox.addButton("INFO", QDialogButtonBox.ActionRole)
-        self.buttonBox.addButton("WARNING", QDialogButtonBox.ActionRole)
-        self.buttonBox.addButton("ERROR", QDialogButtonBox.ActionRole)
-        self.buttonBox.addButton("CRITICAL", QDialogButtonBox.ActionRole)
-        self.buttonBox.addButton("Cancel", QDialogButtonBox.RejectRole)
-
-        # connect signals
-        self.buttonBox.clicked.connect(self.buttonClicked)
-        # layouts
-        layout = QVBoxLayout()
-        self.setLayout(layout)
-        layout.addWidget(self.label)
-        layout.addWidget(self.buttonBox)
-
-    def buttonClicked(self, button):
-        """
-        change logger level by sensing which button is pressed
-        """
-        if button.text() == "DEBUG":
-            logger.setLevel(logging.DEBUG)
-        elif button.text() == "INFO":
-            logger.setLevel(logging.INFO)
-        elif button.text() == "WARNING":
-            logger.setLevel(logging.WARNING)
-        elif button.text() == "ERROR":
-            logger.setLevel(logging.ERROR)
-        elif button.text() == "CRITICAL":
-            logger.setLevel(logging.CRITICAL)
-        elif button.text() == "Cancel":
-            self.close()      
+        self.close()      
                   
 class LoggerApp(BaseApp):
     """App for logging.
@@ -148,15 +107,13 @@ class LoggerApp(BaseApp):
         self.loggerFrame.clearButton.clicked.connect(self.checkToClear)
         self.confirmFrame = ConfirmClearingFrame()
         self.confirmFrame.confirmed.connect(self.clearLog)
-        self.loggerFrame.levelButton.clicked.connect(self.selectLevel)
-        self.setlevelFrame = SetLevelFrame()
         # define handler
         self.handler = LoggingHandler(self.addLog)
         # arbitrary format
         fs ="%(name)s %(message)s"
         formatter = logging.Formatter(fs)
         self.handler.setFormatter(formatter)
-        logger.addHandler(self.handler)
+        logging.getLogger().addHandler(self.handler)
 
     def frames(self) -> Tuple[LoggerFrame]:
         """Overridden."""
@@ -188,11 +145,6 @@ class LoggerApp(BaseApp):
         else:
             print(f"The message was ignored because "
                   f"the treatment for the channel {channelName} is not implemented.")
-            
-    @pyqtSlot()
-    def selectLevel(self):
-        """"shows a level select frame"""
-        self.setlevelFrame.show()
 
     @pyqtSlot()
     def checkToClear(self):
