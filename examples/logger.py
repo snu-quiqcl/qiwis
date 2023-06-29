@@ -14,15 +14,19 @@ from qiwis import BaseApp
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-# Handler for dealing input log to logger
 class LoggingHandler(QObject, logging.Handler):
+    """
+    Handler for logger, handle input log by emit
+    """
     signal = pyqtSignal(str)
     def __init__(self, slotfunc, *args, **kwargs):
-        super(LoggingHandler, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.signal.connect(slotfunc)
 
-    # Works when signal inserted to logger, and handler is in the logger
     def emit(self, record):
+        """ 
+        emit input signal to connected function
+        """
         s = self.format(record)
         self.signal.emit(s)
 
@@ -83,7 +87,9 @@ class ConfirmClearingFrame(QWidget):
         self.close()
 
 class SetLevelFrame(QWidget):
-
+    """
+    Extended.
+    """
     def __init__(self, parent: Optional[QObject] = None):
 
         super().__init__(parent=parent)
@@ -105,8 +111,10 @@ class SetLevelFrame(QWidget):
         layout.addWidget(self.label)
         layout.addWidget(self.buttonBox)
 
-    # change logger level by sensing which button is pressed
     def buttonClicked(self, button):
+        """
+        change logger level by sensing which button is pressed
+        """
         if button.text() == "DEBUG":
             logger.setLevel(logging.DEBUG)
         elif button.text() == "INFO":
