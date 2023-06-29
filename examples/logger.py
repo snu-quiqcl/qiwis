@@ -119,7 +119,7 @@ class LoggerApp(BaseApp):
     def frames(self) -> Tuple[LoggerFrame]:
         """Overridden."""
         return (self.loggerFrame,)
-    
+
     @pyqtSlot(str)
     def addLog(self, content: str):
         """Adds a channel name and log message.
