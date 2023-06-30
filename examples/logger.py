@@ -121,7 +121,7 @@ class LoggerApp(BaseApp):
         logger.setLevel(logging.INFO)
         logger.addHandler(self.handler)
 
-  
+
     def frames(self) -> Tuple[LoggerFrame]:
         """Overridden."""
         return (self.loggerFrame,)
