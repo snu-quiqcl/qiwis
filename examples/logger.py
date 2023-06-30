@@ -5,11 +5,10 @@ App module for logging.
 import time
 import logging
 from typing import Any, Optional, Tuple
-
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QTextEdit, QLabel, QDialogButtonBox
-
 from qiwis import BaseApp
+
 
 class Signaller(QObject):
     """Signal for LoggingHandler"""
@@ -18,15 +17,16 @@ class Signaller(QObject):
 class LoggingHandler(QObject, logging.Handler):
     """Handler for logger.
 
-    Sends log message to connected function using emit
-
-    Signal:
-          signal: Helps to send message to destination.
+    Sends a log message to connected function using emit.
     """
-    signal = pyqtSignal(str)
 
-    def __init__(self, slotfunc, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, slotfunc):
+        """Connect an input function to the signal.
+
+        Args:
+            slotfunc: function connected to signal
+        """
+        super().__init__()
         self.signaller = Signaller()
         self.signaller.signal.connect(slotfunc)
 
@@ -34,6 +34,7 @@ class LoggingHandler(QObject, logging.Handler):
         """ Emits input signal to connected function."""
         s = self.format(record)
         self.signaller.signal.emit(s)
+
 
 class LoggerFrame(QWidget):
     """Frame for logging.
@@ -53,6 +54,7 @@ class LoggerFrame(QWidget):
         layout = QVBoxLayout(self)
         layout.addWidget(self.logEdit)
         layout.addWidget(self.clearButton)
+
 
 class ConfirmClearingFrame(QWidget):
     """
@@ -88,6 +90,7 @@ class ConfirmClearingFrame(QWidget):
         """Clicks Cancel not to clear log."""
         self.close()
 
+
 class LoggerApp(BaseApp):
     """App for logging.
 
@@ -114,8 +117,11 @@ class LoggerApp(BaseApp):
         fs ="%(name)s %(message)s"
         formatter = logging.Formatter(fs)
         self.handler.setFormatter(formatter)
-        logging.getLogger().addHandler(self.handler)
+        logger = logging.getLogger("parent")
+        logger.setLevel(logging.INFO)
+        logger.addHandler(self.handler)
 
+        
     def frames(self) -> Tuple[LoggerFrame]:
         """Overridden."""
         return (self.loggerFrame,)
