@@ -37,7 +37,6 @@ class LoggingHandler(QObject, logging.Handler):
 
 class LoggerFrame(QWidget):
     """Frame for logging.
- 
     Attributes:
         logEdit: A textEdit which shows all logs.
         clearButton: A button for clearing all logs.
