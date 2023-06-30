@@ -22,17 +22,21 @@ import json
 import logging
 import os
 import sys
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 from contextlib import contextmanager
+from types import MappingProxyType
 from typing import (
-    Dict, DefaultDict, Set, Any, Callable, Iterable, Mapping, Optional, Tuple, TypeVar, Type
+    Dict, DefaultDict, Set, Any, Callable, Iterable, Mapping, Optional, Tuple,
+    List, Union, TypeVar, Type
 )
 
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QDockWidget, QMessageBox, QWidget
 
-
 T = TypeVar("T")
+JsonType = Union[None, float, bool, str, List["JsonType"], Dict[str, "JsonType"]]
+# Generic MappingProxyType or GenericAlias is introduced in Python 3.9.
+ImmutableJsonType = Union[None, float, bool, str, Tuple["ImmutableJsonType", ...], MappingProxyType]
 
 
 logger = logging.getLogger(__name__)
@@ -449,6 +453,8 @@ class BaseApp(QObject):
     qiwiscallRequested = pyqtSignal(str)
     qiwiscallReturned = pyqtSignal(str, str)
 
+    _constants = namedtuple("EmptyNamespace", ())()
+
     def __init__(self, name: str, parent: Optional[QObject] = None):
         """
         Args:
@@ -460,6 +466,11 @@ class BaseApp(QObject):
         self.qiwiscall = QiwiscallProxy(self.qiwiscallRequested)
         self.received.connect(self._receivedMessage)
         self.qiwiscallReturned.connect(self._receivedQiwiscallResult)
+
+    @property
+    def constants(self) -> Tuple:
+        """The global constant namespace."""
+        return BaseApp._constants
 
     def frames(self) -> Iterable[QWidget]:
         """Gets frames for which are managed by the App.
@@ -609,6 +620,23 @@ class QiwiscallProxy:  # pylint: disable=too-few-public-methods
         logger.debug("Qiwiscall result is updated: %s", _result)
 
 
+def set_global_constant_namespace(constants: Mapping[str, JsonType]) -> Tuple:
+    """Creates an immutable namedtuple and sets it as the global constant namespace.
+
+    Args:
+        constants: A mapping source for the global constant namespace.
+          The key-values become the constant name-values and hence the keys
+          should be a valid namedtuple field name.
+
+    Returns:
+        The created namedtuple, which is the global constant namespace.
+    """
+    ConstantNamespace = namedtuple("ConstantNamespace", constants.keys())
+    _constants = ConstantNamespace(*map(_immutable, constants.values()))
+    BaseApp._constants = _constants  # pylint: disable=protected-access
+    return _constants
+
+
 @contextmanager
 def _add_to_path(path: str):
     """Adds a path temporarily.
@@ -645,7 +673,7 @@ def _get_argparser() -> argparse.ArgumentParser:
     return parser
 
 
-def _read_setup_file(setup_path: str) -> Mapping[str, AppInfo]:
+def _read_setup_file(setup_path: str) -> Tuple[Dict[str, AppInfo], Dict[str, JsonType]]:
     """Reads set-up information from a JSON file.
 
     The JSON file content should have the following structure:
@@ -653,6 +681,10 @@ def _read_setup_file(setup_path: str) -> Mapping[str, AppInfo]:
       {
         "app": {
           "app_name_0": {app_info_0},
+          ...
+        },
+        "constant": {
+          "CONSTANT_0": ...,
           ...
         }
       }
@@ -663,14 +695,31 @@ def _read_setup_file(setup_path: str) -> Mapping[str, AppInfo]:
         setup_path: A path of set-up file.
 
     Returns:
-        A dictionary of set-up information about apps. See appInfos in Qiwis.load().
+        Two dictionaries: (app_infos, constants). See appInfos in Qiwis.load().
     """
     with open(setup_path, encoding="utf-8") as setup_file:
-        setup_data: Dict[str, Dict[str, dict]] = json.load(setup_file)
+        setup_data: Dict[str, Dict[str, JsonType]] = json.load(setup_file)
     app_dict = setup_data.get("app", {})
     app_infos = {name: AppInfo(**info) for (name, info) in app_dict.items()}
     logger.info("Loaded %d app infos from %s", len(app_infos), setup_path)
-    return app_infos
+    constants = setup_data.get("constant", {})
+    logger.info("Loaded %d constants from %s", len(constants), setup_path)
+    return app_infos, constants
+
+
+def _immutable(source: JsonType) -> ImmutableJsonType:
+    """Returns the immutable version of the given JSON object.
+
+    Args:
+        source: An object which is decoded from a JSON. Every list or dict
+          are converted to a tuple or types.MappingProxyType, respectively.
+          The other types, e.g., float, str, etc., stay the same.
+    """
+    if isinstance(source, list):
+        return tuple(map(_immutable, source))
+    if isinstance(source, dict):
+        return MappingProxyType({key: _immutable(value) for key, value in source.items()})
+    return source
 
 
 def main():
@@ -678,9 +727,10 @@ def main():
     args = _get_argparser().parse_args()
     logger.info("Parsed arguments: %s", args)
     # read set-up information
-    app_infos = _read_setup_file(args.setup_path)
+    app_infos, constants = _read_setup_file(args.setup_path)
     # start GUI
     qapp = QApplication(sys.argv)
+    set_global_constant_namespace(constants)
     _qiwis = Qiwis(app_infos)
     logger.info("Now the QApplication starts")
     qapp.exec_()
