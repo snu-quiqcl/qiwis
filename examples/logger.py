@@ -14,7 +14,7 @@ class Signaller(QObject):
     """Signal for LoggingHandler"""
     signal = pyqtSignal(str)
 
-class LoggingHandler(QObject, logging.Handler):
+class LoggingHandler(logging.Handler):
     """Handler for logger.
 
     Sends a log message to connected function using emit.
@@ -117,8 +117,8 @@ class LoggerApp(BaseApp):
         formatter = logging.Formatter(fs)
         self.handler.setFormatter(formatter)
         logger = logging.getLogger("parent")
-        logger.setLevel(logging.INFO)
         logger.addHandler(self.handler)
+        logger.setLevel(logging.INFO)
 
 
     def frames(self) -> Tuple[LoggerFrame]:
