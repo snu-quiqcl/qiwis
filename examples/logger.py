@@ -116,10 +116,9 @@ class LoggerApp(BaseApp):
         fs ="%(name)s %(message)s"
         formatter = logging.Formatter(fs)
         self.handler.setFormatter(formatter)
-        logger = logging.getLogger("parent")
+        logger = logging.getLogger()
         logger.addHandler(self.handler)
-        logger.setLevel(logging.INFO)
-
+        logger.setLevel(logging.DEBUG)
 
     def frames(self) -> Tuple[LoggerFrame]:
         """Overridden."""
