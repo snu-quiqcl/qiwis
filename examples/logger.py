@@ -35,8 +35,6 @@ class LoggingHandler(logging.Handler):
         """ Emits input signal to connected function."""
         s = self.format(record)
         self.signaller.signal.emit(s)
-
-
 class LoggerFrame(QWidget):
     """Frame for logging.
 
