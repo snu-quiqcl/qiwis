@@ -4,7 +4,7 @@ App module for logging.
 
 import time
 import logging
-from typing import Any, Optional, Tuple 
+from typing import Any, Optional, Tuple
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QTextEdit, QLabel, QDialogButtonBox
 from qiwis import BaseApp
@@ -35,7 +35,8 @@ class LoggingHandler(logging.Handler):
         """ Emits input signal to connected function."""
         s = self.format(record)
         self.signaller.signal.emit(s)
-        
+
+
 class LoggerFrame(QWidget):
     """Frame for logging.
 
