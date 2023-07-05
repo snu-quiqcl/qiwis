@@ -36,7 +36,6 @@ class LoggingHandler(logging.Handler):
         s = self.format(record)
         self.signaller.signal.emit(s)
 
-
 class LoggerFrame(QWidget):
     """Frame for logging.
 
