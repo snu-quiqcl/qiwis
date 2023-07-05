@@ -11,19 +11,21 @@ from qiwis import BaseApp
 
 
 class Signaller(QObject):
-    """Signal for LoggingHandler"""
+    """Signal for LoggingHandler."""
     signal = pyqtSignal(str)
+
 
 class LoggingHandler(logging.Handler):
     """Handler for logger.
 
     Sends a log message to connected function using emit.
     """
+
     def __init__(self, slotfunc):
         """Connect an input function to the signal.
 
         Args:
-            slotfunc: class method function connected to signal
+            slotfunc: method function connected to signal.
         """
         super().__init__()
         self.signaller = Signaller()
@@ -42,6 +44,7 @@ class LoggerFrame(QWidget):
         logEdit: A textEdit which shows all logs.
         clearButton: A button for clearing all logs.
     """
+
     def __init__(self, parent: Optional[QObject] = None):
         """Extended."""
         super().__init__(parent=parent)
@@ -98,6 +101,7 @@ class LoggerApp(BaseApp):
     Attributes:
         loggerFrame: A frame that shows the logs.
     """
+
     def __init__(self, name: str, parent: Optional[QObject] = None):
         """Extended.
 
