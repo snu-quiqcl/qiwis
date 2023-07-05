@@ -5,27 +5,33 @@ App module for logging.
 import time
 import logging
 from typing import Any, Optional, Tuple
+
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QTextEdit, QLabel, QDialogButtonBox
+
 from qiwis import BaseApp
 
 
 class Signaller(QObject):
-    """Signal for LoggingHandler."""
+    """Signal for LoggingHandler.
+
+    Signals:
+        signal(log): A formatted log message is emitted. 
+    """
+
     signal = pyqtSignal(str)
 
 
 class LoggingHandler(logging.Handler):
     """Handler for logger.
 
-    Sends a log message to connected function using emit.
-
-    Signals:
-        signal(log): A formatted log message is emitted.    
+    Sends a log message to connected function using emit.   
     """
 
     def __init__(self, slotfunc):
-        """Connect an input function to the signal.
+        """Extended.
+
+        Connect an input function to the signal.
 
         Args:
             slotfunc: method function connected to signal.
@@ -35,7 +41,7 @@ class LoggingHandler(logging.Handler):
         self.signaller.signal.connect(slotfunc)
 
     def emit(self, record: logging.LogRecord):
-        """ Emits input signal to connected function."""
+        """Emits input signal to connected function."""
         s = self.format(record)
         self.signaller.signal.emit(s)
 
@@ -117,7 +123,6 @@ class LoggerApp(BaseApp):
         self.loggerFrame.clearButton.clicked.connect(self.checkToClear)
         self.confirmFrame = ConfirmClearingFrame()
         self.confirmFrame.confirmed.connect(self.clearLog)
-        # define handler
         self.handler = LoggingHandler(self.addLog)
         # arbitrary format
         fs ="%(name)s %(message)s"
@@ -125,7 +130,6 @@ class LoggerApp(BaseApp):
         self.handler.setFormatter(formatter)
         logger = logging.getLogger()
         logger.addHandler(self.handler)
-        logger.setLevel(logging.DEBUG)
 
     def frames(self) -> Tuple[LoggerFrame]:
         """Overridden."""
