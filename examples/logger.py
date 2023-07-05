@@ -19,6 +19,9 @@ class LoggingHandler(logging.Handler):
     """Handler for logger.
 
     Sends a log message to connected function using emit.
+
+    Signals:
+        signal(log): A formatted log message is emitted.    
     """
 
     def __init__(self, slotfunc):
