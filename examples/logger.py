@@ -32,16 +32,16 @@ class LoggingHandler(logging.Handler):
         """Extended.
 
         Connects the slotfunc to the signal.
-
-        Args:
-            slotfunc: method function connected to signal.
         """
         super().__init__()
         self.signaller = Signaller()
         self.signaller.signal.connect(slotfunc)
 
     def emit(self, record: logging.LogRecord):
-        """Emits input signal to connected function."""
+        """Overridden.
+        
+        Emits input signal to connected function.
+        """
         s = self.format(record)
         self.signaller.signal.emit(s)
 
