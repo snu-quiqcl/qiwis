@@ -4,7 +4,7 @@ App module for logging.
 
 import time
 import logging
-from typing import Any, Optional, Tuple
+from typing import Any, Optional, Tuple, Callable
 
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QTextEdit, QLabel, QDialogButtonBox
@@ -28,7 +28,7 @@ class LoggingHandler(logging.Handler):
     Sends a log message to connected function using emit.   
     """
 
-    def __init__(self, slotfunc):
+    def __init__(self, slotfunc: Callable[[str],None]):
         """Extended.
 
         Connects the slotfunc to the signal.
