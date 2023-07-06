@@ -31,7 +31,7 @@ class LoggingHandler(logging.Handler):
     def __init__(self, slotfunc):
         """Extended.
 
-        Connect an input function to the signal.
+        Connects the slotfunc to the signal.
 
         Args:
             slotfunc: method function connected to signal.
@@ -124,7 +124,7 @@ class LoggerApp(BaseApp):
         self.confirmFrame = ConfirmClearingFrame()
         self.confirmFrame.confirmed.connect(self.clearLog)
         self.handler = LoggingHandler(self.addLog)
-        # arbitrary format
+        # TODO(aijuh): Change the log format when it is determined.
         fs ="%(name)s %(message)s"
         formatter = logging.Formatter(fs)
         self.handler.setFormatter(formatter)
