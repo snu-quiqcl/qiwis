@@ -32,6 +32,9 @@ class LoggingHandler(logging.Handler):
         """Extended.
 
         Connects the slotfunc to the signal.
+
+        Args:
+            slotfunc: A method addLog in class LoggerApp.
         """
         super().__init__()
         self.signaller = Signaller()
