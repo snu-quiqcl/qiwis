@@ -27,13 +27,13 @@ class LoggingHandler(logging.Handler):
     Sends a log message to connected function using emit.   
     """
 
-    def __init__(self, slotfunc: Callable[[str], None]):
+    def __init__(self, slotfunc: Callable[[str], Any]):
         """Extended.
 
         Connects the slotfunc to the signal.
 
         Args:
-            slotfunc: A slot function which is called when log record emitted.
+            slotfunc: A slot function which is called when a log record emitted.
         """
         super().__init__()
         self.signaller = _Signaller()
