@@ -33,7 +33,7 @@ class LoggingHandler(logging.Handler):
         Connects the slotfunc to the signal.
 
         Args:
-            slotfunc: A slot function which is called when a log record emitted.
+            slotfunc: A slot function which is called when a log record is emitted.
         """
         super().__init__()
         self.signaller = _Signaller()
