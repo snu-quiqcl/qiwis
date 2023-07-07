@@ -11,9 +11,8 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QTextEdit, QLabel
 
 from qiwis import BaseApp
 
-
-class Signaller(QObject):
-    """Signal for LoggingHandler.
+class _Signaller(QObject):
+    """Signal only for LoggingHandler.
 
     Signals:
         signal(log): A formatted log message is emitted. 
@@ -37,7 +36,7 @@ class LoggingHandler(logging.Handler):
             slotfunc: A slot function which is called when log record emitted.
         """
         super().__init__()
-        self.signaller = Signaller()
+        self.signaller = _Signaller()
         self.signaller.signal.connect(slotfunc)
 
     def emit(self, record: logging.LogRecord):
@@ -176,4 +175,3 @@ class LoggerApp(BaseApp):
     def clearLog(self):
         """Clears the log text edit."""
         self.loggerFrame.logEdit.clear()
-        
