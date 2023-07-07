@@ -176,3 +176,4 @@ class LoggerApp(BaseApp):
     def clearLog(self):
         """Clears the log text edit."""
         self.loggerFrame.logEdit.clear()
+        
