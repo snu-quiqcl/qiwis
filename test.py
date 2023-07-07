@@ -8,6 +8,7 @@ import sys
 import json
 import unittest
 from unittest import mock
+from types import MappingProxyType
 from typing import Any, Optional, Mapping, Iterable
 
 from PyQt5.QtCore import QObject
@@ -341,6 +342,13 @@ class BaseAppTest(unittest.TestCase):
     def test_set_parent(self):
         qiwis.BaseApp("name", QObject())
 
+    def test_constants_default(self):
+        self.assertFalse(self.app.constants._fields)
+
+    @mock.patch("qiwis.BaseApp._constants")
+    def test_constants(self, mocked_constants):
+        self.assertIs(self.app.constants, mocked_constants)
+
     def test_frames(self):
         self.assertIsInstance(self.app.frames(), collections.abc.Iterable)
 
@@ -497,6 +505,67 @@ class QiwisFunctionTest(unittest.TestCase):
         self.assertEqual(qiwis.dumps(APP_INFOS["app1"]), APP_JSONS["app1"])
         self.assertEqual(qiwis.dumps(APP_INFOS["app2"]), APP_JSONS["app2"])
 
+    @mock.patch("qiwis.namedtuple")
+    @mock.patch("qiwis._immutable")
+    @mock.patch("qiwis.BaseApp")
+    def test_set_global_constant_namespace(
+        self,
+        mocked_base_app_cls,
+        mocked_immutable,
+        mocked_namedtuple
+    ):
+        source = {"C0": 0, "C1": True, "C2": "str"}
+        mocked_immutable_values = ("M0", "M1", "M2")
+        mocked_namespace = mocked_namedtuple.return_value
+        mocked_constants = mocked_namespace.return_value
+        mocked_immutable.side_effect = mocked_immutable_values
+        constants = qiwis.set_global_constant_namespace(source)
+        self.assertIs(constants, mocked_constants)
+        self.assertIs(mocked_base_app_cls._constants, mocked_constants)
+        mocked_namedtuple.assert_called_once_with("ConstantNamespace", source.keys())
+        _args, _kwargs = mocked_namespace.call_args
+        self.assertSequenceEqual(_args, mocked_immutable_values)
+        mocked_immutable.assert_has_calls((mock.call(value) for value in source.values()))
+
+    def test_immutable(self):
+        sources = (
+            None,
+            0,
+            True,
+            "str",
+            [None, 1.2, False, "test"],
+            {"k1": 0, "k2": True},
+        )
+        results = (
+            None,
+            0,
+            True,
+            "str",
+            (None, 1.2, False, "test"),
+            MappingProxyType({"k1": 0, "k2": True}),
+        )
+        for source, result in zip(sources, results):
+            self.assertEqual(qiwis._immutable(source), result)
+
+    def test_immutable_recursive(self):
+        source = {
+            "LIST": [None, 0, True, "list"],
+            "LIST_LIST": [0, [1, 2, [3, 4, 5]]],
+            "DICT": {"A": True, "B": False},
+            "DICT_DICT": {"A": 0, "B": {"C": 1, "D": 2}},
+            "LIST_DICT": [0, {"A": 1, "B": [2, 3]}],
+        }
+        result = MappingProxyType({
+            "LIST": (None, 0, True, "list"),
+            "LIST_LIST": (0, (1, 2, (3, 4, 5))),
+            "DICT": MappingProxyType({"A": True, "B": False}),
+            "DICT_DICT": MappingProxyType({"A": 0, "B": MappingProxyType({"C": 1, "D": 2})}),
+            "LIST_DICT": (0, MappingProxyType({"A": 1, "B": (2, 3)})),
+        })
+        self.assertEqual(qiwis._immutable(source), result)
+        # when the root-type is list
+        self.assertEqual(qiwis._immutable(source["LIST_DICT"]), result["LIST_DICT"])
+
     def test_add_to_path(self):
         test_dir = "/test_dir"
         old_path = sys.path.copy()
@@ -517,18 +586,29 @@ class QiwisFunctionTest(unittest.TestCase):
         self.assertEqual(args.setup_path, "./setup.json")
 
     @mock.patch("builtins.open")
-    @mock.patch("json.load", return_value={"app": APP_DICTS})
+    @mock.patch("json.load", return_value={"app": APP_DICTS, "constant": {"C0": 0}})
     def test_read_setup_file(self, mock_load, mock_open):
-        self.assertEqual(qiwis._read_setup_file(""), APP_INFOS)
+        app_infos, constants = qiwis._read_setup_file("")
+        self.assertEqual(constants, {"C0": 0})
+        self.assertEqual(app_infos, APP_INFOS)
         mock_open.assert_called_once()
         mock_load.assert_called_once()
 
+    @mock.patch("qiwis.set_global_constant_namespace")
     @mock.patch("qiwis._get_argparser")
-    @mock.patch("qiwis._read_setup_file", return_value={})
+    @mock.patch("qiwis._read_setup_file", return_value=({}, {}))
     @mock.patch("qiwis.Qiwis")
     @mock.patch("qiwis.QApplication")
-    def test_main(self, mock_qapp, mock_qiwis, mock_read_setup_file, mock_get_argparser):
+    def test_main(
+        self,
+        mock_qapp,
+        mock_qiwis,
+        mock_read_setup_file,
+        mock_get_argparser,
+        mock_set_global_constant_namespace,
+    ):
         qiwis.main()
+        mock_set_global_constant_namespace.assert_called_once()
         mock_get_argparser.assert_called_once()
         mock_read_setup_file.assert_called_once()
         mock_qiwis.assert_called_once()
