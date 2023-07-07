@@ -126,14 +126,14 @@ class LoggerApp(BaseApp):
         self.loggerFrame.clearButton.clicked.connect(self.checkToClear)
         self.confirmFrame = ConfirmClearingFrame()
         self.confirmFrame.confirmed.connect(self.clearLog)
-        handler = LoggingHandler(self.addLog)
+        self.handler = LoggingHandler(self.addLog)
         # TODO(aijuh): Change the log format when it is determined.
         fs ="%(name)s %(message)s"
         formatter = logging.Formatter(fs)
-        handler.setFormatter(formatter)
+        self.handler.setFormatter(formatter)
         logger = logging.getLogger()
         logger.setLevel(logging.DEBUG)
-        logger.addHandler(handler)
+        logger.addHandler(self.handler)
 
     def frames(self) -> Tuple[LoggerFrame]:
         """Overridden."""
