@@ -28,7 +28,7 @@ class LoggingHandler(logging.Handler):
     Sends a log message to connected function using emit.   
     """
 
-    def __init__(self, slotfunc: Callable[[str],None]):
+    def __init__(self, slotfunc: Callable[[str], None]):
         """Extended.
 
         Connects the slotfunc to the signal.
@@ -43,7 +43,7 @@ class LoggingHandler(logging.Handler):
     def emit(self, record: logging.LogRecord):
         """Overridden.
         
-        Emits input signal to connected function.
+        Emits input signal to the connected function.
         """
         s = self.format(record)
         self.signaller.signal.emit(s)
@@ -126,13 +126,14 @@ class LoggerApp(BaseApp):
         self.loggerFrame.clearButton.clicked.connect(self.checkToClear)
         self.confirmFrame = ConfirmClearingFrame()
         self.confirmFrame.confirmed.connect(self.clearLog)
-        self.handler = LoggingHandler(self.addLog)
+        handler = LoggingHandler(self.addLog)
         # TODO(aijuh): Change the log format when it is determined.
         fs ="%(name)s %(message)s"
         formatter = logging.Formatter(fs)
-        self.handler.setFormatter(formatter)
+        handler.setFormatter(formatter)
         logger = logging.getLogger()
-        logger.addHandler(self.handler)
+        logger.setLevel(logging.DEBUG)
+        logger.addHandler(handler)
 
     def frames(self) -> Tuple[LoggerFrame]:
         """Overridden."""
