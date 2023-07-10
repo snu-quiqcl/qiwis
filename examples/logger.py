@@ -3,20 +3,59 @@ App module for logging.
 """
 
 import time
-from typing import Any, Optional, Tuple
+import logging
+from typing import Any, Optional, Tuple, Callable
 
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QTextEdit, QLabel, QDialogButtonBox
 
 from qiwis import BaseApp
 
+class _Signaller(QObject):
+    """Signal only for LoggingHandler.
+
+    Signals:
+        signal(log): A formatted log message is emitted. 
+    """
+
+    signal = pyqtSignal(str)
+
+
+class LoggingHandler(logging.Handler):
+    """Handler for logger.
+
+    Sends a log message to connected function using emit.   
+    """
+
+    def __init__(self, slotfunc: Callable[[str], Any]):
+        """Extended.
+
+        Connects the slotfunc to the signal.
+
+        Args:
+            slotfunc: A slot function which is called when a log record is emitted.
+        """
+        super().__init__()
+        self.signaller = _Signaller()
+        self.signaller.signal.connect(slotfunc)
+
+    def emit(self, record: logging.LogRecord):
+        """Overridden.
+        
+        Emits input signal to the connected function.
+        """
+        s = self.format(record)
+        self.signaller.signal.emit(s)
+
+
 class LoggerFrame(QWidget):
     """Frame for logging.
-    
+
     Attributes:
         logEdit: A textEdit which shows all logs.
         clearButton: A button for clearing all logs.
     """
+
     def __init__(self, parent: Optional[QObject] = None):
         """Extended."""
         super().__init__(parent=parent)
@@ -73,6 +112,7 @@ class LoggerApp(BaseApp):
     Attributes:
         loggerFrame: A frame that shows the logs.
     """
+
     def __init__(self, name: str, parent: Optional[QObject] = None):
         """Extended.
 
@@ -85,11 +125,20 @@ class LoggerApp(BaseApp):
         self.loggerFrame.clearButton.clicked.connect(self.checkToClear)
         self.confirmFrame = ConfirmClearingFrame()
         self.confirmFrame.confirmed.connect(self.clearLog)
+        self.handler = LoggingHandler(self.addLog)
+        # TODO(aijuh): Change the log format when it is determined.
+        fs ="%(name)s %(message)s"
+        formatter = logging.Formatter(fs)
+        self.handler.setFormatter(formatter)
+        logger = logging.getLogger()
+        logger.setLevel(logging.DEBUG)
+        logger.addHandler(self.handler)
 
     def frames(self) -> Tuple[LoggerFrame]:
         """Overridden."""
         return (self.loggerFrame,)
 
+    @pyqtSlot(str)
     def addLog(self, content: str):
         """Adds a channel name and log message.
 
