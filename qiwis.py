@@ -667,7 +667,7 @@ def _get_argparser() -> argparse.ArgumentParser:
         description="QuIqcl Widget Integration Software"
     )
     parser.add_argument(
-        "-s", "--setup", dest="setup_path", default="./setup.json",
+        "-s", "--setup", dest="setup_path", default="./config.json",
         help="a path of set-up file containing the infomation about app"
     )
     return parser
