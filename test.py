@@ -574,16 +574,16 @@ class QiwisFunctionTest(unittest.TestCase):
             self.assertIn(test_dir, sys.path)
         self.assertEqual(old_path, sys.path)
 
-    @mock.patch.object(sys, "argv", ["", "-s", "test_setup.json"])
+    @mock.patch.object(sys, "argv", ["", "-s", "test_config.json"])
     def test_get_argparser(self):
         parser = qiwis._get_argparser()
         args = parser.parse_args()
-        self.assertEqual(args.setup_path, "test_setup.json")
+        self.assertEqual(args.setup_path, "test_config.json")
 
     @mock.patch.object(sys, "argv", [""])
     def test_get_argparser_default(self):
         args = qiwis._get_argparser().parse_args()
-        self.assertEqual(args.setup_path, "./setup.json")
+        self.assertEqual(args.setup_path, "./config.json")
 
     @mock.patch("builtins.open")
     @mock.patch("json.load", return_value={"app": APP_DICTS, "constant": {"C0": 0}})
