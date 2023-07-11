@@ -21,7 +21,7 @@ For details, refer to [VCS Support](https://pip.pypa.io/en/stable/topics/vcs-sup
 
 ## How to use
 In the repository, just do like as below:  
-`python -m qiwis (-s ${setup_file))`
+`python -m qiwis (-s ${config_file))`
 
 If you installed `qiwis`, you can use it everywhere as below:  
-`qiwis (-s ${setup_file))`
+`qiwis (-s ${config_file))`

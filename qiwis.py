@@ -6,7 +6,7 @@ Qiwis is a main manager for qiwis system.
 Using a set-up file written by a user, it sets up apps.
 
 Usage:
-    python -m qiwis (-s <SETUP_PATH>)
+    python -m qiwis (-s <CONFIG_PATH>)
 
 Logging:
     The module-level logger name is __name__.
@@ -145,7 +145,7 @@ class Qiwis(QObject):
     For details, see _qiwiscall().
 
     Brief procedure:
-        1. Load setup environment.
+        1. Load the configuration information.
         2. Create apps and show their frames.
     """
 
@@ -658,7 +658,7 @@ def _add_to_path(path: str):
 def _get_argparser() -> argparse.ArgumentParser:
     """Parses command line arguments.
 
-    -s, --setup: A path of set-up file.
+    -c, --config: A path of set-up file.
 
     Returns:
         A namespace containing arguments.
@@ -667,14 +667,14 @@ def _get_argparser() -> argparse.ArgumentParser:
         description="QuIqcl Widget Integration Software"
     )
     parser.add_argument(
-        "-s", "--setup", dest="setup_path", default="./config.json",
+        "-c", "--config", dest="config_path", default="./config.json",
         help="a path of set-up file containing the infomation about app"
     )
     return parser
 
 
-def _read_setup_file(setup_path: str) -> Tuple[Dict[str, AppInfo], Dict[str, JsonType]]:
-    """Reads set-up information from a JSON file.
+def _read_config_file(config_path: str) -> Tuple[Dict[str, AppInfo], Dict[str, JsonType]]:
+    """Reads the configuration information from a JSON file.
 
     The JSON file content should have the following structure:
 
@@ -692,18 +692,18 @@ def _read_setup_file(setup_path: str) -> Tuple[Dict[str, AppInfo], Dict[str, Jso
     See AppInfo for app_info_* structure.
       
     Args:
-        setup_path: A path of set-up file.
+        config_path: The path of the configuration file.
 
     Returns:
         Two dictionaries: (app_infos, constants). See appInfos in Qiwis.load().
     """
-    with open(setup_path, encoding="utf-8") as setup_file:
-        setup_data: Dict[str, Dict[str, JsonType]] = json.load(setup_file)
-    app_dict = setup_data.get("app", {})
+    with open(config_path, encoding="utf-8") as config_file:
+        config_data: Dict[str, Dict[str, JsonType]] = json.load(config_file)
+    app_dict = config_data.get("app", {})
     app_infos = {name: AppInfo(**info) for (name, info) in app_dict.items()}
-    logger.info("Loaded %d app infos from %s", len(app_infos), setup_path)
-    constants = setup_data.get("constant", {})
-    logger.info("Loaded %d constants from %s", len(constants), setup_path)
+    logger.info("Loaded %d app infos from %s", len(app_infos), config_path)
+    constants = config_data.get("constant", {})
+    logger.info("Loaded %d constants from %s", len(constants), config_path)
     return app_infos, constants
 
 
@@ -727,7 +727,7 @@ def main():
     args = _get_argparser().parse_args()
     logger.info("Parsed arguments: %s", args)
     # read set-up information
-    app_infos, constants = _read_setup_file(args.setup_path)
+    app_infos, constants = _read_config_file(args.config_path)
     # start GUI
     qapp = QApplication(sys.argv)
     set_global_constant_namespace(constants)

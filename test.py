@@ -578,17 +578,17 @@ class QiwisFunctionTest(unittest.TestCase):
     def test_get_argparser(self):
         parser = qiwis._get_argparser()
         args = parser.parse_args()
-        self.assertEqual(args.setup_path, "test_config.json")
+        self.assertEqual(args.config_path, "test_config.json")
 
     @mock.patch.object(sys, "argv", [""])
     def test_get_argparser_default(self):
         args = qiwis._get_argparser().parse_args()
-        self.assertEqual(args.setup_path, "./config.json")
+        self.assertEqual(args.config_path, "./config.json")
 
     @mock.patch("builtins.open")
     @mock.patch("json.load", return_value={"app": APP_DICTS, "constant": {"C0": 0}})
-    def test_read_setup_file(self, mock_load, mock_open):
-        app_infos, constants = qiwis._read_setup_file("")
+    def test_read_config_file(self, mock_load, mock_open):
+        app_infos, constants = qiwis._read_config_file("")
         self.assertEqual(constants, {"C0": 0})
         self.assertEqual(app_infos, APP_INFOS)
         mock_open.assert_called_once()
@@ -596,21 +596,21 @@ class QiwisFunctionTest(unittest.TestCase):
 
     @mock.patch("qiwis.set_global_constant_namespace")
     @mock.patch("qiwis._get_argparser")
-    @mock.patch("qiwis._read_setup_file", return_value=({}, {}))
+    @mock.patch("qiwis._read_config_file", return_value=({}, {}))
     @mock.patch("qiwis.Qiwis")
     @mock.patch("qiwis.QApplication")
     def test_main(
         self,
         mock_qapp,
         mock_qiwis,
-        mock_read_setup_file,
+        mock_read_config_file,
         mock_get_argparser,
         mock_set_global_constant_namespace,
     ):
         qiwis.main()
         mock_set_global_constant_namespace.assert_called_once()
         mock_get_argparser.assert_called_once()
-        mock_read_setup_file.assert_called_once()
+        mock_read_config_file.assert_called_once()
         mock_qiwis.assert_called_once()
         mock_qapp.return_value.exec_.assert_called_once()
 
