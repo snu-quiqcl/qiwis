@@ -140,7 +140,7 @@ class LoggerApp(BaseApp):
         logger.addHandler(self.handler)
         self.loggerFrame.setLevelBox.addItems(["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"])
         self.loggerFrame.setLevelBox.textActivated.connect(self.setLevel)
-    
+
     def setLevel(self, text: str):
         """Responds to the levelSelector widget and changes the handler's level.
         
