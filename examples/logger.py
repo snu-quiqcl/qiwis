@@ -7,8 +7,9 @@ import logging
 from typing import Any, Optional, Tuple, Callable
 
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QTextEdit, QLabel, QDialogButtonBox
-from PyQt5.QtWidgets import QComboBox
+from PyQt5.QtWidgets import (
+    QWidget, QVBoxLayout, QPushButton, QTextEdit, QLabel, QDialogButtonBox, QComboBox
+)
 
 from qiwis import BaseApp
 
@@ -55,6 +56,7 @@ class LoggerFrame(QWidget):
     Attributes:
         logEdit: A textEdit which shows all logs.
         clearButton: A button for clearing all logs.
+        setLevelBox: A combo box for setting the logger's level.
     """
 
     def __init__(self, parent: Optional[QObject] = None):
@@ -64,12 +66,12 @@ class LoggerFrame(QWidget):
         self.logEdit = QTextEdit(self)
         self.logEdit.setReadOnly(True)
         self.clearButton = QPushButton("Clear")
-        self.levelSelector = QComboBox(self)
+        self.setLevelBox = QComboBox(self)
         # layout
         layout = QVBoxLayout(self)
         layout.addWidget(self.logEdit)
         layout.addWidget(self.clearButton)
-        layout.addWidget(self.levelSelector)
+        layout.addWidget(self.setLevelBox)
 
 
 class ConfirmClearingFrame(QWidget):
@@ -136,29 +138,24 @@ class LoggerApp(BaseApp):
         logger = logging.getLogger()
         logger.setLevel(logging.DEBUG)
         logger.addHandler(self.handler)
-        self.initLevelSelector(self.loggerFrame.levelSelector)
-
-    def initLevelSelector(self, box: QComboBox):
-        """Initializes a combo box for selecting level."""
-        box.addItem("DEBUG")
-        box.addItem("INFO")
-        box.addItem("WARNING")
-        box.addItem("ERROR")
-        box.addItem("CRITICAL")
-        box.activated[str].connect(self.fixLevel)
-
-    def fixLevel(self, text):
-        """Responds to the levelSelector widget and changes the handler's level."""
-        if text == "DEBUG":
-            self.handler.setLevel(logging.DEBUG)
-        if text == "INFO":
-            self.handler.setLevel(logging.INFO)
-        if text == "WARNING":
-            self.handler.setLevel(logging.WARNING)
-        if text == "ERROR":
-            self.handler.setLevel(logging.ERROR)
-        if text == "CRITICAL":
-            self.handler.setLevel(logging.CRITICAL)
+        self.loggerFrame.setLevelBox.addItems(["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"])
+        self.loggerFrame.setLevelBox.textActivated.connect(self.setLevel)
+    
+    def setLevel(self, text: str):
+        """Responds to the levelSelector widget and changes the handler's level.
+        
+        Args:
+            text: Selected level in the level select box.
+        """
+        level = {
+            "DEBUG": logging.DEBUG,
+            "INFO": logging.INFO,
+            "WARNING":logging.WARNING,
+            "ERROR":logging.ERROR,
+            "CRITICAL":logging.CRITICAL
+        }
+        if text in level.keys():
+            self.handler.setLevel(level[text])
 
     def frames(self) -> Tuple[LoggerFrame]:
         """Overridden."""
