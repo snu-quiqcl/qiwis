@@ -574,7 +574,7 @@ class QiwisFunctionTest(unittest.TestCase):
             self.assertIn(test_dir, sys.path)
         self.assertEqual(old_path, sys.path)
 
-    @mock.patch.object(sys, "argv", ["", "-s", "test_config.json"])
+    @mock.patch.object(sys, "argv", ["", "-c", "test_config.json"])
     def test_get_argparser(self):
         parser = qiwis._get_argparser()
         args = parser.parse_args()
