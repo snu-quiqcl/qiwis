@@ -7,7 +7,7 @@ import logging
 from typing import Any, Optional, Tuple, Callable
 
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QTextEdit, QLabel, QDialogButtonBox
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QTextEdit, QLabel, QDialogButtonBox, QComboBox
 
 from qiwis import BaseApp
 
@@ -63,10 +63,12 @@ class LoggerFrame(QWidget):
         self.logEdit = QTextEdit(self)
         self.logEdit.setReadOnly(True)
         self.clearButton = QPushButton("Clear")
+        self.levelSelector = QComboBox(self)
         # layout
         layout = QVBoxLayout(self)
         layout.addWidget(self.logEdit)
         layout.addWidget(self.clearButton)
+        layout.addWidget(self.levelSelector)
 
 
 class ConfirmClearingFrame(QWidget):
@@ -133,6 +135,29 @@ class LoggerApp(BaseApp):
         logger = logging.getLogger()
         logger.setLevel(logging.DEBUG)
         logger.addHandler(self.handler)
+        self.initLevelSelector(self.loggerFrame.levelSelector)
+
+    def initLevelSelector(self, box: QComboBox):
+        """Initialize a combo box for selecting level."""
+        box.addItem("DEBUG")
+        box.addItem("INFO")
+        box.addItem("WARNING")
+        box.addItem("ERROR")
+        box.addItem("CRITICAL")
+        box.activated[str].connect(self.fixLevel)
+    
+    def fixLevel(self, text):
+        match text:
+            case "DEBUG":
+                self.handler.setLevel(logging.DEBUG)
+            case "INFO":
+                self.handler.setLevel(logging.INFO)        
+            case "WARNING":
+                self.handler.setLevel(logging.WARNING)
+            case "ERROR":
+                self.handler.setLevel(logging.ERROR)
+            case "CRITICAL":
+                self.handler.setLevel(logging.CRITICAL)
 
     def frames(self) -> Tuple[LoggerFrame]:
         """Overridden."""
