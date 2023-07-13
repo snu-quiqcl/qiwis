@@ -154,7 +154,7 @@ class LoggerApp(BaseApp):
             "ERROR":logging.ERROR,
             "CRITICAL":logging.CRITICAL
         }
-        if text in level.keys():
+        if text in level:
             self.handler.setLevel(level[text])
 
     def frames(self) -> Tuple[LoggerFrame]:
