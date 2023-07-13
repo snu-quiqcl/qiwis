@@ -25,5 +25,5 @@ jobs:
         sudo apt-get install python3-pyqt5
     - name: Unittest the code with coverage
       run: |
-        xvfb-run `which coverage` run -m test
-        xvfb-run `which coverage` report -m
+        xvfb-run `which coverage` run -m unittest test
+        xvfb-run `which coverage` report qiwis.py
