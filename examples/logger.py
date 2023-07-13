@@ -148,7 +148,7 @@ class LoggerApp(BaseApp):
         box.activated[str].connect(self.fixLevel)
 
     def fixLevel(self, text):
-        """Responds to the levelSelector widget and changes the handler's level"""
+        """Responds to the levelSelector widget and changes the handler's level."""
         if text == "DEBUG":
             self.handler.setLevel(logging.DEBUG)
         if text == "INFO":
