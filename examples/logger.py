@@ -7,7 +7,9 @@ import logging
 from typing import Any, Optional, Tuple, Callable
 
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QTextEdit, QLabel, QDialogButtonBox
+from PyQt5.QtWidgets import (
+    QWidget, QVBoxLayout, QPushButton, QTextEdit, QLabel, QDialogButtonBox, QComboBox
+)
 
 from qiwis import BaseApp
 
@@ -54,6 +56,7 @@ class LoggerFrame(QWidget):
     Attributes:
         logEdit: A textEdit which shows all logs.
         clearButton: A button for clearing all logs.
+        levelBox: A comboBox for setting the logger's level.
     """
 
     def __init__(self, parent: Optional[QObject] = None):
@@ -63,10 +66,12 @@ class LoggerFrame(QWidget):
         self.logEdit = QTextEdit(self)
         self.logEdit.setReadOnly(True)
         self.clearButton = QPushButton("Clear")
+        self.levelBox = QComboBox(self)
         # layout
         layout = QVBoxLayout(self)
         layout.addWidget(self.logEdit)
         layout.addWidget(self.clearButton)
+        layout.addWidget(self.levelBox)
 
 
 class ConfirmClearingFrame(QWidget):
@@ -133,6 +138,27 @@ class LoggerApp(BaseApp):
         logger = logging.getLogger()
         logger.setLevel(logging.DEBUG)
         logger.addHandler(self.handler)
+        self.loggerFrame.levelBox.addItems(["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"])
+        self.loggerFrame.levelBox.textActivated.connect(self.setLevel)
+
+    @pyqtSlot(str)
+    def setLevel(self, text: str):
+        """Responds to the setLevelBox widget and changes the handler's level.
+
+        Args:
+            text: Selected level in the level select box.
+                  It should be one of "DEBUG", "INFO", "WARNING", "ERROR" and "CRITICAL".
+                  It should be case-sensitive and any other input is ignored.
+        """
+        level = {
+            "DEBUG": logging.DEBUG,
+            "INFO": logging.INFO,
+            "WARNING": logging.WARNING,
+            "ERROR": logging.ERROR,
+            "CRITICAL": logging.CRITICAL
+        }
+        if text in level:
+            self.handler.setLevel(level[text])
 
     def frames(self) -> Tuple[LoggerFrame]:
         """Overridden."""
