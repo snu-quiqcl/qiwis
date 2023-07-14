@@ -147,8 +147,8 @@ class LoggerApp(BaseApp):
 
         Args:
             text: Selected level in the level select box.
-                  It should be one of 'DEBUG', 'INFO', 'WARNING', 'ERROR' and 'CRITICAL' (case-sensitive).
-                  Any other input is ignored.
+                  It should be one of 'DEBUG', 'INFO', 'WARNING', 'ERROR' and 'CRITICAL'.
+                  it should be case-sensitive and any other input is ignored.
         """
         level = {
             "DEBUG": logging.DEBUG,
