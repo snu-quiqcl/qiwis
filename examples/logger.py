@@ -56,7 +56,7 @@ class LoggerFrame(QWidget):
     Attributes:
         logEdit: A textEdit which shows all logs.
         clearButton: A button for clearing all logs.
-        setLevelBox: A comboBox for setting the logger's level.
+        levelBox: A comboBox for setting the logger's level.
     """
 
     def __init__(self, parent: Optional[QObject] = None):
@@ -144,9 +144,11 @@ class LoggerApp(BaseApp):
     @pyqtSlot(str)
     def setLevel(self, text: str):
         """Responds to the setLevelBox widget and changes the handler's level.
-        
+
         Args:
             text: Selected level in the level select box.
+                  It should be one of 'DEBUG', 'INFO', 'WARNING', 'ERROR' and 'CRITICAL' (case-sensitive).
+                  Any other input is ignored.
         """
         level = {
             "DEBUG": logging.DEBUG,
