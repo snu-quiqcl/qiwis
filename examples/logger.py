@@ -66,12 +66,12 @@ class LoggerFrame(QWidget):
         self.logEdit = QTextEdit(self)
         self.logEdit.setReadOnly(True)
         self.clearButton = QPushButton("Clear")
-        self.setLevelBox = QComboBox(self)
+        self.levelBox = QComboBox(self)
         # layout
         layout = QVBoxLayout(self)
         layout.addWidget(self.logEdit)
         layout.addWidget(self.clearButton)
-        layout.addWidget(self.setLevelBox)
+        layout.addWidget(self.levelBox)
 
 
 class ConfirmClearingFrame(QWidget):
@@ -138,9 +138,10 @@ class LoggerApp(BaseApp):
         logger = logging.getLogger()
         logger.setLevel(logging.DEBUG)
         logger.addHandler(self.handler)
-        self.loggerFrame.setLevelBox.addItems(["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"])
-        self.loggerFrame.setLevelBox.textActivated.connect(self.setLevel)
+        self.loggerFrame.levelBox.addItems(["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"])
+        self.loggerFrame.levelBox.textActivated.connect(self.setLevel)
 
+    @pyqtSlot(str)
     def setLevel(self, text: str):
         """Responds to the setLevelBox widget and changes the handler's level.
         
