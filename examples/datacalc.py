@@ -141,10 +141,10 @@ class DataCalcApp(BaseApp):
         """
         dbBox = self.viewerFrame.dbBoxes[name]
         self.dbNames[name] = dbBox.currentText()
-        logging.info(
-            f"Database {name} is set as {self.dbNames[name]}."
+        logger.info(
+            "Database %s is set as %s." % (name, self.dbNames[name]) 
             if self.dbNames[name]
-            else f"Database {name} is not selected."
+            else "Database %s is not selected." %name
         )
 
     @pyqtSlot()
@@ -165,4 +165,4 @@ class DataCalcApp(BaseApp):
             result += value
         else:
             self.viewerFrame.numberLabel.setText(f"sum: {result}")
-            logger.log(f"Sum: {result}.")
+            logger.log("Sum: %f.", result)

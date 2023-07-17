@@ -159,3 +159,5 @@ class PollerApp(BaseApp):
         dbPath = self.dbs[self.dbName]
         if write(os.path.join(dbPath, self.dbName), self.table, num):
             logger.info("Polled number saved.")
+        else:
+            logger.info("Failed to save polled number.")

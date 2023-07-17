@@ -142,7 +142,7 @@ class NumGenApp(BaseApp):
             else:
                 print("The message for the channel db should be a dictionary.")
         else:
-            print("The message was ignored because "\
+            print("The message was ignored because "
                   "the treatment for the channel %s is not implemented.", channelName)
 
     @pyqtSlot()
@@ -173,3 +173,4 @@ class NumGenApp(BaseApp):
             logger.info("Generated number saved.")
         else:
             self.viewerFrame.statusLabel.setText("failed to save number")
+            logger.info("Failed to save generated number")
