@@ -88,7 +88,6 @@ class NumGenApp(BaseApp):
         self.generatorFrame.dbBox.currentIndexChanged.connect(self.setDB)
         self.generatorFrame.generateButton.clicked.connect(self.generateNumber)
 
-
     def frames(self) -> Union[Tuple[GeneratorFrame, ViewerFrame], Tuple[GeneratorFrame]]:
         """Overridden.
         
