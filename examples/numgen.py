@@ -143,8 +143,8 @@ class NumGenApp(BaseApp):
             else:
                 print("The message for the channel db should be a dictionary.")
         else:
-            print(f"The message was ignored because "
-                  f"the treatment for the channel {channelName} is not implemented.")
+            print("The message was ignored because "\
+                  "the treatment for the channel %s is not implemented.", channelName)
 
     @pyqtSlot()
     def setDB(self):
@@ -152,8 +152,8 @@ class NumGenApp(BaseApp):
         self.dbName = self.generatorFrame.dbBox.currentText()
         self.viewerFrame.statusLabel.setText("database updated")
         logger.info(
-            f"Database to store is set as {self.dbName}." if self.dbName
-            else "Database to store is not selected."
+            "Database to store is set as %s." if self.dbName
+            else "Database to store is not selected.", self.dbName
         )
 
     @pyqtSlot()
@@ -165,7 +165,7 @@ class NumGenApp(BaseApp):
             self.isGenerated = True
             self.qiwiscall.updateFrames(name=self.name)
         self.viewerFrame.numberLabel.setText(f"generated number: {num}")
-        logger.info(f"Generated number: {num}.")
+        logger.info("Generated number: %d.", num)
         # save the generated number
         dbPath = self.dbs[self.dbName]
         is_save_success = write(os.path.join(dbPath, self.dbName), self.table, num)
