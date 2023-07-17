@@ -3,6 +3,7 @@ App module for adding and removing available databases.
 """
 
 import os
+import logging
 from collections import namedtuple
 from typing import Optional, Tuple
 
@@ -11,6 +12,9 @@ from PyQt5.QtWidgets import (QWidget, QLabel, QPushButton, QFileDialog,
                              QHBoxLayout, QVBoxLayout, QListWidget, QListWidgetItem)
 
 from qiwis import AppInfo, BaseApp
+
+logger = logging.getLogger(__name__)
+
 
 class DBWidget(QWidget):
     """Widget for showing a database.
@@ -121,8 +125,7 @@ class DBMgrApp(BaseApp):
         """
         msg = {"db": [db._asdict() for db in self.dbList]}
         self.broadcast("db", msg)
-        self.broadcast(
-            "log",
+        logger.info(
             f"Database {name} is added." if isAdded
             else f"Database {name} is removed."
         )

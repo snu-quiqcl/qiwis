@@ -3,6 +3,7 @@ App module for polling a number and saving it into the selected database.
 """
 
 import os
+import logging
 from typing import Any, Optional, Tuple
 
 from PyQt5.QtCore import QObject, pyqtSlot, QTimer
@@ -10,6 +11,9 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QComboBox, QSpinBox, QLabel
 
 from qiwis import BaseApp
 from examples.backend import poll, write
+
+logger = logging.getLogger(__name__)
+
 
 class ViewerFrame(QWidget):
     """Frame for selecting a database and period, and showing the polled number.
@@ -132,14 +136,13 @@ class PollerApp(BaseApp):
         """Sets the polling period."""
         period = self.viewerFrame.periodBox.value()
         self.timer.start(1000 * period)
-        self.broadcast("log", f"Period is set as {period}s.")
+        logger.info("Period is set as {period}s.")
 
     @pyqtSlot()
     def setDB(self):
         """Sets the database to store the polled number."""
         self.dbName = self.viewerFrame.dbBox.currentText()
-        self.broadcast(
-            "log", 
+        logger.info(
             f"Polled database is set as {self.dbName}." if self.dbName
             else "Polled database is not selected."
         )
@@ -151,8 +154,8 @@ class PollerApp(BaseApp):
         self.count += 1
         self.viewerFrame.countLabel.setText(f"polled count: {self.count}")
         self.viewerFrame.numberLabel.setText(f"polled number: {num}")
-        self.broadcast("log", f"Polled number: {num}.")
+        logger.info(f"Polled number: {num}.")
         # save the polled number
         dbPath = self.dbs[self.dbName]
         if write(os.path.join(dbPath, self.dbName), self.table, num):
-            self.broadcast("log", "Polled number saved.")
+            logger.info("Polled number saved.")

@@ -3,6 +3,7 @@ App module for showing the sum of two values from selected databases.
 """
 
 import os
+import logging
 import functools
 from typing import Any, Optional, Dict, Tuple
 
@@ -11,6 +12,9 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QComboBox, QPushButton, QLabel
 
 from qiwis import BaseApp
 from examples.backend import read
+
+logger = logging.getLogger(__name__)
+
 
 class ViewerFrame(QWidget):
     """Frame of for selecting databases and showing the calculated number.
@@ -137,8 +141,7 @@ class DataCalcApp(BaseApp):
         """
         dbBox = self.viewerFrame.dbBoxes[name]
         self.dbNames[name] = dbBox.currentText()
-        self.broadcast(
-            "log", 
+        logging.info(
             f"Database {name} is set as {self.dbNames[name]}."
             if self.dbNames[name]
             else f"Database {name} is not selected."
@@ -162,4 +165,4 @@ class DataCalcApp(BaseApp):
             result += value
         else:
             self.viewerFrame.numberLabel.setText(f"sum: {result}")
-            self.broadcast("log", f"Sum: {result}.")
+            logger.log(f"Sum: {result}.")

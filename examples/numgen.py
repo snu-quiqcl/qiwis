@@ -3,6 +3,7 @@ App module for generating and showing a random number.
 """
 
 import os
+import logging
 from typing import Any, Optional, Tuple, Union
 
 from PyQt5.QtCore import QObject, pyqtSlot
@@ -10,6 +11,9 @@ from PyQt5.QtWidgets import QWidget, QComboBox, QPushButton, QLabel, QVBoxLayout
 
 from qiwis import BaseApp
 from examples.backend import generate, write
+
+logger = logging.getLogger(__name__)
+
 
 class GeneratorFrame(QWidget):
     """Frame for requesting generating a random number.
@@ -84,6 +88,7 @@ class NumGenApp(BaseApp):
         self.generatorFrame.dbBox.currentIndexChanged.connect(self.setDB)
         self.generatorFrame.generateButton.clicked.connect(self.generateNumber)
 
+
     def frames(self) -> Union[Tuple[GeneratorFrame, ViewerFrame], Tuple[GeneratorFrame]]:
         """Overridden.
         
@@ -146,8 +151,7 @@ class NumGenApp(BaseApp):
         """Sets the database to store the number."""
         self.dbName = self.generatorFrame.dbBox.currentText()
         self.viewerFrame.statusLabel.setText("database updated")
-        self.broadcast(
-            "log", 
+        logger.info(
             f"Database to store is set as {self.dbName}." if self.dbName
             else "Database to store is not selected."
         )
@@ -161,12 +165,12 @@ class NumGenApp(BaseApp):
             self.isGenerated = True
             self.qiwiscall.updateFrames(name=self.name)
         self.viewerFrame.numberLabel.setText(f"generated number: {num}")
-        self.broadcast("log", f"Generated number: {num}.")
+        logger.info(f"Generated number: {num}.")
         # save the generated number
         dbPath = self.dbs[self.dbName]
         is_save_success = write(os.path.join(dbPath, self.dbName), self.table, num)
         if is_save_success:
             self.viewerFrame.statusLabel.setText("number saved successfully")
-            self.broadcast("log", "Generated number saved.")
+            logger.info("Generated number saved.")
         else:
             self.viewerFrame.statusLabel.setText("failed to save number")
