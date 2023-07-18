@@ -184,7 +184,7 @@ class DBMgrApp(BaseApp):
         """
         if self.openCloseDatacalcResult is not None:
             if not self.openCloseDatacalcResult.done:
-                print("DBMgrApp.openCloseDatacalc(): The previous qiwiscall must be done.")
+                logger.info("DBMgrApp.openCloseDatacalc(): The previous qiwiscall must be done.")
                 return
             if self.openCloseDatacalcResult.success:
                 self.isDatacalcOpen = not self.isDatacalcOpen

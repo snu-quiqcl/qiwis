@@ -3,6 +3,7 @@ App module for showing the sum of two values from selected databases.
 """
 
 import os
+import json
 import logging
 import functools
 from typing import Any, Optional, Dict, Tuple
@@ -97,8 +98,8 @@ class DataCalcApp(BaseApp):
         newDBs = set([""])
         for db in content.get("db", ()):
             if any(key not in db for key in ("name", "path")):
-                print(f"The message was ignored because "
-                        f"the database {db} has no such key; name or path.")
+                logger.info("The message was ignored because "
+                        "the database %s has no such key; name or path.", json.dumps(db))
                 continue
             name, path = db["name"], db["path"]
             newDBs.add(name)
@@ -127,10 +128,10 @@ class DataCalcApp(BaseApp):
             if isinstance(content, dict):
                 self.updateDB(content)
             else:
-                print("The message for the channel db should be a dictionary.")
+                logger.info("The message for the channel db should be a dictionary.")
         else:
-            print(f"The message was ignored because "
-                  f"the treatment for the channel {channelName} is not implemented.")
+            logger.info("The message was ignored because "
+                        "the treatment for the channel %s is not implemented.", channelName)
 
     @pyqtSlot(str)
     def setDB(self, name: str):
@@ -141,9 +142,8 @@ class DataCalcApp(BaseApp):
         """
         dbBox = self.viewerFrame.dbBoxes[name]
         self.dbNames[name] = dbBox.currentText()
-        if self.dbNames[name]:
-            logger.info("Database %s is set as %s.", name, self.dbNames[name])
-        else: logger.info("Database %s is not selected.", name)
+        logger.info("Database %s is set as %s.", (name, self.dbNames[name]) if self.dbNames[name]
+                    else "Database %s is not selected.", name)
 
     @pyqtSlot()
     def calculateSum(self):

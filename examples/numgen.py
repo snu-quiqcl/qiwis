@@ -3,6 +3,7 @@ App module for generating and showing a random number.
 """
 
 import os
+import json
 import logging
 from typing import Any, Optional, Tuple, Union
 
@@ -113,8 +114,8 @@ class NumGenApp(BaseApp):
         newDBs = set([""])
         for db in content.get("db", ()):
             if any(key not in db for key in ("name", "path")):
-                print(f"The message was ignored because "
-                        f"the database {db} has no such key; name or path.")
+                logger.info("The message was ignored because "
+                        "the database %s has no such key; name or path.", json.dumps(db))
                 continue
             name, path = db["name"], db["path"]
             newDBs.add(name)
@@ -140,9 +141,9 @@ class NumGenApp(BaseApp):
             if isinstance(content, dict):
                 self.updateDB(content)
             else:
-                print("The message for the channel db should be a dictionary.")
+                logger.info("The message for the channel db should be a dictionary.")
         else:
-            print("The message was ignored because "
+            logger.info("The message was ignored because "
                   "the treatment for the channel %s is not implemented.", channelName)
 
     @pyqtSlot()

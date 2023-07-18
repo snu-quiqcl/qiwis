@@ -135,9 +135,9 @@ class LoggerApp(BaseApp):
         fs ="%(name)s %(message)s"
         formatter = logging.Formatter(fs)
         self.handler.setFormatter(formatter)
-        logger = logging.getLogger()
-        logger.setLevel(logging.DEBUG)
-        logger.addHandler(self.handler)
+        self.logger = logging.getLogger()
+        self.logger.setLevel(logging.DEBUG)
+        self.logger.addHandler(self.handler)
         self.loggerFrame.levelBox.addItems(["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"])
         self.loggerFrame.levelBox.textActivated.connect(self.setLevel)
 
@@ -186,10 +186,10 @@ class LoggerApp(BaseApp):
             if isinstance(content, str):
                 self.addLog(content)
             else:
-                print("The message for the channel log should be a string.")
+                self.logger.info("The message for the channel log should be a string.")
         else:
-            print(f"The message was ignored because "
-                  f"the treatment for the channel {channelName} is not implemented.")
+            self.logger.info("The message was ignored because "
+                             "the treatment for the channel %s is not implemented.", channelName)
 
     @pyqtSlot()
     def checkToClear(self):
