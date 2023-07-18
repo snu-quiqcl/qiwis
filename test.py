@@ -172,6 +172,10 @@ class QiwisTestWithApps(unittest.TestCase):
                 {name for name, info in APP_INFOS.items() if channel in info.channel}
             )
 
+    def test_subscribe(self):
+        self.qiwis.subscribe("app1", "ch3")
+        self.assertIn("app1", self.qiwis._subscribers["ch3"])
+
     def test_unsubcribe(self):
         self.assertEqual(self.qiwis.unsubscribe("app1", "ch1"), True)
         self.assertNotIn("app1", self.qiwis._subscribers["ch1"])
