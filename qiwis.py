@@ -232,7 +232,8 @@ class Qiwis(QObject):
         Args:
             name: The name of the app to be added.
             info: The AppInfo object describing the app.
-            replace: If True, the existing app will be replaced. Otherwise, nothing happens.
+            replace: It describes the behavior when trying to create an existing app.
+              If True, the original app will be replaced. Otherwise, it will be ignored.
         """
         if name in self._apps:
             if replace:
