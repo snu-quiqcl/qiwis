@@ -4,8 +4,12 @@ Backend module for offering various functions.
 
 import random
 import time
+import logging
 import sqlite3
 from typing import Any
+
+logger = logging.getLogger(__name__)
+
 
 def generate() -> int:
     """Generates a random number from 0 to 99.
@@ -56,7 +60,7 @@ def read(db_path: str, table: str) -> Any:
                 f"SELECT * FROM {table} ORDER BY rowid DESC LIMIT 1"
             ).fetchone()[0]
     except sqlite3.Error as e:
-        print(f"apps.backend.read(): {e!r}")
+        logger.error("apps.backend.read(): %r", e)
         return None
     finally:
         con.close()
@@ -96,7 +100,7 @@ def write(db_path: str, table: str, value: Any) -> bool:
                 (value,)
             )
     except sqlite3.Error as e:
-        print(f"apps.backend.write(): {e!r}")
+        logger.error("apps.backend.write(): %r", e)
         return False
     finally:
         con.close()
