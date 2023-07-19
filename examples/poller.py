@@ -101,7 +101,7 @@ class PollerApp(BaseApp):
         for db in content.get("db", ()):
             if any(key not in db for key in ("name", "path")):
                 logger.info("The message was ignored because "
-                        "the database %s has no such key; name or path.", json.dumps(db))
+                            "the database %s has no such key; name or path.", json.dumps(db))
                 continue
             name, path = db["name"], db["path"]
             newDBs.add(name)
@@ -144,8 +144,8 @@ class PollerApp(BaseApp):
         """Sets the database to store the polled number."""
         self.dbName = self.viewerFrame.dbBox.currentText()
         logger.info(
-            "Polled database is set as %s." if self.dbName
-            else "Polled database is not selected.", self.dbName
+            f"Database to store is set as {self.dbName}." if self.dbName
+            else "Database to store is not selected."
         )
 
     @pyqtSlot()

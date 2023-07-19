@@ -60,7 +60,7 @@ def read(db_path: str, table: str) -> Any:
                 f"SELECT * FROM {table} ORDER BY rowid DESC LIMIT 1"
             ).fetchone()[0]
     except sqlite3.Error as e:
-        logger.error("apps.backend.read(): %r", e)
+        logging.exception("apps.backend.read(): %r", e)
         return None
     finally:
         con.close()
@@ -100,7 +100,7 @@ def write(db_path: str, table: str, value: Any) -> bool:
                 (value,)
             )
     except sqlite3.Error as e:
-        logger.error("apps.backend.write(): %r", e)
+        logging.exception("apps.backend.write(): %r", e)
         return False
     finally:
         con.close()

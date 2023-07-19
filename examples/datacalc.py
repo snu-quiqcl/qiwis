@@ -99,7 +99,7 @@ class DataCalcApp(BaseApp):
         for db in content.get("db", ()):
             if any(key not in db for key in ("name", "path")):
                 logger.info("The message was ignored because "
-                        "the database %s has no such key; name or path.", json.dumps(db))
+                            "the database %s has no such key; name or path.", json.dumps(db))
                 continue
             name, path = db["name"], db["path"]
             newDBs.add(name)
@@ -142,8 +142,10 @@ class DataCalcApp(BaseApp):
         """
         dbBox = self.viewerFrame.dbBoxes[name]
         self.dbNames[name] = dbBox.currentText()
-        logger.info("Database %s is set as %s.", (name, self.dbNames[name]) if self.dbNames[name]
-                    else "Database %s is not selected.", name)
+        if self.dbNames[name]:
+            logger.info("Database %s is set as %s.", name, self.dbNames[name])
+        else:
+            logger.info("Database %s is not selected.", name)
 
     @pyqtSlot()
     def calculateSum(self):
@@ -163,4 +165,4 @@ class DataCalcApp(BaseApp):
             result += value
         else:
             self.viewerFrame.numberLabel.setText(f"sum: {result}")
-            logger.log("Sum: %f.", result)
+            logger.info("Sum: %f.", result)
