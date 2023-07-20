@@ -101,7 +101,7 @@ class QiwisTestWithApps(unittest.TestCase):
         setattr(self.mocked_import_module.return_value, "cls3", cls)
         self.qiwis.createApp(
             "app3",
-            qiwis.AppInfo(**{"module": "module3", "cls": "cls3", "channel": ["ch1"]})
+            qiwis.AppInfo(module="module3", cls="cls3", channel=["ch1"])
         )
         self.mocked_import_module.assert_called_with("module3")
         self.assertEqual(self.qiwis._apps["app3"].cls, "cls3")
@@ -120,14 +120,14 @@ class QiwisTestWithApps(unittest.TestCase):
         # The original app will not be replaced.
         self.qiwis.createApp(
             "app2",
-            qiwis.AppInfo(**{"module": "module2", "cls": "cls2"})
+            qiwis.AppInfo(module="module2", cls="cls2")
         )
         mockedDestroyApp.assert_not_called()
         self.assertEqual(self.qiwis._apps["app2"], orgApp)
         # The original app will be replaced.
         self.qiwis.createApp(
             "app2",
-            qiwis.AppInfo(**{"module": "module2", "cls": "cls2"}),
+            qiwis.AppInfo(module="module2", cls="cls2"),
             True
         )
         mockedDestroyApp.assert_called_once_with("app2")
