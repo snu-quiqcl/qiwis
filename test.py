@@ -169,6 +169,10 @@ class QiwisTestWithApps(unittest.TestCase):
     def test_subscribe(self):
         self.qiwis.subscribe("app1", "ch3")
         self.assertIn("app1", self.qiwis._subscribers["ch3"])
+        # The app already subscribes to the channel.
+        orgSubscribers = self.qiwis._subscribers["ch3"]
+        self.qiwis.subscribe("app1", "ch3")
+        self.assertEqual(self.qiwis._subscribers["ch3"], orgSubscribers)
 
     def test_unsubcribe(self):
         self.assertEqual(self.qiwis.unsubscribe("app1", "ch1"), True)
