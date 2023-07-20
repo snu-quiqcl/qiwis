@@ -167,11 +167,15 @@ class QiwisTestWithApps(unittest.TestCase):
             )
 
     def test_subscribe(self):
+        self.assertNotIn("app1", self.qiwis._subscribers["ch3"])
         self.qiwis.subscribe("app1", "ch3")
         self.assertIn("app1", self.qiwis._subscribers["ch3"])
-        # The app already subscribes to the channel.
-        orgSubscribers = self.qiwis._subscribers["ch3"]
+    
+    def test_subscribe_duplicate(self):
+        """Tests for the case where trying to subscribe to a channel already subscribed to."""
         self.qiwis.subscribe("app1", "ch3")
+        orgSubscribers = self.qiwis._subscribers["ch3"]
+        self.qiwis.subscribe("app1", "ch3")  # Try to subscribe to the channel again.
         self.assertEqual(self.qiwis._subscribers["ch3"], orgSubscribers)
 
     def test_unsubcribe(self):
