@@ -99,7 +99,7 @@ class DataCalcApp(BaseApp):
         for db in content.get("db", ()):
             if any(key not in db for key in ("name", "path")):
                 logger.error("The message was ignored because "
-                            "the database %s has no such key; name or path.", json.dumps(db))
+                             "the database %s has no such key; name or path.", json.dumps(db))
                 continue
             name, path = db["name"], db["path"]
             newDBs.add(name)
@@ -131,7 +131,7 @@ class DataCalcApp(BaseApp):
                 logger.error("The message for the channel db should be a dictionary.")
         else:
             logger.error("The message was ignored because "
-                        "the treatment for the channel %s is not implemented.", channelName)
+                         "the treatment for the channel %s is not implemented.", channelName)
 
     @pyqtSlot(str)
     def setDB(self, name: str):

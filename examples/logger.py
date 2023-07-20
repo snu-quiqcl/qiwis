@@ -13,6 +13,9 @@ from PyQt5.QtWidgets import (
 
 from qiwis import BaseApp
 
+logger = logging.getLogger(__name__)
+
+
 class _Signaller(QObject):
     """Signal only for LoggingHandler.
 
@@ -135,9 +138,9 @@ class LoggerApp(BaseApp):
         fs ="%(name)s %(message)s"
         formatter = logging.Formatter(fs)
         self.handler.setFormatter(formatter)
-        logger = logging.getLogger()
-        logger.setLevel(logging.DEBUG)
-        logger.addHandler(self.handler)
+        rootLogger = logging.getLogger()
+        rootLogger.setLevel(logging.DEBUG)
+        rootLogger.addHandler(self.handler)
         self.loggerFrame.levelBox.addItems(["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"])
         self.loggerFrame.levelBox.textActivated.connect(self.setLevel)
 
@@ -186,10 +189,10 @@ class LoggerApp(BaseApp):
             if isinstance(content, str):
                 self.addLog(content)
             else:
-                (logging.getLogger(__name__)).error("The message for the channel log should be a string.")
+                logger.error("The message for the channel log should be a string.")
         else:
-            (logging.getLogger(__name__)).error("The message was ignored because "
-                             "the treatment for the channel %s is not implemented.", channelName)
+            logger.error("The message was ignored because "
+                         "the treatment for the channel %s is not implemented.", channelName)
 
     @pyqtSlot()
     def checkToClear(self):
