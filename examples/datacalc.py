@@ -145,7 +145,7 @@ class DataCalcApp(BaseApp):
         if self.dbNames[name]:
             logger.info("Database %s is set as %s.", name, self.dbNames[name])
         else:
-            logger.warning("Database %s is not selected.", name)
+            logger.info("Database %s is not selected.", name)
 
     @pyqtSlot()
     def calculateSum(self):
