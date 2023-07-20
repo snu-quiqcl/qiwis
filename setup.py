@@ -5,8 +5,8 @@ Set-up file for releasing this package.
 import sys
 from setuptools import setup
 
-if sys.version_info[:2] < (3, 7):
-    print("You need Python 3.7+")
+if sys.version_info[:2] < (3, 8):
+    print("You need Python 3.8+")
     sys.exit()
 
 setup(
