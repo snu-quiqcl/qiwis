@@ -117,19 +117,13 @@ class QiwisTestWithApps(unittest.TestCase):
         app_.frames.return_value = (QWidget(),)
         cls = mock.MagicMock(return_value=app_)
         setattr(self.mocked_import_module.return_value, "cls2", cls)
+        appInfo = qiwis.AppInfo(module="module2", cls="cls2")
         # The original app will not be replaced.
-        self.qiwis.createApp(
-            "app2",
-            qiwis.AppInfo(module="module2", cls="cls2")
-        )
+        self.qiwis.createApp("app2", appInfo)
         mocked_destroy_app.assert_not_called()
         self.assertEqual(self.qiwis._apps["app2"], orgApp)
         # The original app will be replaced.
-        self.qiwis.createApp(
-            "app2",
-            qiwis.AppInfo(module="module2", cls="cls2"),
-            True
-        )
+        self.qiwis.createApp("app2", appInfo, True)
         mocked_destroy_app.assert_called_once_with("app2")
         self.assertNotEqual(self.qiwis._apps["app2"], orgApp)
 
