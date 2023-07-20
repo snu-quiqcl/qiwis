@@ -186,9 +186,9 @@ class LoggerApp(BaseApp):
             if isinstance(content, str):
                 self.addLog(content)
             else:
-                (logging.getLogger()).info("The message for the channel log should be a string.")
+                (logging.getLogger(__name__)).error("The message for the channel log should be a string.")
         else:
-            (logging.getLogger()).info("The message was ignored because "
+            (logging.getLogger(__name__)).error("The message was ignored because "
                              "the treatment for the channel %s is not implemented.", channelName)
 
     @pyqtSlot()
