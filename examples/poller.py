@@ -100,7 +100,7 @@ class PollerApp(BaseApp):
         newDBs = set([""])
         for db in content.get("db", ()):
             if any(key not in db for key in ("name", "path")):
-                logger.info("The message was ignored because "
+                logger.error("The message was ignored because "
                             "the database %s has no such key; name or path.", json.dumps(db))
                 continue
             name, path = db["name"], db["path"]
@@ -127,9 +127,9 @@ class PollerApp(BaseApp):
             if isinstance(content, dict):
                 self.updateDB(content)
             else:
-                logger.info("The message for the channel db should be a dictionary.")
+                logger.error("The message for the channel db should be a dictionary.")
         else:
-            logger.info("The message was ignored because "
+            logger.error("The message was ignored because "
                         "the treatment for the channel %s is not implemented.", channelName)
 
     @pyqtSlot()
@@ -143,10 +143,10 @@ class PollerApp(BaseApp):
     def setDB(self):
         """Sets the database to store the polled number."""
         self.dbName = self.viewerFrame.dbBox.currentText()
-        logger.info(
-            f"Database to store is set as {self.dbName}." if self.dbName
-            else "Database to store is not selected."
-        )
+        if self.dbName:
+            logger.info("Database to store is set as %s.", self.dbName)
+        else: logger.warning("Database to store is not selected.")
+        
 
     @pyqtSlot()
     def poll(self):
@@ -161,4 +161,4 @@ class PollerApp(BaseApp):
         if write(os.path.join(dbPath, self.dbName), self.table, num):
             logger.info("Polled number saved.")
         else:
-            logger.info("Failed to save polled number.")
+            logger.error("Failed to save polled number.")

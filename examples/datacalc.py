@@ -98,7 +98,7 @@ class DataCalcApp(BaseApp):
         newDBs = set([""])
         for db in content.get("db", ()):
             if any(key not in db for key in ("name", "path")):
-                logger.info("The message was ignored because "
+                logger.error("The message was ignored because "
                             "the database %s has no such key; name or path.", json.dumps(db))
                 continue
             name, path = db["name"], db["path"]
@@ -128,9 +128,9 @@ class DataCalcApp(BaseApp):
             if isinstance(content, dict):
                 self.updateDB(content)
             else:
-                logger.info("The message for the channel db should be a dictionary.")
+                logger.error("The message for the channel db should be a dictionary.")
         else:
-            logger.info("The message was ignored because "
+            logger.error("The message was ignored because "
                         "the treatment for the channel %s is not implemented.", channelName)
 
     @pyqtSlot(str)
@@ -145,7 +145,7 @@ class DataCalcApp(BaseApp):
         if self.dbNames[name]:
             logger.info("Database %s is set as %s.", name, self.dbNames[name])
         else:
-            logger.info("Database %s is not selected.", name)
+            logger.warning("Database %s is not selected.", name)
 
     @pyqtSlot()
     def calculateSum(self):
