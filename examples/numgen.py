@@ -115,7 +115,7 @@ class NumGenApp(BaseApp):
         for db in content.get("db", ()):
             if any(key not in db for key in ("name", "path")):
                 logger.error("The message was ignored because "
-                            "the database %s has no such key; name or path.", json.dumps(db))
+                             "the database %s has no such key; name or path.", json.dumps(db))
                 continue
             name, path = db["name"], db["path"]
             newDBs.add(name)
@@ -144,7 +144,7 @@ class NumGenApp(BaseApp):
                 logger.error("The message for the channel db should be a dictionary.")
         else:
             logger.error("The message was ignored because "
-                        "the treatment for the channel %s is not implemented.", channelName)
+                         "the treatment for the channel %s is not implemented.", channelName)
 
     @pyqtSlot()
     def setDB(self):
@@ -153,7 +153,8 @@ class NumGenApp(BaseApp):
         self.viewerFrame.statusLabel.setText("database updated")
         if self.dbName:
             logger.info("Database to store is set as %s", self.dbName)
-        else: logger.info("Database to store is not selected.")
+        else: 
+            logger.info("Database to store is not selected.")
 
     @pyqtSlot()
     def generateNumber(self):
