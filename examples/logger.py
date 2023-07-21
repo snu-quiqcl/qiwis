@@ -177,23 +177,6 @@ class LoggerApp(BaseApp):
         timeString = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         self.loggerFrame.logEdit.insertPlainText(f"{timeString}: {content}\n")
 
-    def receivedSlot(self, channelName: str, content: Any):
-        """Overridden.
-
-        Possible channels are as follows.
-
-        "log": Log channel.
-            See self.addLog().
-        """
-        if channelName == "log":
-            if isinstance(content, str):
-                self.addLog(content)
-            else:
-                logger.error("The message for the channel log should be a string.")
-        else:
-            logger.error("The message was ignored because "
-                         "the treatment for the channel %s is not implemented.", channelName)
-
     @pyqtSlot()
     def checkToClear(self):
         """Shows a confirmation frame for log clearing."""

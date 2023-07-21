@@ -153,7 +153,7 @@ class NumGenApp(BaseApp):
         self.viewerFrame.statusLabel.setText("database updated")
         if self.dbName:
             logger.info("Database to store is set as %s", self.dbName)
-        else: 
+        else:
             logger.info("Database to store is not selected.")
 
     @pyqtSlot()
