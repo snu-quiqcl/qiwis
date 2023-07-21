@@ -226,13 +226,21 @@ class Qiwis(QObject):
         """Returns the names of the apps including whose frames are hidden."""
         return tuple(self._apps.keys())
 
-    def createApp(self, name: str, info: AppInfo):
+    def createApp(self, name: str, info: AppInfo, replace: bool = False):
         """Creates an app and shows their frames using set-up environment.
         
         Args:
-            name: A name of app.
-            info: An AppInfo object describing the app.
+            name: The name of the app to be added.
+            info: The AppInfo object describing the app.
+            replace: It describes the behavior when trying to create an existing app.
+              If True, the original app will be replaced. Otherwise, it will be ignored.
         """
+        if name in self._apps:
+            if replace:
+                self.destroyApp(name)
+            else:
+                logger.error("The app %s already exists.", name)
+                return
         with _add_to_path(os.path.dirname(info.path)):
             module = importlib.import_module(info.module)
         cls = getattr(module, info.cls)

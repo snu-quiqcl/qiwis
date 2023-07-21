@@ -101,12 +101,31 @@ class QiwisTestWithApps(unittest.TestCase):
         setattr(self.mocked_import_module.return_value, "cls3", cls)
         self.qiwis.createApp(
             "app3",
-            qiwis.AppInfo(**{"module": "module3", "cls": "cls3", "channel": ["ch1"]})
+            qiwis.AppInfo(module="module3", cls="cls3", channel=["ch1"])
         )
         self.mocked_import_module.assert_called_with("module3")
         self.assertEqual(self.qiwis._apps["app3"].cls, "cls3")
         self.assertIn("app3", self.qiwis._dockWidgets)
         self.assertIn("app3", self.qiwis._subscribers["ch1"])
+
+    @mock.patch("qiwis.Qiwis.destroyApp")
+    def test_create_existing_app(self, mocked_destroy_app):
+        """Tests for the case where trying to create an existing app."""
+        orgApp = self.qiwis._apps["app2"]
+        app_ = mock.MagicMock()
+        app_.cls = "cls2"
+        app_.frames.return_value = (QWidget(),)
+        cls = mock.MagicMock(return_value=app_)
+        setattr(self.mocked_import_module.return_value, "cls2", cls)
+        appInfo = qiwis.AppInfo(module="module2", cls="cls2")
+        # The original app will not be replaced.
+        self.qiwis.createApp("app2", appInfo)
+        mocked_destroy_app.assert_not_called()
+        self.assertEqual(self.qiwis._apps["app2"], orgApp)
+        # The original app will be replaced.
+        self.qiwis.createApp("app2", appInfo, True)
+        mocked_destroy_app.assert_called_once_with("app2")
+        self.assertNotEqual(self.qiwis._apps["app2"], orgApp)
 
     def test_destroy_app(self):
         for name, info in APP_INFOS.items():
@@ -146,6 +165,18 @@ class QiwisTestWithApps(unittest.TestCase):
                 subscriberNamesSet,
                 {name for name, info in APP_INFOS.items() if channel in info.channel}
             )
+
+    def test_subscribe(self):
+        self.assertNotIn("app1", self.qiwis._subscribers["ch3"])
+        self.qiwis.subscribe("app1", "ch3")
+        self.assertIn("app1", self.qiwis._subscribers["ch3"])
+
+    def test_subscribe_duplicate(self):
+        """Tests for the case where trying to subscribe to a channel already subscribed to."""
+        self.qiwis.subscribe("app1", "ch3")
+        orgSubscribers = self.qiwis._subscribers["ch3"]
+        self.qiwis.subscribe("app1", "ch3")  # Try to subscribe to the channel again.
+        self.assertEqual(self.qiwis._subscribers["ch3"], orgSubscribers)
 
     def test_unsubcribe(self):
         self.assertEqual(self.qiwis.unsubscribe("app1", "ch1"), True)
