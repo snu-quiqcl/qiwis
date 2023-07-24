@@ -59,8 +59,8 @@ def read(db_path: str, table: str) -> Any:
             value = con.execute(
                 f"SELECT * FROM {table} ORDER BY rowid DESC LIMIT 1"
             ).fetchone()[0]
-    except sqlite3.Error as e:
-        logging.exception("apps.backend.read(): %r", e)
+    except sqlite3.Error:
+        logger.exception("Failed to read table %s from database %s.", table, db_path)
         return None
     finally:
         con.close()
@@ -99,8 +99,8 @@ def write(db_path: str, table: str, value: Any) -> bool:
                 f"INSERT INTO {table} VALUES (?, datetime('now', 'localtime'))", 
                 (value,)
             )
-    except sqlite3.Error as e:
-        logging.exception("apps.backend.write(): %r", e)
+    except sqlite3.Error:
+        logger.exception("Failed to write database %s from table %s.", db_path, table)
         return False
     finally:
         con.close()

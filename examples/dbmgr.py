@@ -125,10 +125,7 @@ class DBMgrApp(BaseApp):
         """
         msg = {"db": [db._asdict() for db in self.dbList]}
         self.broadcast("db", msg)
-        logger.info(
-            "Database %s is added." if isAdded
-            else "Database %s is removed.", name
-        )
+        logger.info("Database %s is %s.", name, "added" if isAdded else "removed")
 
     @pyqtSlot()
     def addDB(self):

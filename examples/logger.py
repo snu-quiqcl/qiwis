@@ -180,7 +180,7 @@ class LoggerApp(BaseApp):
     @pyqtSlot()
     def checkToClear(self):
         """Shows a confirmation frame for log clearing."""
-        logger.info("Clicked to clear logs")
+        logger.info("Clicked to clear logs.")
         self.confirmFrame.show()
 
     @pyqtSlot()

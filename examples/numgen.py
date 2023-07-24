@@ -174,4 +174,4 @@ class NumGenApp(BaseApp):
             logger.info("Generated number saved.")
         else:
             self.viewerFrame.statusLabel.setText("failed to save number")
-            logger.error("Failed to save generated number")
+            logger.error("Failed to save generated number.")
