@@ -68,7 +68,7 @@ class LoggerFrame(QWidget):
         # widgets
         self.logEdit = QTextEdit(self)
         self.logEdit.setReadOnly(True)
-        self.clearButton = QPushButton("Clear")
+        self.clearButton = QPushButton("Clear", self)
         self.levelBox = QComboBox(self)
         # layout
         layout = QVBoxLayout(self)
@@ -78,18 +78,15 @@ class LoggerFrame(QWidget):
 
 
 class ConfirmClearingFrame(QWidget):
-    """
-    A confirmation frame for log clearing.
-    """
+    """A confirmation frame for log clearing."""
+
     confirmed = pyqtSignal()
 
     def __init__(self, parent: Optional[QObject] = None):
-        """
-        Extended.
-        """
+        """Extended."""
         super().__init__(parent=parent)
         # widgets
-        self.label = QLabel("Are you sure to clear?")
+        self.label = QLabel("Are you sure to clear?", self)
         self.buttonBox = QDialogButtonBox()
         self.buttonBox.addButton("OK", QDialogButtonBox.AcceptRole)
         self.buttonBox.addButton("Cancel", QDialogButtonBox.RejectRole)
@@ -97,18 +94,18 @@ class ConfirmClearingFrame(QWidget):
         self.buttonBox.accepted.connect(self.buttonOKClicked)
         self.buttonBox.rejected.connect(self.buttonCancelClicked)
         # layouts
-        layout = QVBoxLayout()
+        layout = QVBoxLayout(self)
         self.setLayout(layout)
         layout.addWidget(self.label)
         layout.addWidget(self.buttonBox)
 
     def buttonOKClicked(self):
-        """Clicks OK to clear log."""
+        """Called when the OK button is clicked."""
         self.confirmed.emit()
         self.close()
 
     def buttonCancelClicked(self):
-        """Clicks Cancel not to clear log."""
+        """Clicked Cancel not to clear log."""
         self.close()
 
 
@@ -119,6 +116,8 @@ class LoggerApp(BaseApp):
 
     Attributes:
         loggerFrame: A frame that shows the logs.
+        confirmFame: A frame that asks to whether clear logs.
+        handler: A handler for adding logs to GUI. 
     """
 
     def __init__(self, name: str, parent: Optional[QObject] = None):
@@ -150,8 +149,8 @@ class LoggerApp(BaseApp):
 
         Args:
             text: Selected level in the level select box.
-                  It should be one of "DEBUG", "INFO", "WARNING", "ERROR" and "CRITICAL".
-                  It should be case-sensitive and any other input is ignored.
+              It should be one of "DEBUG", "INFO", "WARNING", "ERROR" and "CRITICAL".
+              It should be case-sensitive and any other input is ignored.
         """
         level = {
             "DEBUG": logging.DEBUG,
@@ -180,7 +179,7 @@ class LoggerApp(BaseApp):
     @pyqtSlot()
     def checkToClear(self):
         """Shows a confirmation frame for log clearing."""
-        logger.info("Clicked to clear logs.")
+        logger.info("Clear button is clicked to clear logs")
         self.confirmFrame.show()
 
     @pyqtSlot()
