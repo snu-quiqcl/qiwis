@@ -100,7 +100,7 @@ def write(db_path: str, table: str, value: Any) -> bool:
                 (value,)
             )
     except sqlite3.Error:
-        logger.exception("Failed to write a value into table %s of database %s", db_path, table)
+        logger.exception("Failed to write a value into table %s of database %s", table, db_path)
         return False
     finally:
         con.close()
