@@ -31,7 +31,9 @@ from typing import (
 )
 
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, Qt
-from PyQt5.QtWidgets import QApplication, QMainWindow, QDockWidget, QMessageBox, QWidget
+from PyQt5.QtWidgets import (
+    QApplication, QDockWidget, QMainWindow, QMdiArea, QMdiSubWindow, QMessageBox, QWidget
+)
 
 T = TypeVar("T")
 JsonType = Union[None, float, bool, str, List["JsonType"], Dict[str, "JsonType"]]
@@ -161,8 +163,7 @@ class Qiwis(QObject):
         super().__init__(parent=parent)
         self.appInfos = appInfos
         self.mainWindow = QMainWindow()
-        self.centralWidget = QWidget()
-        self.centralWidget.setStyleSheet("border-image: url(./resources/background.png);")
+        self.centralWidget = QMdiArea()
         self.mainWindow.setCentralWidget(self.centralWidget)
         self._dockWidgets = defaultdict(list)
         self._apps: Dict[str, BaseApp] = {}
@@ -194,24 +195,29 @@ class Qiwis(QObject):
             frame: A frame to show.
             info: An AppInfo object describing the app.
         """
-        dockWidget = QDockWidget(name, self.mainWindow)
-        dockWidget.setWidget(frame)
-        area = {
-            "left": Qt.LeftDockWidgetArea,
-            "right": Qt.RightDockWidgetArea,
-            "top": Qt.TopDockWidgetArea,
-            "bottom": Qt.BottomDockWidgetArea
-        }.get(info.pos, Qt.LeftDockWidgetArea)
-        if info.show:
-            areaDockWidgets = [
-                dockWidget_ for dockWidget_ in self.mainWindow.findChildren(QDockWidget)
-                if self.mainWindow.dockWidgetArea(dockWidget_) == area
-            ]
-            if areaDockWidgets:
-                self.mainWindow.tabifyDockWidget(areaDockWidgets[-1], dockWidget)
-            else:
-                self.mainWindow.addDockWidget(area, dockWidget)
-        self._dockWidgets[name].append(dockWidget)
+        if info.pos == "center":
+            widget = QMdiSubWindow(self.centralWidget)
+            widget.setWindowTitle(name)
+            widget.setWidget(frame)
+        else:
+            dockWidget = QDockWidget(name, self.mainWindow)
+            dockWidget.setWidget(frame)
+            area = {
+                "left": Qt.LeftDockWidgetArea,
+                "right": Qt.RightDockWidgetArea,
+                "top": Qt.TopDockWidgetArea,
+                "bottom": Qt.BottomDockWidgetArea
+            }.get(info.pos, Qt.LeftDockWidgetArea)
+            if info.show:
+                areaDockWidgets = [
+                    dockWidget_ for dockWidget_ in self.mainWindow.findChildren(QDockWidget)
+                    if self.mainWindow.dockWidgetArea(dockWidget_) == area
+                ]
+                if areaDockWidgets:
+                    self.mainWindow.tabifyDockWidget(areaDockWidgets[-1], dockWidget)
+                else:
+                    self.mainWindow.addDockWidget(area, dockWidget)
+            self._dockWidgets[name].append(dockWidget)
         logger.info("Added a frame to the app %s: %s", name, info)
 
     def removeFrame(self, name: str, dockWidget: QDockWidget):
