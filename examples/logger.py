@@ -1,17 +1,17 @@
-"""
-App module for logging.
-"""
+"""App module for logging."""
 
-import time
 import logging
 from typing import Any, Optional, Tuple, Callable
 
-from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
+from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal, QDateTime
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QPushButton, QTextEdit, QLabel, QDialogButtonBox, QComboBox
 )
 
 from qiwis import BaseApp
+
+logger = logging.getLogger(__name__)
+
 
 class _Signaller(QObject):
     """Signal only for LoggingHandler.
@@ -26,7 +26,10 @@ class _Signaller(QObject):
 class LoggingHandler(logging.Handler):
     """Handler for logger.
 
-    Sends a log message to connected function using emit.   
+    Sends a log message to the connected function through a signal. 
+
+    Attributes:
+        signaller: A _Signaller class contains signal for emitting log.
     """
 
     def __init__(self, slotfunc: Callable[[str], Any]):
@@ -46,8 +49,8 @@ class LoggingHandler(logging.Handler):
         
         Emits input signal to the connected function.
         """
-        s = self.format(record)
-        self.signaller.signal.emit(s)
+        logMsg = self.format(record)
+        self.signaller.signal.emit(logMsg)
 
 
 class LoggerFrame(QWidget):
@@ -65,7 +68,7 @@ class LoggerFrame(QWidget):
         # widgets
         self.logEdit = QTextEdit(self)
         self.logEdit.setReadOnly(True)
-        self.clearButton = QPushButton("Clear")
+        self.clearButton = QPushButton("Clear", self)
         self.levelBox = QComboBox(self)
         # layout
         layout = QVBoxLayout(self)
@@ -75,90 +78,95 @@ class LoggerFrame(QWidget):
 
 
 class ConfirmClearingFrame(QWidget):
+    """A confirmation frame for log clearing in the LoggerFrame.
+    
+    Attributes:
+        label: The label for displaying a confirmation message to clear logs in the LoggerFrame.
+        buttonBox: The buttonBox with OK and Cancel button to check whether to clear logs.
+
+    Signals:
+        confirmed: A pyqtSignal that emits signal when Ok button is clicked. 
     """
-    A confirmation frame for log clearing.
-    """
+
     confirmed = pyqtSignal()
 
     def __init__(self, parent: Optional[QObject] = None):
-        """
-        Extended.
-        """
+        """Extended."""
         super().__init__(parent=parent)
         # widgets
-        self.label = QLabel("Are you sure to clear?")
-        self.buttonBox = QDialogButtonBox()
+        self.label = QLabel("Are you sure to clear?", self)
+        self.buttonBox = QDialogButtonBox(self)
         self.buttonBox.addButton("OK", QDialogButtonBox.AcceptRole)
         self.buttonBox.addButton("Cancel", QDialogButtonBox.RejectRole)
         # connect signals
         self.buttonBox.accepted.connect(self.buttonOKClicked)
         self.buttonBox.rejected.connect(self.buttonCancelClicked)
         # layouts
-        layout = QVBoxLayout()
-        self.setLayout(layout)
+        layout = QVBoxLayout(self)
         layout.addWidget(self.label)
         layout.addWidget(self.buttonBox)
 
     def buttonOKClicked(self):
-        """Clicks OK to clear log."""
+        """Called when the OK button is clicked."""
         self.confirmed.emit()
         self.close()
 
     def buttonCancelClicked(self):
-        """Clicks Cancel not to clear log."""
+        """Called when the Cancel button is clicked."""
         self.close()
 
 
 class LoggerApp(BaseApp):
     """App for logging.
 
-    Manages a logger frame.
+    Sets a handler of the root logger and manages the loggerFrame to show log messages.
+    Gives options to clear logs and select log level in the loggerFrame.
 
     Attributes:
         loggerFrame: A frame that shows the logs.
+        confirmFrame: A frame that asks whether to clear logs.
+        handler: A handler for adding logs to the loggerFrame. 
     """
 
     def __init__(self, name: str, parent: Optional[QObject] = None):
-        """Extended.
-
-        Args:
-            name: Name of the App
-        """
+        """Extended."""
         super().__init__(name, parent=parent)
         self.loggerFrame = LoggerFrame()
+        self.confirmFrame = ConfirmClearingFrame()
         # connect signals to slots
         self.loggerFrame.clearButton.clicked.connect(self.checkToClear)
-        self.confirmFrame = ConfirmClearingFrame()
         self.confirmFrame.confirmed.connect(self.clearLog)
         self.handler = LoggingHandler(self.addLog)
         # TODO(aijuh): Change the log format when it is determined.
-        fs ="%(name)s %(message)s"
+        fs = "%(levelname)s [%(name)s] [%(filename)s:%(lineno)d] %(message)s"
         formatter = logging.Formatter(fs)
         self.handler.setFormatter(formatter)
-        logger = logging.getLogger()
-        logger.setLevel(logging.DEBUG)
-        logger.addHandler(self.handler)
+        rootLogger = logging.getLogger()
+        rootLogger.addHandler(self.handler)
+        self.setLevel("WARNING")
         self.loggerFrame.levelBox.addItems(["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"])
         self.loggerFrame.levelBox.textActivated.connect(self.setLevel)
+        self.loggerFrame.levelBox.setCurrentText("WARNING")
 
     @pyqtSlot(str)
-    def setLevel(self, text: str):
-        """Responds to the setLevelBox widget and changes the handler's level.
+    def setLevel(self, levelText: str):
+        """Responds to the loggerFrame's levelBox widget and changes the handler's level.
 
         Args:
-            text: Selected level in the level select box.
-                  It should be one of "DEBUG", "INFO", "WARNING", "ERROR" and "CRITICAL".
-                  It should be case-sensitive and any other input is ignored.
+            leveltext: Selected level in the level select box.
+              It should be one of "DEBUG", "INFO", "WARNING", "ERROR" and "CRITICAL".
+              It should be case-sensitive and any other input is ignored.
         """
-        level = {
+        levels = {
             "DEBUG": logging.DEBUG,
             "INFO": logging.INFO,
             "WARNING": logging.WARNING,
             "ERROR": logging.ERROR,
             "CRITICAL": logging.CRITICAL
         }
-        if text in level:
-            self.handler.setLevel(level[text])
+        if levelText in levels:
+            self.handler.setLevel(levels[levelText])
+            logging.getLogger().setLevel(levels[levelText])
 
     def frames(self) -> Tuple[LoggerFrame]:
         """Overridden."""
@@ -166,38 +174,21 @@ class LoggerApp(BaseApp):
 
     @pyqtSlot(str)
     def addLog(self, content: str):
-        """Adds a channel name and log message.
+        """Adds a received log message to the LoggerFrame.
 
         Args:
             content: Received log message.
         """
-        timeString = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+        timeString = QDateTime.currentDateTime().toString("yyyy-MM-dd HH:mm:ss")
         self.loggerFrame.logEdit.insertPlainText(f"{timeString}: {content}\n")
-
-    def receivedSlot(self, channelName: str, content: Any):
-        """Overridden.
-
-        Possible channels are as follows.
-
-        "log": Log channel.
-            See self.addLog().
-        """
-        if channelName == "log":
-            if isinstance(content, str):
-                self.addLog(content)
-            else:
-                print("The message for the channel log should be a string.")
-        else:
-            print(f"The message was ignored because "
-                  f"the treatment for the channel {channelName} is not implemented.")
 
     @pyqtSlot()
     def checkToClear(self):
-        """Shows a confirmation frame for log clearing."""
-        self.broadcast("log", "Clicked to clear logs")
+        """Shows a confirmation frame for clearing logs."""
+        logger.info("Tried to clear logs by clicking clear button")
         self.confirmFrame.show()
 
     @pyqtSlot()
     def clearLog(self):
-        """Clears the log text edit."""
+        """Clears the log texts in loggerFrame."""
         self.loggerFrame.logEdit.clear()

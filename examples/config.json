@@ -32,7 +32,7 @@
             "cls": "LoggerApp",
             "show": true,
             "pos": "bottom",
-            "channel": ["log"]
+            "channel": []
         }
     }
 }
