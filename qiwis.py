@@ -196,12 +196,12 @@ class Qiwis(QObject):
             info: An AppInfo object describing the app.
         """
         if info.pos == "center":
-            widget = QMdiSubWindow(self.centralWidget)
-            widget.setWindowTitle(name)
-            widget.setWidget(frame)
+            outerWidget = QMdiSubWindow(self.centralWidget)
+            outerWidget.setWindowTitle(name)
+            outerWidget.setWidget(frame)
         else:
-            dockWidget = QDockWidget(name, self.mainWindow)
-            dockWidget.setWidget(frame)
+            outerWidget = QDockWidget(name, self.mainWindow)
+            outerWidget.setWidget(frame)
             area = {
                 "left": Qt.LeftDockWidgetArea,
                 "right": Qt.RightDockWidgetArea,
@@ -214,10 +214,10 @@ class Qiwis(QObject):
                     if self.mainWindow.dockWidgetArea(dockWidget_) == area
                 ]
                 if areaDockWidgets:
-                    self.mainWindow.tabifyDockWidget(areaDockWidgets[-1], dockWidget)
+                    self.mainWindow.tabifyDockWidget(areaDockWidgets[-1], outerWidget)
                 else:
-                    self.mainWindow.addDockWidget(area, dockWidget)
-            self._outerWidgets[name].append(dockWidget)
+                    self.mainWindow.addDockWidget(area, outerWidget)
+        self._outerWidgets[name].append(outerWidget)
         logger.info("Added a frame to the app %s: %s", name, info)
 
     def removeFrame(self, name: str, outerWidget: Union[QMdiSubWindow, QDockWidget]):
@@ -299,7 +299,7 @@ class Qiwis(QObject):
         """
         app = self._apps[name]
         info = self.appInfos[name]
-        orgFrames = {dockWidget.widget(): dockWidget for dockWidget in self._outerWidgets[name]}
+        orgFrames = {outerWidget.widget(): outerWidget for outerWidget in self._outerWidgets[name]}
         newFrames = app.frames()
         orgFramesSet = set(orgFrames)
         newFramesSet = set(newFrames)
