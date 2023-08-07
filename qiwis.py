@@ -165,7 +165,7 @@ class Qiwis(QObject):
         self.mainWindow = QMainWindow()
         self.centralWidget = QMdiArea()
         self.mainWindow.setCentralWidget(self.centralWidget)
-        self._dockWidgets = defaultdict(list)
+        self._outerWidgets = defaultdict(list)
         self._apps: Dict[str, BaseApp] = {}
         self._subscribers: DefaultDict[str, Set[str]] = defaultdict(set)
         appInfos = appInfos if appInfos else {}
@@ -217,22 +217,25 @@ class Qiwis(QObject):
                     self.mainWindow.tabifyDockWidget(areaDockWidgets[-1], dockWidget)
                 else:
                     self.mainWindow.addDockWidget(area, dockWidget)
-            self._dockWidgets[name].append(dockWidget)
+            self._outerWidgets[name].append(dockWidget)
         logger.info("Added a frame to the app %s: %s", name, info)
 
-    def removeFrame(self, name: str, dockWidget: QDockWidget):
+    def removeFrame(self, name: str, outerWidget: Union[QMdiSubWindow, QDockWidget]):
         """Removes the frame from the main window.
         
-        This is not a qiwiscall because QDockWidget is not Serializable.
+        This is not a qiwiscall because QMdiSubWindow and QDockWidget are not Serializable.
         
         Args:
-            name: A name of app.
-            dockWidget: A dock widget to remove.
+            name: The name of the app.
+            outerWidget: The outer widget to remove.
         """
-        frameName = dockWidget.widget().__class__.__name__
-        self.mainWindow.removeDockWidget(dockWidget)
-        self._dockWidgets[name].remove(dockWidget)
-        dockWidget.deleteLater()
+        frameName = outerWidget.widget().__class__.__name__
+        if isinstance(outerWidget, QMdiSubWindow):
+            self.centralWidget.removeSubWindow(outerWidget)
+        else:
+            self.mainWindow.removeDockWidget(outerWidget)
+        self._outerWidgets[name].remove(outerWidget)
+        outerWidget.deleteLater()
         logger.info("Removed a frame %s from the app %s", frameName, name)
 
     def appNames(self) -> Tuple[str]:
@@ -279,10 +282,10 @@ class Qiwis(QObject):
         Args:
             name: A name of the app to destroy.
         """
-        dockWidgets = self._dockWidgets[name]
+        dockWidgets = self._outerWidgets[name]
         for dockWidget in dockWidgets:
             self.removeFrame(name, dockWidget)
-        del self._dockWidgets[name]
+        del self._outerWidgets[name]
         for apps in self._subscribers.values():
             apps.discard(name)
         self._apps.pop(name).deleteLater()
@@ -296,7 +299,7 @@ class Qiwis(QObject):
         """
         app = self._apps[name]
         info = self.appInfos[name]
-        orgFrames = {dockWidget.widget(): dockWidget for dockWidget in self._dockWidgets[name]}
+        orgFrames = {dockWidget.widget(): dockWidget for dockWidget in self._outerWidgets[name]}
         newFrames = app.frames()
         orgFramesSet = set(orgFrames)
         newFramesSet = set(newFrames)
