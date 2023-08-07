@@ -194,7 +194,7 @@ class DBMgrApp(BaseApp):
                     module="examples.datacalc",
                     cls="DataCalcApp",
                     show=True,
-                    pos="top",
+                    pos="center",
                     channel=["db"],
                     args={
                         "tables": {
