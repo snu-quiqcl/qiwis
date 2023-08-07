@@ -202,6 +202,7 @@ class Qiwis(QObject):
             outerWidget = QMdiSubWindow(self.centralWidget)
             outerWidget.setWindowTitle(name)
             outerWidget.setWidget(frame)
+            outerWidget.show()
         else:
             outerWidget = QDockWidget(name, self.mainWindow)
             outerWidget.setWidget(frame)
