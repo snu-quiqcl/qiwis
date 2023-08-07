@@ -60,18 +60,21 @@ class AppInfo(Serializable):
     """Information required to create an app.
     
     Fields:
-        module: Module name in which the app class resides.
-        cls: App class name.
-        path: System path for module importing.
-        show: Whether to show the app frames on creation.
-        pos: Position on the main window; refer to Qt.DockWidgetArea enum.
-          Should be one of "left", "right", "top", or "bottom", case-sensitive.
-          Otherwise, defaults to Qt.LeftDockWidgetArea.
-        channel: Channels which the app subscribes to.
-        args: Keyword argument dictionary of the app class constructor.
-          It must exclude name and parent arguments. Even if they exist, they will be ignored.
+        module: The module name of the app class.
+        cls: The name of the app class.
+        path: The path for importing the module.
+        show: Whether to show frames of the app.
+        pos: The position of the frames on the GUI.
+          It should be one of "center", "left", "right", "top", or "bottom", case-sensitive.
+          Otherwise, it is set to "left".
+          In the case "center", the frame is wrapped by QMdiSubWindow.
+          In the other cases, the frame is wrapped by QDockWidget and
+            its position follows Qt.DockWidgetArea.
+        channel: The list of channels which the app subscribes to.
+        args: The dictionary for the keyword arguments of the app class constructor.
+          It should exclude the name and parent arguments.
           None for initializing the app with default values,
-          where only name and parent arguments will be passed.
+            where only the name and parent arguments will be passed.
     """
     module: str
     cls: str
