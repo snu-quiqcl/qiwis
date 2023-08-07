@@ -282,9 +282,9 @@ class Qiwis(QObject):
         Args:
             name: A name of the app to destroy.
         """
-        dockWidgets = self._outerWidgets[name]
-        for dockWidget in dockWidgets:
-            self.removeFrame(name, dockWidget)
+        outerWidgets = self._outerWidgets[name]
+        for outerWidget in outerWidgets:
+            self.removeFrame(name, outerWidget)
         del self._outerWidgets[name]
         for apps in self._subscribers.values():
             apps.discard(name)
