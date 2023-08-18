@@ -108,8 +108,7 @@ class QiwisTestWithApps(unittest.TestCase):
         self.assertIn("app3", self.qiwis._dockWidgets)
         self.assertIn("app3", self.qiwis._subscribers["ch1"])
 
-    @mock.patch("qiwis.Qiwis.destroyApp")
-    def test_create_existing_app(self, mocked_destroy_app):
+    def test_create_existing_app(self):
         """Tests for the case where trying to create an existing app."""
         orgApp = self.qiwis._apps["app2"]
         app_ = mock.MagicMock()
@@ -118,14 +117,15 @@ class QiwisTestWithApps(unittest.TestCase):
         cls = mock.MagicMock(return_value=app_)
         setattr(self.mocked_import_module.return_value, "cls2", cls)
         appInfo = qiwis.AppInfo(module="module2", cls="cls2")
-        # The original app will not be replaced.
-        self.qiwis.createApp("app2", appInfo)
-        mocked_destroy_app.assert_not_called()
-        self.assertEqual(self.qiwis._apps["app2"], orgApp)
-        # The original app will be replaced.
-        self.qiwis.createApp("app2", appInfo, True)
-        mocked_destroy_app.assert_called_once_with("app2")
-        self.assertNotEqual(self.qiwis._apps["app2"], orgApp)
+        with mock.patch.object(self.qiwis, "destroyApp") as mocked_destroy_app:
+            # The original app will not be replaced.
+            self.qiwis.createApp("app2", appInfo)
+            mocked_destroy_app.assert_not_called()
+            self.assertEqual(self.qiwis._apps["app2"], orgApp)
+            # The original app will be replaced.
+            self.qiwis.createApp("app2", appInfo, True)
+            mocked_destroy_app.assert_called_once_with("app2")
+            self.assertNotEqual(self.qiwis._apps["app2"], orgApp)
 
     def test_destroy_app(self):
         for name, info in APP_INFOS.items():

@@ -203,7 +203,14 @@ class Qiwis(QObject):
             "bottom": Qt.BottomDockWidgetArea
         }.get(info.pos, Qt.LeftDockWidgetArea)
         if info.show:
-            self.mainWindow.addDockWidget(area, dockWidget)
+            areaDockWidgets = [
+                dockWidget_ for dockWidget_ in self.mainWindow.findChildren(QDockWidget)
+                if self.mainWindow.dockWidgetArea(dockWidget_) == area
+            ]
+            if areaDockWidgets:
+                self.mainWindow.tabifyDockWidget(areaDockWidgets[-1], dockWidget)
+            else:
+                self.mainWindow.addDockWidget(area, dockWidget)
         self._dockWidgets[name].append(dockWidget)
         logger.info("Added a frame to the app %s: %s", name, info)
 
