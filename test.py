@@ -85,7 +85,7 @@ class QiwisTestWithApps(unittest.TestCase):
         for name, info in APP_INFOS.items():
             self.mocked_import_module.assert_any_call(info.module)
             self.assertEqual(self.qiwis._apps[name].cls, info.cls)
-            self.assertIn(name, self.qiwis._outerWidgets)
+            self.assertIn(name, self.qiwis._wrapperWidgets)
         for channel in self.channels:
             self.assertIn(channel, self.qiwis._subscribers)
 
@@ -105,7 +105,7 @@ class QiwisTestWithApps(unittest.TestCase):
         )
         self.mocked_import_module.assert_called_with("module3")
         self.assertEqual(self.qiwis._apps["app3"].cls, "cls3")
-        self.assertIn("app3", self.qiwis._outerWidgets)
+        self.assertIn("app3", self.qiwis._wrapperWidgets)
         self.assertIn("app3", self.qiwis._subscribers["ch1"])
 
     def test_create_existing_app(self):
@@ -131,26 +131,26 @@ class QiwisTestWithApps(unittest.TestCase):
         for name, info in APP_INFOS.items():
             self.qiwis.destroyApp(name)
             self.assertNotIn(name, self.qiwis._apps)
-            self.assertNotIn(name, self.qiwis._outerWidgets)
+            self.assertNotIn(name, self.qiwis._wrapperWidgets)
             for channel in info.channel:
                 self.assertNotIn(name, self.qiwis._subscribers[channel])
 
     def test_update_frames_inclusive(self):
         """Tests for the case where a new frame is added in the return of frames()."""
-        orgFramesSet = {dockWidget.widget() for dockWidget in self.qiwis._outerWidgets["app1"]}
+        orgFramesSet = {dockWidget.widget() for dockWidget in self.qiwis._wrapperWidgets["app1"]}
         newFramesSet = orgFramesSet | {QWidget()}
         self.qiwis._apps["app1"].frames.return_value = tuple(newFramesSet)
         self.qiwis.updateFrames("app1")
-        finalFramesSet = {dockWidget.widget() for dockWidget in self.qiwis._outerWidgets["app1"]}
+        finalFramesSet = {dockWidget.widget() for dockWidget in self.qiwis._wrapperWidgets["app1"]}
         self.assertEqual(finalFramesSet, newFramesSet)
 
     def test_update_frames_exclusive(self):
         """Tests for the case where a new frame replaced the return of frames()."""
-        orgFramesSet = {dockWidget.widget() for dockWidget in self.qiwis._outerWidgets["app1"]}
+        orgFramesSet = {dockWidget.widget() for dockWidget in self.qiwis._wrapperWidgets["app1"]}
         newFramesSet = {QWidget()}
         self.qiwis._apps["app1"].frames.return_value = tuple(newFramesSet)
         self.qiwis.updateFrames("app1")
-        finalFramesSet = {dockWidget.widget() for dockWidget in self.qiwis._outerWidgets["app1"]}
+        finalFramesSet = {dockWidget.widget() for dockWidget in self.qiwis._wrapperWidgets["app1"]}
         self.assertFalse(finalFramesSet & orgFramesSet)
         self.assertEqual(finalFramesSet, newFramesSet)
 

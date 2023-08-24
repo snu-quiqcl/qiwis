@@ -168,7 +168,7 @@ class Qiwis(QObject):
         self.mainWindow = QMainWindow()
         self.centralWidget = QMdiArea()
         self.mainWindow.setCentralWidget(self.centralWidget)
-        self._outerWidgets = defaultdict(list)
+        self._wrapperWidgets = defaultdict(list)
         self._apps: Dict[str, BaseApp] = {}
         self._subscribers: DefaultDict[str, Set[str]] = defaultdict(set)
         appInfos = appInfos if appInfos else {}
@@ -221,7 +221,7 @@ class Qiwis(QObject):
                     self.mainWindow.tabifyDockWidget(areaDockWidgets[-1], outerWidget)
                 else:
                     self.mainWindow.addDockWidget(area, outerWidget)
-        self._outerWidgets[name].append(outerWidget)
+        self._wrapperWidgets[name].append(outerWidget)
         logger.info("Added a frame to the app %s: %s", name, info)
 
     def removeFrame(self, name: str, outerWidget: Union[QMdiSubWindow, QDockWidget]):
@@ -238,7 +238,7 @@ class Qiwis(QObject):
             self.centralWidget.removeSubWindow(outerWidget)
         else:
             self.mainWindow.removeDockWidget(outerWidget)
-        self._outerWidgets[name].remove(outerWidget)
+        self._wrapperWidgets[name].remove(outerWidget)
         outerWidget.deleteLater()
         logger.info("Removed a frame %s from the app %s", frameName, name)
 
@@ -286,10 +286,10 @@ class Qiwis(QObject):
         Args:
             name: A name of the app to destroy.
         """
-        outerWidgets = self._outerWidgets[name]
+        outerWidgets = self._wrapperWidgets[name]
         for outerWidget in outerWidgets:
             self.removeFrame(name, outerWidget)
-        del self._outerWidgets[name]
+        del self._wrapperWidgets[name]
         for apps in self._subscribers.values():
             apps.discard(name)
         self._apps.pop(name).deleteLater()
@@ -303,7 +303,7 @@ class Qiwis(QObject):
         """
         app = self._apps[name]
         info = self.appInfos[name]
-        orgFrames = {outerWidget.widget(): outerWidget for outerWidget in self._outerWidgets[name]}
+        orgFrames = {outerWidget.widget(): outerWidget for outerWidget in self._wrapperWidgets[name]}
         newFrames = app.frames()
         orgFramesSet = set(orgFrames)
         newFramesSet = set(newFrames)
