@@ -303,7 +303,10 @@ class Qiwis(QObject):
         """
         app = self._apps[name]
         info = self.appInfos[name]
-        orgFrames = {outerWidget.widget(): outerWidget for outerWidget in self._wrapperWidgets[name]}
+        orgFrames = {
+            outerWidget.widget(): outerWidget
+            for outerWidget in self._wrapperWidgets[name]
+        }
         newFrames = app.frames()
         orgFramesSet = set(orgFrames)
         newFramesSet = set(newFrames)
