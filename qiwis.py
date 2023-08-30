@@ -199,13 +199,13 @@ class Qiwis(QObject):
             info: An AppInfo object describing the app.
         """
         if info.pos == "center":
-            outerWidget = QMdiSubWindow(self.centralWidget)
-            outerWidget.setWindowTitle(name)
-            outerWidget.setWidget(frame)
-            outerWidget.show()
+            wrapperWidget = QMdiSubWindow(self.centralWidget)
+            wrapperWidget.setWindowTitle(name)
+            wrapperWidget.setWidget(frame)
+            wrapperWidget.show()
         else:
-            outerWidget = QDockWidget(name, self.mainWindow)
-            outerWidget.setWidget(frame)
+            wrapperWidget = QDockWidget(name, self.mainWindow)
+            wrapperWidget.setWidget(frame)
             area = {
                 "left": Qt.LeftDockWidgetArea,
                 "right": Qt.RightDockWidgetArea,
@@ -218,28 +218,28 @@ class Qiwis(QObject):
                     if self.mainWindow.dockWidgetArea(dockWidget_) == area
                 ]
                 if areaDockWidgets:
-                    self.mainWindow.tabifyDockWidget(areaDockWidgets[-1], outerWidget)
+                    self.mainWindow.tabifyDockWidget(areaDockWidgets[-1], wrapperWidget)
                 else:
-                    self.mainWindow.addDockWidget(area, outerWidget)
-        self._wrapperWidgets[name].append(outerWidget)
+                    self.mainWindow.addDockWidget(area, wrapperWidget)
+        self._wrapperWidgets[name].append(wrapperWidget)
         logger.info("Added a frame to the app %s: %s", name, info)
 
-    def removeFrame(self, name: str, outerWidget: Union[QMdiSubWindow, QDockWidget]):
+    def removeFrame(self, name: str, wrapperWidget: Union[QMdiSubWindow, QDockWidget]):
         """Removes the frame from the main window.
         
         This is not a qiwiscall because QMdiSubWindow and QDockWidget are not Serializable.
         
         Args:
             name: The name of the app.
-            outerWidget: The outer widget to remove.
+            wrapperWidget: The wrapper widget to remove.
         """
-        frameName = outerWidget.widget().__class__.__name__
-        if isinstance(outerWidget, QMdiSubWindow):
-            self.centralWidget.removeSubWindow(outerWidget)
+        frameName = wrapperWidget.widget().__class__.__name__
+        if isinstance(wrapperWidget, QMdiSubWindow):
+            self.centralWidget.removeSubWindow(wrapperWidget)
         else:
-            self.mainWindow.removeDockWidget(outerWidget)
-        self._wrapperWidgets[name].remove(outerWidget)
-        outerWidget.deleteLater()
+            self.mainWindow.removeDockWidget(wrapperWidget)
+        self._wrapperWidgets[name].remove(wrapperWidget)
+        wrapperWidget.deleteLater()
         logger.info("Removed a frame %s from the app %s", frameName, name)
 
     def appNames(self) -> Tuple[str]:
@@ -286,9 +286,9 @@ class Qiwis(QObject):
         Args:
             name: A name of the app to destroy.
         """
-        outerWidgets = self._wrapperWidgets[name]
-        for outerWidget in outerWidgets:
-            self.removeFrame(name, outerWidget)
+        wrapperWidgets = self._wrapperWidgets[name]
+        for wrapperWidget in wrapperWidgets:
+            self.removeFrame(name, wrapperWidget)
         del self._wrapperWidgets[name]
         for apps in self._subscribers.values():
             apps.discard(name)
@@ -304,8 +304,8 @@ class Qiwis(QObject):
         app = self._apps[name]
         info = self.appInfos[name]
         orgFrames = {
-            outerWidget.widget(): outerWidget
-            for outerWidget in self._wrapperWidgets[name]
+            wrapperWidget.widget(): wrapperWidget
+            for wrapperWidget in self._wrapperWidgets[name]
         }
         newFrames = app.frames()
         orgFramesSet = set(orgFrames)
