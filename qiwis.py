@@ -189,7 +189,7 @@ class Qiwis(QObject):
         logger.info("Loaded %d app(s)", len(appInfos))
 
     def addFrame(self, name: str, frame: QWidget, info: AppInfo):
-        """Adds a frame of the app and wraps it with a dock widget.
+        """Adds the given frame and wraps it with a wrapper widget.
 
         This is not a qiwiscall because QWidget is not Serializable.
         

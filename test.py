@@ -137,20 +137,20 @@ class QiwisTestWithApps(unittest.TestCase):
 
     def test_update_frames_inclusive(self):
         """Tests for the case where a new frame is added in the return of frames()."""
-        orgFramesSet = {dockWidget.widget() for dockWidget in self.qiwis._wrapperWidgets["app1"]}
+        orgFramesSet = {wrapperWidget.widget() for wrapperWidget in self.qiwis._wrapperWidgets["app1"]}
         newFramesSet = orgFramesSet | {QWidget()}
         self.qiwis._apps["app1"].frames.return_value = tuple(newFramesSet)
         self.qiwis.updateFrames("app1")
-        finalFramesSet = {dockWidget.widget() for dockWidget in self.qiwis._wrapperWidgets["app1"]}
+        finalFramesSet = {wrapperWidget.widget() for wrapperWidget in self.qiwis._wrapperWidgets["app1"]}
         self.assertEqual(finalFramesSet, newFramesSet)
 
     def test_update_frames_exclusive(self):
         """Tests for the case where a new frame replaced the return of frames()."""
-        orgFramesSet = {dockWidget.widget() for dockWidget in self.qiwis._wrapperWidgets["app1"]}
+        orgFramesSet = {wrapperWidget.widget() for wrapperWidget in self.qiwis._wrapperWidgets["app1"]}
         newFramesSet = {QWidget()}
         self.qiwis._apps["app1"].frames.return_value = tuple(newFramesSet)
         self.qiwis.updateFrames("app1")
-        finalFramesSet = {dockWidget.widget() for dockWidget in self.qiwis._wrapperWidgets["app1"]}
+        finalFramesSet = {wrapperWidget.widget() for wrapperWidget in self.qiwis._wrapperWidgets["app1"]}
         self.assertFalse(finalFramesSet & orgFramesSet)
         self.assertEqual(finalFramesSet, newFramesSet)
 
