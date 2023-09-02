@@ -214,8 +214,8 @@ class Qiwis(QObject):
             }.get(info.pos, Qt.LeftDockWidgetArea)
             if info.show:
                 areaDockWidgets = [
-                    dockWidget_ for dockWidget_ in self.mainWindow.findChildren(QDockWidget)
-                    if self.mainWindow.dockWidgetArea(dockWidget_) == area
+                    dockWidget for dockWidget in self.mainWindow.findChildren(QDockWidget)
+                    if self.mainWindow.dockWidgetArea(dockWidget) == area
                 ]
                 if areaDockWidgets:
                     self.mainWindow.tabifyDockWidget(areaDockWidgets[-1], wrapperWidget)
