@@ -67,10 +67,10 @@ class QiwisTestWithApps(unittest.TestCase):
         self.import_module_patcher = mock.patch("importlib.import_module")
         self.mocked_import_module = self.import_module_patcher.start()
         for appInfo in APP_INFOS.values():
-            app_ = mock.MagicMock()
-            app_.cls = appInfo.cls
-            app_.frames.return_value = (QWidget(),)
-            cls = mock.MagicMock(return_value=app_)
+            app = mock.MagicMock()
+            app.cls = appInfo.cls
+            app.frames.return_value = (QWidget(),)
+            cls = mock.MagicMock(return_value=app)
             setattr(self.mocked_import_module.return_value, appInfo.cls, cls)
         self.channels = set()
         for appInfo in APP_INFOS.values():
