@@ -94,10 +94,10 @@ class QiwisTestWithApps(unittest.TestCase):
         self.assertEqual(appNamesSet, set(APP_INFOS))
 
     def test_create_app(self):
-        app_ = mock.MagicMock()
-        app_.cls = "cls3"
-        app_.frames.return_value = (QWidget(),)
-        cls = mock.MagicMock(return_value=app_)
+        app = mock.MagicMock()
+        app.cls = "cls3"
+        app.frames.return_value = (QWidget(),)
+        cls = mock.MagicMock(return_value=app)
         setattr(self.mocked_import_module.return_value, "cls3", cls)
         self.qiwis.createApp(
             "app3",
@@ -111,10 +111,10 @@ class QiwisTestWithApps(unittest.TestCase):
     def test_create_existing_app(self):
         """Tests for the case where trying to create an existing app."""
         orgApp = self.qiwis._apps["app2"]
-        app_ = mock.MagicMock()
-        app_.cls = "cls2"
-        app_.frames.return_value = (QWidget(),)
-        cls = mock.MagicMock(return_value=app_)
+        app = mock.MagicMock()
+        app.cls = "cls2"
+        app.frames.return_value = (QWidget(),)
+        cls = mock.MagicMock(return_value=app)
         setattr(self.mocked_import_module.return_value, "cls2", cls)
         appInfo = qiwis.AppInfo(module="module2", cls="cls2")
         with mock.patch.object(self.qiwis, "destroyApp") as mocked_destroy_app:
@@ -186,8 +186,8 @@ class QiwisTestWithApps(unittest.TestCase):
     def test_broadcast(self):
         for channelName in self.channels:
             self.qiwis._broadcast(channelName, "test_msg")
-        for name, app_ in self.qiwis._apps.items():
-            self.assertEqual(len(APP_INFOS[name].channel), app_.received.emit.call_count)
+        for name, app in self.qiwis._apps.items():
+            self.assertEqual(len(APP_INFOS[name].channel), app.received.emit.call_count)
 
 
 class QiwisTestWithoutApps(unittest.TestCase):
