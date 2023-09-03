@@ -31,7 +31,7 @@ from typing import (
 )
 
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, Qt
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QBrush, QIcon, QPainter, QPixmap
 from PyQt5.QtWidgets import (
     QApplication, QDockWidget, QMainWindow, QMdiArea, QMdiSubWindow, QMessageBox, QWidget
 )
@@ -141,6 +141,22 @@ class QiwiscallResult(Serializable):
     error: Optional[str] = None
 
 
+class MdiArea(QMdiArea):
+    """MdiArea class for the central widget."""
+
+    def __init__(self, background_path: Optional[str] = None):
+        QMdiArea.__init__(self)
+        self.background = QPixmap(background_path)
+
+    def paintEvent(self, event):
+        QMdiArea.paintEvent(self, event)
+        painter = QPainter(self.viewport())
+        x = (self.width() - self.background.width())//2
+        y = (self.height() - self.background.height())//2
+        painter.setOpacity(1)
+        painter.drawPixmap(x, y, self.background)
+
+
 class Qiwis(QObject):
     """Actual manager for qiwis system.
 
@@ -167,23 +183,29 @@ class Qiwis(QObject):
         """
         super().__init__(parent=parent)
         self.appInfos = appInfos
-        self.constants = constants
+        icon_path, background_path = map(
+            lambda attr: getattr(constants, attr, None),
+            ("icon_path", "background_path")
+        )
         self.mainWindow = QMainWindow()
-        self.centralWidget = QMdiArea()
+        self.centralWidget = MdiArea(background_path)
         self.mainWindow.setCentralWidget(self.centralWidget)
         self._wrapperWidgets = defaultdict(list)
         self._apps: Dict[str, BaseApp] = {}
         self._subscribers: DefaultDict[str, Set[str]] = defaultdict(set)
         appInfos = appInfos if appInfos else {}
-        constants = appInfos if constants else {}
-        self.setIconBackground()
+        self.setIcon(icon_path)
         self.load(appInfos)
         self.mainWindow.show()
 
-    def setIconBackground(self):
-        """Sets the icon and background images."""
-        if hasattr(self.constants, "icon_path"):
-            icon = QIcon(self.constants.icon_path)
+    def setIcon(self, icon_path: Optional[str]):
+        """Sets the icon image.
+
+        Args:
+            icon_path: The path of the icon image.
+        """
+        if icon_path is not None:
+            icon = QIcon(icon_path)
             self.mainWindow.setWindowIcon(icon)
 
     def load(self, appInfos: Mapping[str, AppInfo]):
@@ -732,7 +754,11 @@ def _read_config_file(config_path: str) -> Tuple[Dict[str, AppInfo], Dict[str, J
       }
 
     See AppInfo for app_info_* structure.
-      
+
+    The predefined constants are as follows:
+        icon_path: The path of the icon image.
+        background_path: The path of the background image.
+
     Args:
         config_path: The path of the configuration file.
 
