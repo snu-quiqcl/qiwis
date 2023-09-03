@@ -31,7 +31,7 @@ from typing import (
 )
 
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, Qt
-from PyQt5.QtGui import QBrush, QIcon, QPainter, QPixmap
+from PyQt5.QtGui import QIcon, QPainter, QPaintEvent, QPixmap
 from PyQt5.QtWidgets import (
     QApplication, QDockWidget, QMainWindow, QMdiArea, QMdiSubWindow, QMessageBox, QWidget
 )
@@ -142,18 +142,30 @@ class QiwiscallResult(Serializable):
 
 
 class MdiArea(QMdiArea):
-    """MdiArea class for the central widget."""
+    """QMdiArea for the central widget.
+    
+    Attributes:
+        background: The QPixmap instance of the background image.
+    """
 
     def __init__(self, background_path: Optional[str] = None):
+        """Extended.
+        
+        Args:
+            background_path: The path of the background image.
+        """
         QMdiArea.__init__(self)
         self.background = QPixmap(background_path)
 
-    def paintEvent(self, event):
+    def paintEvent(self, event: QPaintEvent):
+        """Extended.
+        
+        Draws the background image.
+        """
         QMdiArea.paintEvent(self, event)
         painter = QPainter(self.viewport())
-        x = (self.width() - self.background.width())//2
-        y = (self.height() - self.background.height())//2
-        painter.setOpacity(1)
+        x = (self.width() - self.background.width()) // 2
+        y = (self.height() - self.background.height()) // 2
         painter.drawPixmap(x, y, self.background)
 
 
