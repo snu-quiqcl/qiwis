@@ -31,6 +31,7 @@ from typing import (
 )
 
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, Qt
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (
     QApplication, QDockWidget, QMainWindow, QMdiArea, QMdiSubWindow, QMessageBox, QWidget
 )
@@ -181,6 +182,9 @@ class Qiwis(QObject):
 
     def setIconBackground(self):
         """Sets the icon and background images."""
+        if hasattr(self.constants, "icon_path"):
+            icon = QIcon(self.constants.icon_path)
+            self.mainWindow.setWindowIcon(icon)
 
     def load(self, appInfos: Mapping[str, AppInfo]):
         """Initializes qiwis system and loads the apps.
