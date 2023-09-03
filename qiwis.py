@@ -157,6 +157,7 @@ class Qiwis(QObject):
     def __init__(
         self,
         appInfos: Optional[Mapping[str, AppInfo]] = None,
+        constants: Optional[Tuple] = None,
         parent: Optional[QObject] = None):
         """
         Args:
@@ -165,6 +166,7 @@ class Qiwis(QObject):
         """
         super().__init__(parent=parent)
         self.appInfos = appInfos
+        self.constants = constants
         self.mainWindow = QMainWindow()
         self.centralWidget = QMdiArea()
         self.mainWindow.setCentralWidget(self.centralWidget)
@@ -663,9 +665,9 @@ def set_global_constant_namespace(constants: Mapping[str, JsonType]) -> Tuple:
         The created namedtuple, which is the global constant namespace.
     """
     ConstantNamespace = namedtuple("ConstantNamespace", constants.keys())
-    _constants = ConstantNamespace(*map(_immutable, constants.values()))
-    BaseApp._constants = _constants  # pylint: disable=protected-access
-    return _constants
+    constants_ = ConstantNamespace(*map(_immutable, constants.values()))
+    BaseApp._constants = constants_  # pylint: disable=protected-access
+    return constants_
 
 
 @contextmanager
@@ -761,8 +763,8 @@ def main():
     app_infos, constants = _read_config_file(args.config_path)
     # start GUI
     qapp = QApplication(sys.argv)
-    set_global_constant_namespace(constants)
-    _qiwis = Qiwis(app_infos)
+    constants_ = set_global_constant_namespace(constants)
+    _qiwis = Qiwis(app_infos, constants_)
     logger.info("Now the QApplication starts")
     qapp.exec_()
 
