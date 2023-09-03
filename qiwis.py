@@ -174,8 +174,13 @@ class Qiwis(QObject):
         self._apps: Dict[str, BaseApp] = {}
         self._subscribers: DefaultDict[str, Set[str]] = defaultdict(set)
         appInfos = appInfos if appInfos else {}
+        constants = appInfos if constants else {}
+        self.setIconBackground()
         self.load(appInfos)
         self.mainWindow.show()
+
+    def setIconBackground(self):
+        """Sets the icon and background images."""
 
     def load(self, appInfos: Mapping[str, AppInfo]):
         """Initializes qiwis system and loads the apps.
