@@ -67,10 +67,10 @@ class QiwisTestWithApps(unittest.TestCase):
         self.import_module_patcher = mock.patch("importlib.import_module")
         self.mocked_import_module = self.import_module_patcher.start()
         for appInfo in APP_INFOS.values():
-            app_ = mock.MagicMock()
-            app_.cls = appInfo.cls
-            app_.frames.return_value = (QWidget(),)
-            cls = mock.MagicMock(return_value=app_)
+            app = mock.MagicMock()
+            app.cls = appInfo.cls
+            app.frames.return_value = (QWidget(),)
+            cls = mock.MagicMock(return_value=app)
             setattr(self.mocked_import_module.return_value, appInfo.cls, cls)
         self.channels = set()
         for appInfo in APP_INFOS.values():
@@ -85,7 +85,7 @@ class QiwisTestWithApps(unittest.TestCase):
         for name, info in APP_INFOS.items():
             self.mocked_import_module.assert_any_call(info.module)
             self.assertEqual(self.qiwis._apps[name].cls, info.cls)
-            self.assertIn(name, self.qiwis._dockWidgets)
+            self.assertIn(name, self.qiwis._wrapperWidgets)
         for channel in self.channels:
             self.assertIn(channel, self.qiwis._subscribers)
 
@@ -94,10 +94,10 @@ class QiwisTestWithApps(unittest.TestCase):
         self.assertEqual(appNamesSet, set(APP_INFOS))
 
     def test_create_app(self):
-        app_ = mock.MagicMock()
-        app_.cls = "cls3"
-        app_.frames.return_value = (QWidget(),)
-        cls = mock.MagicMock(return_value=app_)
+        app = mock.MagicMock()
+        app.cls = "cls3"
+        app.frames.return_value = (QWidget(),)
+        cls = mock.MagicMock(return_value=app)
         setattr(self.mocked_import_module.return_value, "cls3", cls)
         self.qiwis.createApp(
             "app3",
@@ -105,16 +105,16 @@ class QiwisTestWithApps(unittest.TestCase):
         )
         self.mocked_import_module.assert_called_with("module3")
         self.assertEqual(self.qiwis._apps["app3"].cls, "cls3")
-        self.assertIn("app3", self.qiwis._dockWidgets)
+        self.assertIn("app3", self.qiwis._wrapperWidgets)
         self.assertIn("app3", self.qiwis._subscribers["ch1"])
 
     def test_create_existing_app(self):
         """Tests for the case where trying to create an existing app."""
         orgApp = self.qiwis._apps["app2"]
-        app_ = mock.MagicMock()
-        app_.cls = "cls2"
-        app_.frames.return_value = (QWidget(),)
-        cls = mock.MagicMock(return_value=app_)
+        app = mock.MagicMock()
+        app.cls = "cls2"
+        app.frames.return_value = (QWidget(),)
+        cls = mock.MagicMock(return_value=app)
         setattr(self.mocked_import_module.return_value, "cls2", cls)
         appInfo = qiwis.AppInfo(module="module2", cls="cls2")
         with mock.patch.object(self.qiwis, "destroyApp") as mocked_destroy_app:
@@ -131,26 +131,26 @@ class QiwisTestWithApps(unittest.TestCase):
         for name, info in APP_INFOS.items():
             self.qiwis.destroyApp(name)
             self.assertNotIn(name, self.qiwis._apps)
-            self.assertNotIn(name, self.qiwis._dockWidgets)
+            self.assertNotIn(name, self.qiwis._wrapperWidgets)
             for channel in info.channel:
                 self.assertNotIn(name, self.qiwis._subscribers[channel])
 
     def test_update_frames_inclusive(self):
         """Tests for the case where a new frame is added in the return of frames()."""
-        orgFramesSet = {dockWidget.widget() for dockWidget in self.qiwis._dockWidgets["app1"]}
+        orgFramesSet = {wrapper.widget() for wrapper in self.qiwis._wrapperWidgets["app1"]}
         newFramesSet = orgFramesSet | {QWidget()}
         self.qiwis._apps["app1"].frames.return_value = tuple(newFramesSet)
         self.qiwis.updateFrames("app1")
-        finalFramesSet = {dockWidget.widget() for dockWidget in self.qiwis._dockWidgets["app1"]}
+        finalFramesSet = {wrapper.widget() for wrapper in self.qiwis._wrapperWidgets["app1"]}
         self.assertEqual(finalFramesSet, newFramesSet)
 
     def test_update_frames_exclusive(self):
         """Tests for the case where a new frame replaced the return of frames()."""
-        orgFramesSet = {dockWidget.widget() for dockWidget in self.qiwis._dockWidgets["app1"]}
+        orgFramesSet = {wrapper.widget() for wrapper in self.qiwis._wrapperWidgets["app1"]}
         newFramesSet = {QWidget()}
         self.qiwis._apps["app1"].frames.return_value = tuple(newFramesSet)
         self.qiwis.updateFrames("app1")
-        finalFramesSet = {dockWidget.widget() for dockWidget in self.qiwis._dockWidgets["app1"]}
+        finalFramesSet = {wrapper.widget() for wrapper in self.qiwis._wrapperWidgets["app1"]}
         self.assertFalse(finalFramesSet & orgFramesSet)
         self.assertEqual(finalFramesSet, newFramesSet)
 
@@ -186,8 +186,8 @@ class QiwisTestWithApps(unittest.TestCase):
     def test_broadcast(self):
         for channelName in self.channels:
             self.qiwis._broadcast(channelName, "test_msg")
-        for name, app_ in self.qiwis._apps.items():
-            self.assertEqual(len(APP_INFOS[name].channel), app_.received.emit.call_count)
+        for name, app in self.qiwis._apps.items():
+            self.assertEqual(len(APP_INFOS[name].channel), app.received.emit.call_count)
 
 
 class QiwisTestWithoutApps(unittest.TestCase):

@@ -31,7 +31,9 @@ from typing import (
 )
 
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, Qt
-from PyQt5.QtWidgets import QApplication, QMainWindow, QDockWidget, QMessageBox, QWidget
+from PyQt5.QtWidgets import (
+    QApplication, QDockWidget, QMainWindow, QMdiArea, QMdiSubWindow, QMessageBox, QWidget
+)
 
 T = TypeVar("T")
 JsonType = Union[None, float, bool, str, List["JsonType"], Dict[str, "JsonType"]]
@@ -58,18 +60,21 @@ class AppInfo(Serializable):
     """Information required to create an app.
     
     Fields:
-        module: Module name in which the app class resides.
-        cls: App class name.
-        path: System path for module importing.
-        show: Whether to show the app frames on creation.
-        pos: Position on the main window; refer to Qt.DockWidgetArea enum.
-          Should be one of "left", "right", "top", or "bottom", case-sensitive.
-          Otherwise, defaults to Qt.LeftDockWidgetArea.
-        channel: Channels which the app subscribes to.
-        args: Keyword argument dictionary of the app class constructor.
-          It must exclude name and parent arguments. Even if they exist, they will be ignored.
+        module: The module name of the app class.
+        cls: The name of the app class.
+        path: The path for importing the module.
+        show: Whether to show frames of the app.
+        pos: The position of the frames on the GUI.
+          It should be one of "center", "left", "right", "top", or "bottom", case-sensitive.
+          Otherwise, it is set to "left".
+          In the case "center", the frame is wrapped by QMdiSubWindow.
+          In the other cases, the frame is wrapped by QDockWidget and
+            its position follows Qt.DockWidgetArea.
+        channel: The list of channels which the app subscribes to.
+        args: The dictionary for the keyword arguments of the app class constructor.
+          It should exclude the name and parent arguments.
           None for initializing the app with default values,
-          where only name and parent arguments will be passed.
+            where only the name and parent arguments will be passed.
     """
     module: str
     cls: str
@@ -161,10 +166,9 @@ class Qiwis(QObject):
         super().__init__(parent=parent)
         self.appInfos = appInfos
         self.mainWindow = QMainWindow()
-        self.centralWidget = QWidget()
-        self.centralWidget.setStyleSheet("border-image: url(./resources/background.png);")
+        self.centralWidget = QMdiArea()
         self.mainWindow.setCentralWidget(self.centralWidget)
-        self._dockWidgets = defaultdict(list)
+        self._wrapperWidgets = defaultdict(list)
         self._apps: Dict[str, BaseApp] = {}
         self._subscribers: DefaultDict[str, Set[str]] = defaultdict(set)
         appInfos = appInfos if appInfos else {}
@@ -185,7 +189,7 @@ class Qiwis(QObject):
         logger.info("Loaded %d app(s)", len(appInfos))
 
     def addFrame(self, name: str, frame: QWidget, info: AppInfo):
-        """Adds a frame of the app and wraps it with a dock widget.
+        """Adds the given frame and wraps it with a wrapper widget.
 
         This is not a qiwiscall because QWidget is not Serializable.
         
@@ -194,39 +198,48 @@ class Qiwis(QObject):
             frame: A frame to show.
             info: An AppInfo object describing the app.
         """
-        dockWidget = QDockWidget(name, self.mainWindow)
-        dockWidget.setWidget(frame)
-        area = {
-            "left": Qt.LeftDockWidgetArea,
-            "right": Qt.RightDockWidgetArea,
-            "top": Qt.TopDockWidgetArea,
-            "bottom": Qt.BottomDockWidgetArea
-        }.get(info.pos, Qt.LeftDockWidgetArea)
-        if info.show:
-            areaDockWidgets = [
-                dockWidget_ for dockWidget_ in self.mainWindow.findChildren(QDockWidget)
-                if self.mainWindow.dockWidgetArea(dockWidget_) == area
-            ]
-            if areaDockWidgets:
-                self.mainWindow.tabifyDockWidget(areaDockWidgets[-1], dockWidget)
-            else:
-                self.mainWindow.addDockWidget(area, dockWidget)
-        self._dockWidgets[name].append(dockWidget)
+        if info.pos == "center":
+            wrapperWidget = QMdiSubWindow(self.centralWidget)
+            wrapperWidget.setWindowTitle(name)
+            wrapperWidget.setWidget(frame)
+            wrapperWidget.show()
+        else:
+            wrapperWidget = QDockWidget(name, self.mainWindow)
+            wrapperWidget.setWidget(frame)
+            area = {
+                "left": Qt.LeftDockWidgetArea,
+                "right": Qt.RightDockWidgetArea,
+                "top": Qt.TopDockWidgetArea,
+                "bottom": Qt.BottomDockWidgetArea
+            }.get(info.pos, Qt.LeftDockWidgetArea)
+            if info.show:
+                areaDockWidgets = [
+                    dockWidget for dockWidget in self.mainWindow.findChildren(QDockWidget)
+                    if self.mainWindow.dockWidgetArea(dockWidget) == area
+                ]
+                if areaDockWidgets:
+                    self.mainWindow.tabifyDockWidget(areaDockWidgets[-1], wrapperWidget)
+                else:
+                    self.mainWindow.addDockWidget(area, wrapperWidget)
+        self._wrapperWidgets[name].append(wrapperWidget)
         logger.info("Added a frame to the app %s: %s", name, info)
 
-    def removeFrame(self, name: str, dockWidget: QDockWidget):
+    def removeFrame(self, name: str, wrapperWidget: Union[QMdiSubWindow, QDockWidget]):
         """Removes the frame from the main window.
         
-        This is not a qiwiscall because QDockWidget is not Serializable.
+        This is not a qiwiscall because QMdiSubWindow and QDockWidget are not Serializable.
         
         Args:
-            name: A name of app.
-            dockWidget: A dock widget to remove.
+            name: The name of the app.
+            wrapperWidget: The wrapper widget to remove.
         """
-        frameName = dockWidget.widget().__class__.__name__
-        self.mainWindow.removeDockWidget(dockWidget)
-        self._dockWidgets[name].remove(dockWidget)
-        dockWidget.deleteLater()
+        frameName = wrapperWidget.widget().__class__.__name__
+        if isinstance(wrapperWidget, QMdiSubWindow):
+            self.centralWidget.removeSubWindow(wrapperWidget)
+        else:
+            self.mainWindow.removeDockWidget(wrapperWidget)
+        self._wrapperWidgets[name].remove(wrapperWidget)
+        wrapperWidget.deleteLater()
         logger.info("Removed a frame %s from the app %s", frameName, name)
 
     def appNames(self) -> Tuple[str]:
@@ -273,10 +286,10 @@ class Qiwis(QObject):
         Args:
             name: A name of the app to destroy.
         """
-        dockWidgets = self._dockWidgets[name]
-        for dockWidget in dockWidgets:
-            self.removeFrame(name, dockWidget)
-        del self._dockWidgets[name]
+        wrapperWidgets = self._wrapperWidgets[name]
+        for wrapperWidget in wrapperWidgets:
+            self.removeFrame(name, wrapperWidget)
+        del self._wrapperWidgets[name]
         for apps in self._subscribers.values():
             apps.discard(name)
         self._apps.pop(name).deleteLater()
@@ -290,7 +303,10 @@ class Qiwis(QObject):
         """
         app = self._apps[name]
         info = self.appInfos[name]
-        orgFrames = {dockWidget.widget(): dockWidget for dockWidget in self._dockWidgets[name]}
+        orgFrames = {
+            wrapperWidget.widget(): wrapperWidget
+            for wrapperWidget in self._wrapperWidgets[name]
+        }
         newFrames = app.frames()
         orgFramesSet = set(orgFrames)
         newFramesSet = set(newFrames)
