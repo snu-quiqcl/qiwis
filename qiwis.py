@@ -191,6 +191,7 @@ class Qiwis(QObject):
         """
         Args:
             appInfos: See Qiwis.load(). None or an empty dictionary for loading no apps.
+            constants: The global constant namespace. See set_global_constant_namespace().
             parent: A parent object.
         """
         super().__init__(parent=parent)
