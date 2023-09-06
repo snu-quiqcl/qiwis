@@ -154,7 +154,7 @@ class MdiArea(QMdiArea):
         Args:
             background_path: The path of the background image.
         """
-        QMdiArea.__init__(self)
+        super().__init__()
         self.background = QPixmap(background_path)
 
     def paintEvent(self, event: QPaintEvent):
