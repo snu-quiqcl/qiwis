@@ -31,6 +31,7 @@ from typing import (
 )
 
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, Qt
+from PyQt5.QtGui import QIcon, QPainter, QPaintEvent, QPixmap
 from PyQt5.QtWidgets import (
     QApplication, QDockWidget, QMainWindow, QMdiArea, QMdiSubWindow, QMessageBox, QWidget
 )
@@ -140,6 +141,34 @@ class QiwiscallResult(Serializable):
     error: Optional[str] = None
 
 
+class MdiArea(QMdiArea):
+    """QMdiArea for the central widget.
+    
+    Attributes:
+        background: The QPixmap instance of the background image.
+    """
+
+    def __init__(self, background_path: Optional[str] = None):
+        """Extended.
+        
+        Args:
+            background_path: The path of the background image.
+        """
+        super().__init__()
+        self.background = QPixmap(background_path)
+
+    def paintEvent(self, event: QPaintEvent):
+        """Extended.
+        
+        Draws the background image.
+        """
+        QMdiArea.paintEvent(self, event)
+        painter = QPainter(self.viewport())
+        x = (self.width() - self.background.width()) // 2
+        y = (self.height() - self.background.height()) // 2
+        painter.drawPixmap(x, y, self.background)
+
+
 class Qiwis(QObject):
     """Actual manager for qiwis system.
 
@@ -157,23 +186,40 @@ class Qiwis(QObject):
     def __init__(
         self,
         appInfos: Optional[Mapping[str, AppInfo]] = None,
+        constants: Optional[Tuple] = None,
         parent: Optional[QObject] = None):
         """
         Args:
             appInfos: See Qiwis.load(). None or an empty dictionary for loading no apps.
+            constants: The global constant namespace. See set_global_constant_namespace().
             parent: A parent object.
         """
         super().__init__(parent=parent)
         self.appInfos: Dict[str, AppInfo] = {}
+        icon_path, background_path = map(
+            lambda attr: getattr(constants, attr, None),
+            ("icon_path", "background_path")
+        )
         self.mainWindow = QMainWindow()
-        self.centralWidget = QMdiArea()
+        self.centralWidget = MdiArea(background_path)
         self.mainWindow.setCentralWidget(self.centralWidget)
         self._wrapperWidgets = defaultdict(list)
         self._apps: Dict[str, BaseApp] = {}
         self._subscribers: DefaultDict[str, Set[str]] = defaultdict(set)
         appInfos = appInfos if appInfos else {}
+        self.setIcon(icon_path)
         self.load(appInfos)
         self.mainWindow.show()
+
+    def setIcon(self, icon_path: Optional[str]):
+        """Sets the icon image.
+
+        Args:
+            icon_path: The path of the icon image.
+        """
+        if icon_path is not None:
+            icon = QIcon(icon_path)
+            self.mainWindow.setWindowIcon(icon)
 
     def load(self, appInfos: Mapping[str, AppInfo]):
         """Initializes qiwis system and loads the apps.
@@ -665,9 +711,9 @@ def set_global_constant_namespace(constants: Mapping[str, JsonType]) -> Tuple:
         The created namedtuple, which is the global constant namespace.
     """
     ConstantNamespace = namedtuple("ConstantNamespace", constants.keys())
-    _constants = ConstantNamespace(*map(_immutable, constants.values()))
-    BaseApp._constants = _constants  # pylint: disable=protected-access
-    return _constants
+    constants_ = ConstantNamespace(*map(_immutable, constants.values()))
+    BaseApp._constants = constants_  # pylint: disable=protected-access
+    return constants_
 
 
 @contextmanager
@@ -723,7 +769,11 @@ def _read_config_file(config_path: str) -> Tuple[Dict[str, AppInfo], Dict[str, J
       }
 
     See AppInfo for app_info_* structure.
-      
+
+    The predefined constants are as follows:
+        icon_path: The path of the icon image.
+        background_path: The path of the background image.
+
     Args:
         config_path: The path of the configuration file.
 
@@ -763,8 +813,8 @@ def main():
     app_infos, constants = _read_config_file(args.config_path)
     # start GUI
     qapp = QApplication(sys.argv)
-    set_global_constant_namespace(constants)
-    _qiwis = Qiwis(app_infos)
+    constants_ = set_global_constant_namespace(constants)
+    _qiwis = Qiwis(app_infos, constants_)
     logger.info("Now the QApplication starts")
     qapp.exec_()
 
