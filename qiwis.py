@@ -310,6 +310,7 @@ class Qiwis(QObject):
         with _add_to_path(os.path.dirname(info.path)):
             module = importlib.import_module(info.module)
         cls = getattr(module, info.cls)
+        cls._constants = BaseApp._constants  # pylint: disable=protected-access
         if info.args is not None:
             app = cls(name, parent=self, **info.args)
         else:
@@ -549,7 +550,7 @@ class BaseApp(QObject):
     @property
     def constants(self) -> Tuple:
         """The global constant namespace."""
-        return BaseApp._constants
+        return self._constants
 
     def frames(self) -> Iterable[QWidget]:
         """Gets frames for which are managed by the App.
