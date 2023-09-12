@@ -195,7 +195,7 @@ class Qiwis(QObject):
             parent: A parent object.
         """
         super().__init__(parent=parent)
-        self.appInfos = appInfos
+        self.appInfos: Dict[str, AppInfo] = {}
         icon_path, background_path = map(
             lambda attr: getattr(constants, attr, None),
             ("icon_path", "background_path")
@@ -324,6 +324,7 @@ class Qiwis(QObject):
         for frame in app.frames():
             self.addFrame(name, frame, info)
         self._apps[name] = app
+        self.appInfos[name] = info
         logger.info("Created an app %s: %s", name, info)
 
     def destroyApp(self, name: str):
@@ -339,6 +340,7 @@ class Qiwis(QObject):
         for apps in self._subscribers.values():
             apps.discard(name)
         self._apps.pop(name).deleteLater()
+        self.appInfos.pop(name)
         logger.info("Destroyed the app %s", name)
 
     def updateFrames(self, name: str):
