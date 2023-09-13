@@ -32,7 +32,11 @@
             "cls": "LoggerApp",
             "show": true,
             "pos": "bottom",
-            "channel": ["log"]
+            "channel": []
         }
+    },
+    "constant": {
+        "icon_path": "resources/icon.jpg",
+        "background_path": "resources/background.jpg"
     }
 }

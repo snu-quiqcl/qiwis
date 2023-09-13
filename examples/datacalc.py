@@ -3,6 +3,8 @@ App module for showing the sum of two values from selected databases.
 """
 
 import os
+import json
+import logging
 import functools
 from typing import Any, Optional, Dict, Tuple
 
@@ -11,6 +13,9 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QComboBox, QPushButton, QLabel
 
 from qiwis import BaseApp
 from examples.backend import read
+
+logger = logging.getLogger(__name__)
+
 
 class ViewerFrame(QWidget):
     """Frame of for selecting databases and showing the calculated number.
@@ -93,8 +98,8 @@ class DataCalcApp(BaseApp):
         newDBs = set([""])
         for db in content.get("db", ()):
             if any(key not in db for key in ("name", "path")):
-                print(f"The message was ignored because "
-                        f"the database {db} has no such key; name or path.")
+                logger.error("The message was ignored because "
+                             "the database %s has no such key; name or path.", json.dumps(db))
                 continue
             name, path = db["name"], db["path"]
             newDBs.add(name)
@@ -123,10 +128,10 @@ class DataCalcApp(BaseApp):
             if isinstance(content, dict):
                 self.updateDB(content)
             else:
-                print("The message for the channel db should be a dictionary.")
+                logger.error("The message for the channel db should be a dictionary.")
         else:
-            print(f"The message was ignored because "
-                  f"the treatment for the channel {channelName} is not implemented.")
+            logger.error("The message was ignored because "
+                         "the treatment for the channel %s is not implemented.", channelName)
 
     @pyqtSlot(str)
     def setDB(self, name: str):
@@ -137,12 +142,10 @@ class DataCalcApp(BaseApp):
         """
         dbBox = self.viewerFrame.dbBoxes[name]
         self.dbNames[name] = dbBox.currentText()
-        self.broadcast(
-            "log", 
-            f"Database {name} is set as {self.dbNames[name]}."
-            if self.dbNames[name]
-            else f"Database {name} is not selected."
-        )
+        if self.dbNames[name]:
+            logger.info("Database %s is set as %s.", name, self.dbNames[name])
+        else:
+            logger.info("Database %s is not selected.", name)
 
     @pyqtSlot()
     def calculateSum(self):
@@ -162,4 +165,4 @@ class DataCalcApp(BaseApp):
             result += value
         else:
             self.viewerFrame.numberLabel.setText(f"sum: {result}")
-            self.broadcast("log", f"Sum: {result}.")
+            logger.info("Sum: %f.", result)

@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10"]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
@@ -16,6 +16,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
+        sudo apt-get update
         python -m pip install --upgrade pip
         pip install coverage
     - name: Add dependencies about external libraries
@@ -24,5 +25,5 @@ jobs:
         sudo apt-get install python3-pyqt5
     - name: Unittest the code with coverage
       run: |
-        xvfb-run `which coverage` run -m test
-        xvfb-run `which coverage` report -m
+        xvfb-run `which coverage` run --source=qiwis -m unittest discover
+        xvfb-run `which coverage` report

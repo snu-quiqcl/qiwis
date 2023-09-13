@@ -3,6 +3,7 @@ App module for adding and removing available databases.
 """
 
 import os
+import logging
 from collections import namedtuple
 from typing import Optional, Tuple
 
@@ -11,6 +12,9 @@ from PyQt5.QtWidgets import (QWidget, QLabel, QPushButton, QFileDialog,
                              QHBoxLayout, QVBoxLayout, QListWidget, QListWidgetItem)
 
 from qiwis import AppInfo, BaseApp
+
+logger = logging.getLogger(__name__)
+
 
 class DBWidget(QWidget):
     """Widget for showing a database.
@@ -121,11 +125,7 @@ class DBMgrApp(BaseApp):
         """
         msg = {"db": [db._asdict() for db in self.dbList]}
         self.broadcast("db", msg)
-        self.broadcast(
-            "log",
-            f"Database {name} is added." if isAdded
-            else f"Database {name} is removed."
-        )
+        logger.info("Database %s is %s.", name, "added" if isAdded else "removed")
 
     @pyqtSlot()
     def addDB(self):
@@ -181,7 +181,7 @@ class DBMgrApp(BaseApp):
         """
         if self.openCloseDatacalcResult is not None:
             if not self.openCloseDatacalcResult.done:
-                print("DBMgrApp.openCloseDatacalc(): The previous qiwiscall must be done.")
+                logger.warning("DBMgrApp.openCloseDatacalc(): The previous qiwiscall must be done.")
                 return
             if self.openCloseDatacalcResult.success:
                 self.isDatacalcOpen = not self.isDatacalcOpen
@@ -194,7 +194,7 @@ class DBMgrApp(BaseApp):
                     module="examples.datacalc",
                     cls="DataCalcApp",
                     show=True,
-                    pos="top",
+                    pos="center",
                     channel=["db"],
                     args={
                         "tables": {

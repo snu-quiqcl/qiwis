@@ -3,6 +3,8 @@ App module for polling a number and saving it into the selected database.
 """
 
 import os
+import json
+import logging
 from typing import Any, Optional, Tuple
 
 from PyQt5.QtCore import QObject, pyqtSlot, QTimer
@@ -10,6 +12,9 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QComboBox, QSpinBox, QLabel
 
 from qiwis import BaseApp
 from examples.backend import poll, write
+
+logger = logging.getLogger(__name__)
+
 
 class ViewerFrame(QWidget):
     """Frame for selecting a database and period, and showing the polled number.
@@ -95,8 +100,8 @@ class PollerApp(BaseApp):
         newDBs = set([""])
         for db in content.get("db", ()):
             if any(key not in db for key in ("name", "path")):
-                print(f"The message was ignored because "
-                        f"the database {db} has no such key; name or path.")
+                logger.error("The message was ignored because "
+                             "the database %s has no such key; name or path.", json.dumps(db))
                 continue
             name, path = db["name"], db["path"]
             newDBs.add(name)
@@ -122,27 +127,26 @@ class PollerApp(BaseApp):
             if isinstance(content, dict):
                 self.updateDB(content)
             else:
-                print("The message for the channel db should be a dictionary.")
+                logger.error("The message for the channel db should be a dictionary.")
         else:
-            print(f"The message was ignored because "
-                  f"the treatment for the channel {channelName} is not implemented.")
+            logger.error("The message was ignored because "
+                         "the treatment for the channel %s is not implemented.", channelName)
 
     @pyqtSlot()
     def setPeriod(self):
         """Sets the polling period."""
         period = self.viewerFrame.periodBox.value()
         self.timer.start(1000 * period)
-        self.broadcast("log", f"Period is set as {period}s.")
+        logger.info("Period is set as %ds.", period)
 
     @pyqtSlot()
     def setDB(self):
         """Sets the database to store the polled number."""
         self.dbName = self.viewerFrame.dbBox.currentText()
-        self.broadcast(
-            "log", 
-            f"Polled database is set as {self.dbName}." if self.dbName
-            else "Polled database is not selected."
-        )
+        if self.dbName:
+            logger.info("Database to store is set as %s.", self.dbName)
+        else:
+            logger.info("Database to store is not selected.")
 
     @pyqtSlot()
     def poll(self):
@@ -151,8 +155,10 @@ class PollerApp(BaseApp):
         self.count += 1
         self.viewerFrame.countLabel.setText(f"polled count: {self.count}")
         self.viewerFrame.numberLabel.setText(f"polled number: {num}")
-        self.broadcast("log", f"Polled number: {num}.")
+        logger.info("Polled number: %d.", num)
         # save the polled number
         dbPath = self.dbs[self.dbName]
         if write(os.path.join(dbPath, self.dbName), self.table, num):
-            self.broadcast("log", "Polled number saved.")
+            logger.info("Polled number saved.")
+        else:
+            logger.error("Failed to save polled number.")

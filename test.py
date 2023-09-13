@@ -8,6 +8,7 @@ import sys
 import json
 import unittest
 from unittest import mock
+from types import MappingProxyType
 from typing import Any, Optional, Mapping, Iterable
 
 from PyQt5.QtCore import QObject
@@ -66,10 +67,10 @@ class QiwisTestWithApps(unittest.TestCase):
         self.import_module_patcher = mock.patch("importlib.import_module")
         self.mocked_import_module = self.import_module_patcher.start()
         for appInfo in APP_INFOS.values():
-            app_ = mock.MagicMock()
-            app_.cls = appInfo.cls
-            app_.frames.return_value = (QWidget(),)
-            cls = mock.MagicMock(return_value=app_)
+            app = mock.MagicMock()
+            app.cls = appInfo.cls
+            app.frames.return_value = (QWidget(),)
+            cls = mock.MagicMock(return_value=app)
             setattr(self.mocked_import_module.return_value, appInfo.cls, cls)
         self.channels = set()
         for appInfo in APP_INFOS.values():
@@ -84,7 +85,7 @@ class QiwisTestWithApps(unittest.TestCase):
         for name, info in APP_INFOS.items():
             self.mocked_import_module.assert_any_call(info.module)
             self.assertEqual(self.qiwis._apps[name].cls, info.cls)
-            self.assertIn(name, self.qiwis._dockWidgets)
+            self.assertIn(name, self.qiwis._wrapperWidgets)
         for channel in self.channels:
             self.assertIn(channel, self.qiwis._subscribers)
 
@@ -93,44 +94,63 @@ class QiwisTestWithApps(unittest.TestCase):
         self.assertEqual(appNamesSet, set(APP_INFOS))
 
     def test_create_app(self):
-        app_ = mock.MagicMock()
-        app_.cls = "cls3"
-        app_.frames.return_value = (QWidget(),)
-        cls = mock.MagicMock(return_value=app_)
+        app = mock.MagicMock()
+        app.cls = "cls3"
+        app.frames.return_value = (QWidget(),)
+        cls = mock.MagicMock(return_value=app)
         setattr(self.mocked_import_module.return_value, "cls3", cls)
         self.qiwis.createApp(
             "app3",
-            qiwis.AppInfo(**{"module": "module3", "cls": "cls3", "channel": ["ch1"]})
+            qiwis.AppInfo(module="module3", cls="cls3", channel=["ch1"])
         )
         self.mocked_import_module.assert_called_with("module3")
         self.assertEqual(self.qiwis._apps["app3"].cls, "cls3")
-        self.assertIn("app3", self.qiwis._dockWidgets)
+        self.assertIn("app3", self.qiwis._wrapperWidgets)
         self.assertIn("app3", self.qiwis._subscribers["ch1"])
+
+    def test_create_existing_app(self):
+        """Tests for the case where trying to create an existing app."""
+        orgApp = self.qiwis._apps["app2"]
+        app = mock.MagicMock()
+        app.cls = "cls2"
+        app.frames.return_value = (QWidget(),)
+        cls = mock.MagicMock(return_value=app)
+        setattr(self.mocked_import_module.return_value, "cls2", cls)
+        appInfo = qiwis.AppInfo(module="module2", cls="cls2")
+        with mock.patch.object(self.qiwis, "destroyApp") as mocked_destroy_app:
+            # The original app will not be replaced.
+            self.qiwis.createApp("app2", appInfo)
+            mocked_destroy_app.assert_not_called()
+            self.assertEqual(self.qiwis._apps["app2"], orgApp)
+            # The original app will be replaced.
+            self.qiwis.createApp("app2", appInfo, True)
+            mocked_destroy_app.assert_called_once_with("app2")
+            self.assertNotEqual(self.qiwis._apps["app2"], orgApp)
 
     def test_destroy_app(self):
         for name, info in APP_INFOS.items():
             self.qiwis.destroyApp(name)
             self.assertNotIn(name, self.qiwis._apps)
-            self.assertNotIn(name, self.qiwis._dockWidgets)
+            self.assertNotIn(name, self.qiwis._wrapperWidgets)
             for channel in info.channel:
                 self.assertNotIn(name, self.qiwis._subscribers[channel])
 
     def test_update_frames_inclusive(self):
         """Tests for the case where a new frame is added in the return of frames()."""
-        orgFramesSet = {dockWidget.widget() for dockWidget in self.qiwis._dockWidgets["app1"]}
+        orgFramesSet = {wrapper.widget() for wrapper in self.qiwis._wrapperWidgets["app1"]}
         newFramesSet = orgFramesSet | {QWidget()}
         self.qiwis._apps["app1"].frames.return_value = tuple(newFramesSet)
         self.qiwis.updateFrames("app1")
-        finalFramesSet = {dockWidget.widget() for dockWidget in self.qiwis._dockWidgets["app1"]}
+        finalFramesSet = {wrapper.widget() for wrapper in self.qiwis._wrapperWidgets["app1"]}
         self.assertEqual(finalFramesSet, newFramesSet)
 
     def test_update_frames_exclusive(self):
         """Tests for the case where a new frame replaced the return of frames()."""
-        orgFramesSet = {dockWidget.widget() for dockWidget in self.qiwis._dockWidgets["app1"]}
+        orgFramesSet = {wrapper.widget() for wrapper in self.qiwis._wrapperWidgets["app1"]}
         newFramesSet = {QWidget()}
         self.qiwis._apps["app1"].frames.return_value = tuple(newFramesSet)
         self.qiwis.updateFrames("app1")
-        finalFramesSet = {dockWidget.widget() for dockWidget in self.qiwis._dockWidgets["app1"]}
+        finalFramesSet = {wrapper.widget() for wrapper in self.qiwis._wrapperWidgets["app1"]}
         self.assertFalse(finalFramesSet & orgFramesSet)
         self.assertEqual(finalFramesSet, newFramesSet)
 
@@ -146,6 +166,18 @@ class QiwisTestWithApps(unittest.TestCase):
                 {name for name, info in APP_INFOS.items() if channel in info.channel}
             )
 
+    def test_subscribe(self):
+        self.assertNotIn("app1", self.qiwis._subscribers["ch3"])
+        self.qiwis.subscribe("app1", "ch3")
+        self.assertIn("app1", self.qiwis._subscribers["ch3"])
+
+    def test_subscribe_duplicate(self):
+        """Tests for the case where trying to subscribe to a channel already subscribed to."""
+        self.qiwis.subscribe("app1", "ch3")
+        orgSubscribers = self.qiwis._subscribers["ch3"]
+        self.qiwis.subscribe("app1", "ch3")  # Try to subscribe to the channel again.
+        self.assertEqual(self.qiwis._subscribers["ch3"], orgSubscribers)
+
     def test_unsubcribe(self):
         self.assertEqual(self.qiwis.unsubscribe("app1", "ch1"), True)
         self.assertNotIn("app1", self.qiwis._subscribers["ch1"])
@@ -154,8 +186,8 @@ class QiwisTestWithApps(unittest.TestCase):
     def test_broadcast(self):
         for channelName in self.channels:
             self.qiwis._broadcast(channelName, "test_msg")
-        for name, app_ in self.qiwis._apps.items():
-            self.assertEqual(len(APP_INFOS[name].channel), app_.received.emit.call_count)
+        for name, app in self.qiwis._apps.items():
+            self.assertEqual(len(APP_INFOS[name].channel), app.received.emit.call_count)
 
 
 class QiwisTestWithoutApps(unittest.TestCase):
@@ -341,6 +373,13 @@ class BaseAppTest(unittest.TestCase):
     def test_set_parent(self):
         qiwis.BaseApp("name", QObject())
 
+    def test_constants_default(self):
+        self.assertFalse(self.app.constants._fields)
+
+    @mock.patch("qiwis.BaseApp._constants")
+    def test_constants(self, mocked_constants):
+        self.assertIs(self.app.constants, mocked_constants)
+
     def test_frames(self):
         self.assertIsInstance(self.app.frames(), collections.abc.Iterable)
 
@@ -497,6 +536,67 @@ class QiwisFunctionTest(unittest.TestCase):
         self.assertEqual(qiwis.dumps(APP_INFOS["app1"]), APP_JSONS["app1"])
         self.assertEqual(qiwis.dumps(APP_INFOS["app2"]), APP_JSONS["app2"])
 
+    @mock.patch("qiwis.namedtuple")
+    @mock.patch("qiwis._immutable")
+    @mock.patch("qiwis.BaseApp")
+    def test_set_global_constant_namespace(
+        self,
+        mocked_base_app_cls,
+        mocked_immutable,
+        mocked_namedtuple
+    ):
+        source = {"C0": 0, "C1": True, "C2": "str"}
+        mocked_immutable_values = ("M0", "M1", "M2")
+        mocked_namespace = mocked_namedtuple.return_value
+        mocked_constants = mocked_namespace.return_value
+        mocked_immutable.side_effect = mocked_immutable_values
+        constants = qiwis.set_global_constant_namespace(source)
+        self.assertIs(constants, mocked_constants)
+        self.assertIs(mocked_base_app_cls._constants, mocked_constants)
+        mocked_namedtuple.assert_called_once_with("ConstantNamespace", source.keys())
+        _args, _kwargs = mocked_namespace.call_args
+        self.assertSequenceEqual(_args, mocked_immutable_values)
+        mocked_immutable.assert_has_calls((mock.call(value) for value in source.values()))
+
+    def test_immutable(self):
+        sources = (
+            None,
+            0,
+            True,
+            "str",
+            [None, 1.2, False, "test"],
+            {"k1": 0, "k2": True},
+        )
+        results = (
+            None,
+            0,
+            True,
+            "str",
+            (None, 1.2, False, "test"),
+            MappingProxyType({"k1": 0, "k2": True}),
+        )
+        for source, result in zip(sources, results):
+            self.assertEqual(qiwis._immutable(source), result)
+
+    def test_immutable_recursive(self):
+        source = {
+            "LIST": [None, 0, True, "list"],
+            "LIST_LIST": [0, [1, 2, [3, 4, 5]]],
+            "DICT": {"A": True, "B": False},
+            "DICT_DICT": {"A": 0, "B": {"C": 1, "D": 2}},
+            "LIST_DICT": [0, {"A": 1, "B": [2, 3]}],
+        }
+        result = MappingProxyType({
+            "LIST": (None, 0, True, "list"),
+            "LIST_LIST": (0, (1, 2, (3, 4, 5))),
+            "DICT": MappingProxyType({"A": True, "B": False}),
+            "DICT_DICT": MappingProxyType({"A": 0, "B": MappingProxyType({"C": 1, "D": 2})}),
+            "LIST_DICT": (0, MappingProxyType({"A": 1, "B": (2, 3)})),
+        })
+        self.assertEqual(qiwis._immutable(source), result)
+        # when the root-type is list
+        self.assertEqual(qiwis._immutable(source["LIST_DICT"]), result["LIST_DICT"])
+
     def test_add_to_path(self):
         test_dir = "/test_dir"
         old_path = sys.path.copy()
@@ -505,32 +605,43 @@ class QiwisFunctionTest(unittest.TestCase):
             self.assertIn(test_dir, sys.path)
         self.assertEqual(old_path, sys.path)
 
-    @mock.patch.object(sys, "argv", ["", "-s", "test_setup.json"])
+    @mock.patch.object(sys, "argv", ["", "-c", "test_config.json"])
     def test_get_argparser(self):
         parser = qiwis._get_argparser()
         args = parser.parse_args()
-        self.assertEqual(args.setup_path, "test_setup.json")
+        self.assertEqual(args.config_path, "test_config.json")
 
     @mock.patch.object(sys, "argv", [""])
     def test_get_argparser_default(self):
         args = qiwis._get_argparser().parse_args()
-        self.assertEqual(args.setup_path, "./setup.json")
+        self.assertEqual(args.config_path, "./config.json")
 
     @mock.patch("builtins.open")
-    @mock.patch("json.load", return_value={"app": APP_DICTS})
-    def test_read_setup_file(self, mock_load, mock_open):
-        self.assertEqual(qiwis._read_setup_file(""), APP_INFOS)
+    @mock.patch("json.load", return_value={"app": APP_DICTS, "constant": {"C0": 0}})
+    def test_read_config_file(self, mock_load, mock_open):
+        app_infos, constants = qiwis._read_config_file("")
+        self.assertEqual(constants, {"C0": 0})
+        self.assertEqual(app_infos, APP_INFOS)
         mock_open.assert_called_once()
         mock_load.assert_called_once()
 
+    @mock.patch("qiwis.set_global_constant_namespace")
     @mock.patch("qiwis._get_argparser")
-    @mock.patch("qiwis._read_setup_file", return_value={})
+    @mock.patch("qiwis._read_config_file", return_value=({}, {}))
     @mock.patch("qiwis.Qiwis")
     @mock.patch("qiwis.QApplication")
-    def test_main(self, mock_qapp, mock_qiwis, mock_read_setup_file, mock_get_argparser):
+    def test_main(
+        self,
+        mock_qapp,
+        mock_qiwis,
+        mock_read_config_file,
+        mock_get_argparser,
+        mock_set_global_constant_namespace,
+    ):
         qiwis.main()
+        mock_set_global_constant_namespace.assert_called_once()
         mock_get_argparser.assert_called_once()
-        mock_read_setup_file.assert_called_once()
+        mock_read_config_file.assert_called_once()
         mock_qiwis.assert_called_once()
         mock_qapp.return_value.exec_.assert_called_once()
 
