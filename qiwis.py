@@ -202,6 +202,8 @@ class Qiwis(QObject):
         )
         self.mainWindow = QMainWindow()
         self.centralWidget = MdiArea(background_path)
+        self.centralWidget.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.centralWidget.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.mainWindow.setCentralWidget(self.centralWidget)
         self._wrapperWidgets = defaultdict(list)
         self._apps: Dict[str, BaseApp] = {}
