@@ -11,7 +11,7 @@ if sys.version_info[:2] < (3, 8):
 
 setup(
     name="qiwis",
-    version="2.1.0",
+    version="2.1.1",
     author="QuIQCL",
     author_email="kangz12345@snu.ac.kr",
     url="https://github.com/snu-quiqcl/qiwis",
@@ -19,7 +19,7 @@ setup(
     long_description=
         "A framework for integration of PyQt widgets where they can communicate with each other. "
         "This project is mainly developed for trapped ion experiment controller GUI in SNU QuIQCL.",
-    download_url="https://github.com/snu-quiqcl/qiwis/releases/tag/v2.1.0",
+    download_url="https://github.com/snu-quiqcl/qiwis/releases/tag/v2.1.1",
     license="MIT license",
     install_requires=["pyqt5"],
     py_modules=["qiwis"],
