@@ -258,8 +258,9 @@ class Qiwis(QObject):
                 "left": Qt.LeftDockWidgetArea,
                 "right": Qt.RightDockWidgetArea,
                 "top": Qt.TopDockWidgetArea,
-                "bottom": Qt.BottomDockWidgetArea
-            }.get(info.pos, Qt.LeftDockWidgetArea)
+                "bottom": Qt.BottomDockWidgetArea,
+                "floating": Qt.LeftDockWidgetArea  # temporary area
+            }[info.pos]
             if info.show:
                 areaDockWidgets = [
                     dockWidget for dockWidget in self.mainWindow.findChildren(QDockWidget)
@@ -269,6 +270,8 @@ class Qiwis(QObject):
                     self.mainWindow.tabifyDockWidget(areaDockWidgets[-1], wrapperWidget)
                 else:
                     self.mainWindow.addDockWidget(area, wrapperWidget)
+                if info.pos == "floating":
+                    wrapperWidget.setFloating(True)
         self._wrapperWidgets[name].append(wrapperWidget)
         logger.info("Added a frame to the app %s: %s", name, info)
 
