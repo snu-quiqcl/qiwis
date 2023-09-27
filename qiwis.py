@@ -257,7 +257,7 @@ class Qiwis(QObject):
                 "top": Qt.TopDockWidgetArea,
                 "bottom": Qt.BottomDockWidgetArea,
                 "floating": Qt.LeftDockWidgetArea  # temporary area
-            }[info.pos]
+            }.get(info.pos, Qt.LeftDockWidgetArea)
             areaDockWidgets = [
                 dockWidget for dockWidget in self.mainWindow.findChildren(QDockWidget)
                 if self.mainWindow.dockWidgetArea(dockWidget) == area
