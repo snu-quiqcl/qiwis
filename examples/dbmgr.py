@@ -193,7 +193,6 @@ class DBMgrApp(BaseApp):
                 info=AppInfo(
                     module="examples.datacalc",
                     cls="DataCalcApp",
-                    show=True,
                     pos="center",
                     channel=["db"],
                     args={

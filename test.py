@@ -21,7 +21,6 @@ APP_INFOS = {
         module="module1",
         cls="cls1",
         path="path1",
-        show=False,
         pos="left",
         channel=["ch1", "ch2"],
         args={"arg1": "value1"}
@@ -37,7 +36,6 @@ APP_DICTS = {
         "module": "module1",
         "cls": "cls1",
         "path": "path1",
-        "show": False,
         "pos": "left",
         "channel": ["ch1", "ch2"],
         "args": {"arg1": "value1"}
@@ -49,9 +47,9 @@ APP_DICTS = {
 }
 
 APP_JSONS = {
-    "app1": ('{"module": "module1", "cls": "cls1", "path": "path1", "show": false, '
+    "app1": ('{"module": "module1", "cls": "cls1", "path": "path1", '
              '"pos": "left", "channel": ["ch1", "ch2"], "args": {"arg1": "value1"}}'),
-    "app2": ('{"module": "module2", "cls": "cls2", "path": ".", "show": true, '
+    "app2": ('{"module": "module2", "cls": "cls2", "path": ".", '
              '"pos": "", "channel": [], "args": null}'),
     "app2_default": '{"module": "module2", "cls": "cls2"}'
 }
