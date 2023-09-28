@@ -64,7 +64,6 @@ class AppInfo(Serializable):
         module: The module name of the app class.
         cls: The name of the app class.
         path: The path for importing the module.
-        show: Whether to show frames of the app.
         pos: The position of the frames on the GUI.
           It should be one of "center", "left", "right", "top", or "bottom", case-sensitive.
           Otherwise, it is set to "left".
@@ -80,7 +79,6 @@ class AppInfo(Serializable):
     module: str
     cls: str
     path: str = "."
-    show: bool = True
     pos: str = ""
     channel: Iterable[str] = ()
     args: Optional[Mapping[str, Any]] = None
@@ -229,8 +227,7 @@ class Qiwis(QObject):
         Args:
             appInfos: A dictionary whose keys are app names and the values are
               corresponding AppInfo objects. All the apps in the dictionary
-              will be created, and if the show field is True, its frames will
-              be shown.
+              will be created, and its frames will be shown.
         """
         for name, info in appInfos.items():
             self.createApp(name, info)
@@ -258,17 +255,19 @@ class Qiwis(QObject):
                 "left": Qt.LeftDockWidgetArea,
                 "right": Qt.RightDockWidgetArea,
                 "top": Qt.TopDockWidgetArea,
-                "bottom": Qt.BottomDockWidgetArea
+                "bottom": Qt.BottomDockWidgetArea,
+                "floating": Qt.LeftDockWidgetArea  # temporary area
             }.get(info.pos, Qt.LeftDockWidgetArea)
-            if info.show:
-                areaDockWidgets = [
-                    dockWidget for dockWidget in self.mainWindow.findChildren(QDockWidget)
-                    if self.mainWindow.dockWidgetArea(dockWidget) == area
-                ]
-                if areaDockWidgets:
-                    self.mainWindow.tabifyDockWidget(areaDockWidgets[-1], wrapperWidget)
-                else:
-                    self.mainWindow.addDockWidget(area, wrapperWidget)
+            areaDockWidgets = [
+                dockWidget for dockWidget in self.mainWindow.findChildren(QDockWidget)
+                if self.mainWindow.dockWidgetArea(dockWidget) == area
+            ]
+            if areaDockWidgets:
+                self.mainWindow.tabifyDockWidget(areaDockWidgets[-1], wrapperWidget)
+            else:
+                self.mainWindow.addDockWidget(area, wrapperWidget)
+            if info.pos == "floating":
+                wrapperWidget.setFloating(True)
         self._wrapperWidgets[name].append(wrapperWidget)
         logger.info("Added a frame to the app %s: %s", name, info)
 
