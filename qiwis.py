@@ -262,6 +262,7 @@ class Qiwis(QObject):
             wrapperWidget = MdiSubWindow(self.centralWidget)
             wrapperWidget.setWindowTitle(name)
             wrapperWidget.setWidget(frame)
+            wrapperWidget.closed.connect(functools.partial(self.destroyApp, name))
             wrapperWidget.show()
         else:
             wrapperWidget = QDockWidget(name, self.mainWindow)
