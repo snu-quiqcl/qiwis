@@ -31,7 +31,7 @@ from typing import (
 )
 
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, Qt
-from PyQt5.QtGui import QIcon, QPainter, QPaintEvent, QPixmap
+from PyQt5.QtGui import QIcon, QPainter, QPaintEvent, QPixmap, QCloseEvent
 from PyQt5.QtWidgets import (
     QApplication, QDockWidget, QMainWindow, QMdiArea, QMdiSubWindow, QMessageBox, QWidget
 )
@@ -167,6 +167,21 @@ class MdiArea(QMdiArea):
         painter.drawPixmap(x, y, self.background)
 
 
+class MdiSubWindow(QMdiSubWindow):
+    """QMdiSubWindow with closed signal.
+    
+    Signals:
+        closed(): The sub window is closed.
+    """
+
+    closed = pyqtSignal()
+
+    def closeEvent(self, event: QCloseEvent):
+        """Extended."""
+        self.closed.emit()
+        super().closeEvent(event)
+
+
 class Qiwis(QObject):
     """Actual manager for qiwis system.
 
@@ -244,9 +259,10 @@ class Qiwis(QObject):
             info: An AppInfo object describing the app.
         """
         if info.pos == "center":
-            wrapperWidget = QMdiSubWindow(self.centralWidget)
+            wrapperWidget = MdiSubWindow(self.centralWidget)
             wrapperWidget.setWindowTitle(name)
             wrapperWidget.setWidget(frame)
+            wrapperWidget.closed.connect(functools.partial(self.destroyApp, name))
             wrapperWidget.show()
         else:
             wrapperWidget = QDockWidget(name, self.mainWindow)
