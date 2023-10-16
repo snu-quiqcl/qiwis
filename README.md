@@ -12,7 +12,7 @@ QIWIS (**Q**u**I**qcl **W**idget **I**ntegration **S**oftware) is a framework fo
 ## How to download and install
 One of the below:
 - Using released version (_recommended_)
-1. `pip install git+https://github.com/snu-quiqcl/qiwis.git@v2.2.0`  
+1. `pip install git+https://github.com/snu-quiqcl/qiwis.git@v2.3.0`  
 For details, refer to [VCS Support](https://pip.pypa.io/en/stable/topics/vcs-support/).
 
 - Using git directly
