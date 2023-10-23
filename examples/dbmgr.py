@@ -112,9 +112,9 @@ class DBMgrApp(BaseApp):
         self.managerFrame.addButton.clicked.connect(self.addDB)
         self.managerFrame.openCloseDatacalcButton.clicked.connect(self.openCloseDatacalc)
 
-    def frames(self) -> Tuple[ManagerFrame]:
+    def frames(self) -> Tuple[Tuple[str, ManagerFrame]]:
         """Overridden."""
-        return (self.managerFrame,)
+        return (("database manager", self.managerFrame),)
 
     def sendDB(self, isAdded: bool, name: str):
         """Emits a broadcastRequested signal with the database list and a logging message.
