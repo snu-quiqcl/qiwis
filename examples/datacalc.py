@@ -79,9 +79,9 @@ class DataCalcApp(BaseApp):
             dbBox.currentIndexChanged.connect(functools.partial(self.setDB, dbName))
         self.viewerFrame.calculateButton.clicked.connect(self.calculateSum)
 
-    def frames(self) -> Tuple[ViewerFrame]:
+    def frames(self) -> Tuple[Tuple[str, ViewerFrame]]:
         """Overridden."""
-        return (self.viewerFrame,)
+        return (("database calculator", self.viewerFrame),)
 
     def updateDB(self, content: dict):
         """Updates the database list using the transferred message.
