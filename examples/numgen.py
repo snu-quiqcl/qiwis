@@ -10,7 +10,7 @@ from typing import Any, Optional, Tuple, Union
 from PyQt5.QtCore import QObject, pyqtSlot
 from PyQt5.QtWidgets import QWidget, QComboBox, QPushButton, QLabel, QVBoxLayout
 
-from qiwis import BaseApp
+from qiwis import BaseApp, FI
 from examples.backend import generate, write
 
 logger = logging.getLogger(__name__)
@@ -89,15 +89,15 @@ class NumGenApp(BaseApp):
         self.generatorFrame.dbBox.currentIndexChanged.connect(self.setDB)
         self.generatorFrame.generateButton.clicked.connect(self.generateNumber)
 
-    def frames(self) -> Union[Tuple[GeneratorFrame, ViewerFrame], Tuple[GeneratorFrame]]:
+    def frames(self) -> Tuple[FI[Union[GeneratorFrame, ViewerFrame]], ...]:
         """Overridden.
         
         Once a number is generated, returns both frames.
         Otherwise, returns only the generator frame.
         """
         if self.isGenerated:
-            return (self.generatorFrame, self.viewerFrame)
-        return (self.generatorFrame,)
+            return (("generator", self.generatorFrame), ("viewer", self.viewerFrame))
+        return (("generator", self.generatorFrame),)
 
     def updateDB(self, content: dict):
         """Updates the database list using the transferred message.
