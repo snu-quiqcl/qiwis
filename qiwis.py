@@ -248,24 +248,25 @@ class Qiwis(QObject):
             self.createApp(name, info)
         logger.info("Loaded %d app(s)", len(appInfos))
 
-    def addFrame(self, name: str, frame: QWidget, info: AppInfo):
+    def addFrame(self, name: str, title: str, frame: QWidget, info: AppInfo):
         """Adds the given frame and wraps it with a wrapper widget.
 
         This is not a qiwiscall because QWidget is not Serializable.
         
         Args:
-            name: A name of app.
-            frame: A frame to show.
-            info: An AppInfo object describing the app.
+            name: The app name to which frame is added.
+            titme: The frame title.
+            frame: Frame object to show.
+            info: AppInfo object describing the app.
         """
         if info.pos == "center":
             wrapperWidget = MdiSubWindow(self.centralWidget)
-            wrapperWidget.setWindowTitle(name)
+            wrapperWidget.setWindowTitle(title)
             wrapperWidget.setWidget(frame)
             wrapperWidget.closed.connect(functools.partial(self.destroyApp, name))
             wrapperWidget.show()
         else:
-            wrapperWidget = QDockWidget(name, self.mainWindow)
+            wrapperWidget = QDockWidget(title, self.mainWindow)
             wrapperWidget.setWidget(frame)
             area = {
                 "left": Qt.LeftDockWidgetArea,
@@ -285,7 +286,7 @@ class Qiwis(QObject):
             if info.pos == "floating":
                 wrapperWidget.setFloating(True)
         self._wrapperWidgets[name].append(wrapperWidget)
-        logger.info("Added a frame to the app %s: %s", name, info)
+        logger.info("Added a frame %s to the app %s: %s", title, name, info)
 
     def removeFrame(self, name: str, wrapperWidget: Union[QMdiSubWindow, QDockWidget]):
         """Removes the frame from the main window.
@@ -339,7 +340,7 @@ class Qiwis(QObject):
         )
         for channelName in info.channel:
             self.subscribe(name, channelName)
-        for frame in app.frames():
+        for title, frame in app.frames():
             self.addFrame(name, frame, info)
         self._apps[name] = app
         self.appInfos[name] = info
