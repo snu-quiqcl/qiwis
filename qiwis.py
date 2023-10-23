@@ -37,9 +37,6 @@ from PyQt5.QtWidgets import (
 )
 
 T = TypeVar("T")
-F = TypeVar("F")  # frame type
-FI = Tuple[str, F]  # frame info type for frames()
-
 JsonType = Union[None, float, bool, str, List["JsonType"], Dict[str, "JsonType"]]
 # Generic MappingProxyType or GenericAlias is introduced in Python 3.9.
 ImmutableJsonType = Union[None, float, bool, str, Tuple["ImmutableJsonType", ...], MappingProxyType]
@@ -574,7 +571,7 @@ class BaseApp(QObject):
         """The global constant namespace."""
         return self._constants
 
-    def frames(self) -> Iterable[FI[QWidget]]:
+    def frames(self) -> Iterable[Tuple[str, QWidget]]:
         """Returns frames info for showing.
 
         Returns:
