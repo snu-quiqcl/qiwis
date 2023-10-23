@@ -363,10 +363,10 @@ class Qiwis(QObject):
         logger.info("Destroyed the app %s", name)
 
     def updateFrames(self, name: str):
-        """Updates the frames of an app.
+        """Updates frames of the given app.
         
         Args:
-            name: A name of the app to update its frames.
+            name: The app name to update its frames.
         """
         app = self._apps[name]
         info = self.appInfos[name]
@@ -374,13 +374,14 @@ class Qiwis(QObject):
             wrapperWidget.widget(): wrapperWidget
             for wrapperWidget in self._wrapperWidgets[name]
         }
-        newFrames = app.frames()
+        newFrames = {frame: title for title, frame in app.frames()}
         orgFramesSet = set(orgFrames)
         newFramesSet = set(newFrames)
         for frame in orgFramesSet - newFramesSet:
             self.removeFrame(name, orgFrames[frame])
         for frame in newFramesSet - orgFramesSet:
-            self.addFrame(name, frame, info)
+            title = newFrames[frame]
+            self.addFrame(name, title, frame, info)
         logger.info("Updated frames: %d -> %d", len(orgFramesSet), len(newFramesSet))
 
     def channelNames(self) -> Tuple[str]:
