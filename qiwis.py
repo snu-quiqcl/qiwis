@@ -569,11 +569,12 @@ class BaseApp(QObject):
         """The global constant namespace."""
         return self._constants
 
-    def frames(self) -> Iterable[QWidget]:
+    def frames(self) -> Iterable[Tuple[str, QWidget]]:
         """Gets frames for which are managed by the App.
 
         Returns:
-            An iterable object of Frame objects for showing.
+            An iterable object with frames info for showing.
+            Each entry is a tuple with frame title and frame object.
         """
         return ()
 
