@@ -570,7 +570,7 @@ class BaseApp(QObject):
         return self._constants
 
     def frames(self) -> Iterable[Tuple[str, QWidget]]:
-        """Gets frames for which are managed by the App.
+        """Returns frames info for showing.
 
         Returns:
             An iterable object with frames info for showing.
