@@ -378,7 +378,8 @@ class Qiwis(QObject):
         orgFramesSet = set(orgFrames)
         newFramesSet = set(newFrames)
         for frame in orgFramesSet - newFramesSet:
-            self.removeFrame(name, orgFrames[frame])
+            wrapperWidget = orgFrames[frame]
+            self.removeFrame(name, wrapperWidget)
         for frame in newFramesSet - orgFramesSet:
             title = newFrames[frame]
             self.addFrame(name, title, frame, info)
