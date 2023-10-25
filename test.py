@@ -9,7 +9,7 @@ import json
 import unittest
 from unittest import mock
 from types import MappingProxyType
-from typing import Any, Optional, Mapping, Iterable
+from typing import Any, Optional, Mapping, Iterable, Set
 
 from PyQt5.QtCore import QObject
 from PyQt5.QtWidgets import QApplication, QMessageBox, QWidget
@@ -67,7 +67,7 @@ class QiwisTestWithApps(unittest.TestCase):
         for appInfo in APP_INFOS.values():
             app = mock.MagicMock()
             app.cls = appInfo.cls
-            app.frames.return_value = (QWidget(),)
+            app.frames.return_value = (("title", QWidget()),)
             cls = mock.MagicMock(return_value=app)
             setattr(self.mocked_import_module.return_value, appInfo.cls, cls)
         self.channels = set()
@@ -94,7 +94,7 @@ class QiwisTestWithApps(unittest.TestCase):
     def test_create_app(self):
         app = mock.MagicMock()
         app.cls = "cls3"
-        app.frames.return_value = (QWidget(),)
+        app.frames.return_value = (("title", QWidget()),)
         cls = mock.MagicMock(return_value=app)
         setattr(self.mocked_import_module.return_value, "cls3", cls)
         self.qiwis.createApp(
@@ -111,7 +111,7 @@ class QiwisTestWithApps(unittest.TestCase):
         orgApp = self.qiwis._apps["app2"]
         app = mock.MagicMock()
         app.cls = "cls2"
-        app.frames.return_value = (QWidget(),)
+        app.frames.return_value = (("title", QWidget()),)
         cls = mock.MagicMock(return_value=app)
         setattr(self.mocked_import_module.return_value, "cls2", cls)
         appInfo = qiwis.AppInfo(module="module2", cls="cls2")
@@ -135,20 +135,24 @@ class QiwisTestWithApps(unittest.TestCase):
 
     def test_update_frames_inclusive(self):
         """Tests for the case where a new frame is added in the return of frames()."""
-        orgFramesSet = {wrapper.widget() for wrapper in self.qiwis._wrapperWidgets["app1"]}
+        orgFramesSet = {wrapperWidget.widget()
+                        for wrapperWidget in self.qiwis._wrapperWidgets["app1"]}
         newFramesSet = orgFramesSet | {QWidget()}
-        self.qiwis._apps["app1"].frames.return_value = tuple(newFramesSet)
+        self.qiwis._apps["app1"].frames.return_value = (("title", frame) for frame in newFramesSet)
         self.qiwis.updateFrames("app1")
-        finalFramesSet = {wrapper.widget() for wrapper in self.qiwis._wrapperWidgets["app1"]}
+        finalFramesSet = {wrapperWidget.widget()
+                          for wrapperWidget in self.qiwis._wrapperWidgets["app1"]}
         self.assertEqual(finalFramesSet, newFramesSet)
 
     def test_update_frames_exclusive(self):
         """Tests for the case where a new frame replaced the return of frames()."""
-        orgFramesSet = {wrapper.widget() for wrapper in self.qiwis._wrapperWidgets["app1"]}
+        orgFramesSet = {wrapperWidget.widget()
+                        for wrapperWidget in self.qiwis._wrapperWidgets["app1"]}
         newFramesSet = {QWidget()}
-        self.qiwis._apps["app1"].frames.return_value = tuple(newFramesSet)
+        self.qiwis._apps["app1"].frames.return_value = (("title", frame) for frame in newFramesSet)
         self.qiwis.updateFrames("app1")
-        finalFramesSet = {wrapper.widget() for wrapper in self.qiwis._wrapperWidgets["app1"]}
+        finalFramesSet = {wrapperWidget.widget()
+                          for wrapperWidget in self.qiwis._wrapperWidgets["app1"]}
         self.assertFalse(finalFramesSet & orgFramesSet)
         self.assertEqual(finalFramesSet, newFramesSet)
 
