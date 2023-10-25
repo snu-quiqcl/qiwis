@@ -9,7 +9,7 @@ import json
 import unittest
 from unittest import mock
 from types import MappingProxyType
-from typing import Any, Optional, Mapping, Iterable, Set
+from typing import Any, Optional, Mapping, Iterable
 
 from PyQt5.QtCore import QObject
 from PyQt5.QtWidgets import QApplication, QMessageBox, QWidget
