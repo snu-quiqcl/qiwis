@@ -255,7 +255,7 @@ class Qiwis(QObject):
         
         Args:
             name: The app name to which frame is added.
-            titme: The frame title.
+            title: The frame title.
             frame: Frame object to show.
             info: AppInfo object describing the app.
         """
