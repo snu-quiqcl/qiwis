@@ -256,8 +256,8 @@ class Qiwis(QObject):
         Args:
             name: The app name to which frame is added.
             title: The frame title.
-            frame: Frame object to show.
-            info: AppInfo object describing the app.
+            frame: The frame widget to show.
+            info: The AppInfo object describing the app.
         """
         if info.pos == "center":
             wrapperWidget = MdiSubWindow(self.centralWidget)
