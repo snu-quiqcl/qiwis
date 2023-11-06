@@ -261,7 +261,7 @@ class Qiwis(QObject):
         """
         if info.pos == "center":
             wrapperWidget = MdiSubWindow(self.centralWidget)
-            wrapperWidget.setWindowTitle(title)
+            wrapperWidget.setWindowTitle(f"{name} - {title}" if title else name)
             wrapperWidget.setWidget(frame)
             wrapperWidget.closed.connect(functools.partial(self.destroyApp, name))
             wrapperWidget.show()
