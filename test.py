@@ -137,7 +137,8 @@ class QiwisTestWithApps(unittest.TestCase):
         """Tests for the case where a new frame is added in the return of frames()."""
         orgFramesSet = {wrapper.widget() for wrapper in self.qiwis._wrapperWidgets["app1"]}
         newFramesSet = orgFramesSet | {QWidget()}
-        self.qiwis._apps["app1"].frames.return_value = (("title", frame) for frame in newFramesSet)
+        self.qiwis._apps["app1"].frames.return_value = tuple(("title", frame)
+                                                             for frame in newFramesSet)
         self.qiwis.updateFrames("app1")
         finalFramesSet = {wrapper.widget() for wrapper in self.qiwis._wrapperWidgets["app1"]}
         self.assertEqual(finalFramesSet, newFramesSet)
@@ -146,7 +147,8 @@ class QiwisTestWithApps(unittest.TestCase):
         """Tests for the case where a new frame replaced the return of frames()."""
         orgFramesSet = {wrapper.widget() for wrapper in self.qiwis._wrapperWidgets["app1"]}
         newFramesSet = {QWidget()}
-        self.qiwis._apps["app1"].frames.return_value = (("title", frame) for frame in newFramesSet)
+        self.qiwis._apps["app1"].frames.return_value = tuple(("title", frame)
+                                                             for frame in newFramesSet)
         self.qiwis.updateFrames("app1")
         finalFramesSet = {wrapper.widget() for wrapper in self.qiwis._wrapperWidgets["app1"]}
         self.assertFalse(finalFramesSet & orgFramesSet)
