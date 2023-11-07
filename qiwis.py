@@ -370,18 +370,18 @@ class Qiwis(QObject):
         """
         app = self._apps[name]
         info = self.appInfos[name]
-        orgFrames = {
+        wrapperWidgets = {
             wrapperWidget.widget(): wrapperWidget
             for wrapperWidget in self._wrapperWidgets[name]
         }
-        newFrames = {frame: title for title, frame in app.frames()}
-        orgFramesSet = set(orgFrames)
-        newFramesSet = set(newFrames)
+        frameTitles = {frame: title for title, frame in app.frames()}
+        orgFramesSet = set(wrapperWidgets)
+        newFramesSet = set(frameTitles)
         for frame in orgFramesSet - newFramesSet:
-            wrapperWidget = orgFrames[frame]
+            wrapperWidget = wrapperWidgets[frame]
             self.removeFrame(name, wrapperWidget)
         for frame in newFramesSet - orgFramesSet:
-            title = newFrames[frame]
+            title = frameTitles[frame]
             self.addFrame(name, title, frame, info)
         logger.info("Updated frames: %d -> %d", len(orgFramesSet), len(newFramesSet))
 
