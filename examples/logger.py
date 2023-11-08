@@ -168,9 +168,9 @@ class LoggerApp(BaseApp):
             self.handler.setLevel(levels[levelText])
             logging.getLogger().setLevel(levels[levelText])
 
-    def frames(self) -> Tuple[LoggerFrame]:
+    def frames(self) -> Tuple[Tuple[str, LoggerFrame]]:
         """Overridden."""
-        return (self.loggerFrame,)
+        return (("logger", self.loggerFrame),)
 
     @pyqtSlot(str)
     def addLog(self, content: str):
