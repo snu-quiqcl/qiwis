@@ -514,8 +514,7 @@ class Qiwis(QObject):
         In fact the partial method will be connected using functools.partial().
 
         Args:
-            sender: See _handleQiwiscall().
-            msg: See _handleQiwiscall().
+            See _handleQiwiscall().
         """
         try:
             value = self._handleQiwiscall(sender, msg)
