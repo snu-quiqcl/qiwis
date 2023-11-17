@@ -71,6 +71,7 @@ class AppInfo(Serializable):
           In the other cases, the frame is wrapped by QDockWidget and
             its position follows Qt.DockWidgetArea.
         channel: The list of channels which the app subscribes to.
+        trust: If True, all qiwiscalls requested by the app are not asked for permission.
         args: The dictionary for the keyword arguments of the app class constructor.
           It should exclude the name and parent arguments.
           None for initializing the app with default values,
@@ -81,6 +82,7 @@ class AppInfo(Serializable):
     path: str = "."
     pos: str = ""
     channel: Iterable[str] = ()
+    trust: bool = False
     args: Optional[Mapping[str, Any]] = None
 
 
