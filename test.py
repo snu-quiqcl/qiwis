@@ -47,10 +47,10 @@ APP_DICTS = {
 }
 
 APP_JSONS = {
-    "app1": ('{"module": "module1", "cls": "cls1", "path": "path1", '
-             '"pos": "left", "channel": ["ch1", "ch2"], "args": {"arg1": "value1"}}'),
-    "app2": ('{"module": "module2", "cls": "cls2", "path": ".", '
-             '"pos": "", "channel": [], "args": null}'),
+    "app1": ('{"module": "module1", "cls": "cls1", "path": "path1", "pos": "left", '
+             '"channel": ["ch1", "ch2"], "trust": false, "args": {"arg1": "value1"}}'),
+    "app2": ('{"module": "module2", "cls": "cls2", "path": ".", "pos": "", '
+             '"channel": [], "trust": false, "args": null}'),
     "app2_default": '{"module": "module2", "cls": "cls2"}'
 }
 
