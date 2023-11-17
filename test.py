@@ -309,7 +309,8 @@ class HandleQiwiscallTest(unittest.TestCase):
         msg = json.dumps({"call": "callForTest", "args": args})
         mocked_loads.return_value = info
         mocked_warning.return_value = QMessageBox.Ok
-        with mock.patch.multiple(self.qiwis, create=True,
+        app_infos = {"sender": qiwis.AppInfo(module="module", cls="cls")}
+        with mock.patch.multiple(self.qiwis, create=True, appInfos=app_infos,
                                  callForTest=mock.DEFAULT, _parseArgs=mock.DEFAULT):
             self.qiwis._parseArgs.return_value = args
             self.qiwis._handleQiwiscall(sender="sender", msg=msg)
@@ -324,7 +325,8 @@ class HandleQiwiscallTest(unittest.TestCase):
         msg = json.dumps({"call": "callForTest", "args": args})
         mocked_loads.return_value = info
         mocked_warning.return_value = QMessageBox.Cancel
-        with mock.patch.multiple(self.qiwis, create=True,
+        app_infos = {"sender": qiwis.AppInfo(module="module", cls="cls")}
+        with mock.patch.multiple(self.qiwis, create=True, appInfos=app_infos,
                                  callForTest=mock.DEFAULT, _parseArgs=mock.DEFAULT):
             self.qiwis._parseArgs.return_value = args
             with self.assertRaises(RuntimeError):
