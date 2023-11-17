@@ -496,16 +496,18 @@ class Qiwis(QObject):
             raise ValueError("Only public method calls are allowed.")
         call = getattr(self, info.call)
         args = self._parseArgs(call, info.args)
-        reply = QMessageBox.warning(
-            None,
-            "qiwiscall",
-            f"The app {sender} requests for a qiwiscall {info.call} with {args}.",
-            QMessageBox.Ok | QMessageBox.Cancel,
-            QMessageBox.Cancel,
-        )
-        if reply == QMessageBox.Ok:
-            return call(**args)
-        raise RuntimeError("The user rejected the request.")
+        trust = self.appInfos[sender].trust
+        if not trust:
+            reply = QMessageBox.warning(
+                None,
+                "qiwiscall",
+                f"The app {sender} requests for a qiwiscall {info.call} with {args}.",
+                QMessageBox.Ok | QMessageBox.Cancel,
+                QMessageBox.Cancel,
+            )
+            if reply != QMessageBox.Ok:
+                raise RuntimeError("The user rejected the request.")
+        return call(**args)
 
     def _qiwiscall(self, sender: str, msg: str):
         """Will be connected to the qiwiscallRequested signal.
