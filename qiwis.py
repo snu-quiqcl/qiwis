@@ -71,6 +71,7 @@ class AppInfo(Serializable):
           In the other cases, the frame is wrapped by QDockWidget and
             its position follows Qt.DockWidgetArea.
         channel: The list of channels which the app subscribes to.
+        trust: If True, all qiwiscalls requested by the app are not asked for permission.
         args: The dictionary for the keyword arguments of the app class constructor.
           It should exclude the name and parent arguments.
           None for initializing the app with default values,
@@ -81,6 +82,7 @@ class AppInfo(Serializable):
     path: str = "."
     pos: str = ""
     channel: Iterable[str] = ()
+    trust: bool = False
     args: Optional[Mapping[str, Any]] = None
 
 
@@ -494,16 +496,18 @@ class Qiwis(QObject):
             raise ValueError("Only public method calls are allowed.")
         call = getattr(self, info.call)
         args = self._parseArgs(call, info.args)
-        reply = QMessageBox.warning(
-            None,
-            "qiwiscall",
-            f"The app {sender} requests for a qiwiscall {info.call} with {args}.",
-            QMessageBox.Ok | QMessageBox.Cancel,
-            QMessageBox.Cancel,
-        )
-        if reply == QMessageBox.Ok:
-            return call(**args)
-        raise RuntimeError("The user rejected the request.")
+        trust = self.appInfos[sender].trust
+        if not trust:
+            reply = QMessageBox.warning(
+                None,
+                "qiwiscall",
+                f"The app {sender} requests for a qiwiscall {info.call} with {args}.",
+                QMessageBox.Ok | QMessageBox.Cancel,
+                QMessageBox.Cancel,
+            )
+            if reply != QMessageBox.Ok:
+                raise RuntimeError("The user rejected the request.")
+        return call(**args)
 
     def _qiwiscall(self, sender: str, msg: str):
         """Will be connected to the qiwiscallRequested signal.
@@ -512,8 +516,7 @@ class Qiwis(QObject):
         In fact the partial method will be connected using functools.partial().
 
         Args:
-            sender: See _handleQiwiscall().
-            msg: See _handleQiwiscall().
+            See _handleQiwiscall().
         """
         try:
             value = self._handleQiwiscall(sender, msg)
