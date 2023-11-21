@@ -5,6 +5,7 @@
             "cls": "NumGenApp",
             "pos": "left",
             "channel": ["db"],
+            "trust": true,
             "args": {
                 "table": "number"
             }

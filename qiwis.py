@@ -71,6 +71,7 @@ class AppInfo(Serializable):
           In the other cases, the frame is wrapped by QDockWidget and
             its position follows Qt.DockWidgetArea.
         channel: The list of channels which the app subscribes to.
+        trust: If True, all qiwiscalls requested by the app are not asked for permission.
         args: The dictionary for the keyword arguments of the app class constructor.
           It should exclude the name and parent arguments.
           None for initializing the app with default values,
@@ -81,6 +82,7 @@ class AppInfo(Serializable):
     path: str = "."
     pos: str = ""
     channel: Iterable[str] = ()
+    trust: bool = False
     args: Optional[Mapping[str, Any]] = None
 
 
@@ -248,24 +250,25 @@ class Qiwis(QObject):
             self.createApp(name, info)
         logger.info("Loaded %d app(s)", len(appInfos))
 
-    def addFrame(self, name: str, frame: QWidget, info: AppInfo):
+    def addFrame(self, name: str, title: str, frame: QWidget, info: AppInfo):
         """Adds the given frame and wraps it with a wrapper widget.
 
         This is not a qiwiscall because QWidget is not Serializable.
         
         Args:
-            name: A name of app.
-            frame: A frame to show.
-            info: An AppInfo object describing the app.
+            name: The app name to which frame is added.
+            title: The frame title.
+            frame: The frame widget to show.
+            info: The AppInfo object describing the app.
         """
         if info.pos == "center":
             wrapperWidget = MdiSubWindow(self.centralWidget)
-            wrapperWidget.setWindowTitle(name)
+            wrapperWidget.setWindowTitle(f"{name} - {title}" if title else name)
             wrapperWidget.setWidget(frame)
             wrapperWidget.closed.connect(functools.partial(self.destroyApp, name))
             wrapperWidget.show()
         else:
-            wrapperWidget = QDockWidget(name, self.mainWindow)
+            wrapperWidget = QDockWidget(title, self.mainWindow)
             wrapperWidget.setWidget(frame)
             area = {
                 "left": Qt.LeftDockWidgetArea,
@@ -285,7 +288,7 @@ class Qiwis(QObject):
             if info.pos == "floating":
                 wrapperWidget.setFloating(True)
         self._wrapperWidgets[name].append(wrapperWidget)
-        logger.info("Added a frame to the app %s: %s", name, info)
+        logger.info("Added a frame %s to the app %s: %s", title, name, info)
 
     def removeFrame(self, name: str, wrapperWidget: Union[QMdiSubWindow, QDockWidget]):
         """Removes the frame from the main window.
@@ -339,8 +342,8 @@ class Qiwis(QObject):
         )
         for channelName in info.channel:
             self.subscribe(name, channelName)
-        for frame in app.frames():
-            self.addFrame(name, frame, info)
+        for title, frame in app.frames():
+            self.addFrame(name, title, frame, info)
         self._apps[name] = app
         self.appInfos[name] = info
         logger.info("Created an app %s: %s", name, info)
@@ -362,24 +365,26 @@ class Qiwis(QObject):
         logger.info("Destroyed the app %s", name)
 
     def updateFrames(self, name: str):
-        """Updates the frames of an app.
+        """Updates frames of the given app.
         
         Args:
-            name: A name of the app to update its frames.
+            name: The app name to update its frames.
         """
         app = self._apps[name]
         info = self.appInfos[name]
-        orgFrames = {
+        wrapperWidgets = {
             wrapperWidget.widget(): wrapperWidget
             for wrapperWidget in self._wrapperWidgets[name]
         }
-        newFrames = app.frames()
-        orgFramesSet = set(orgFrames)
-        newFramesSet = set(newFrames)
+        frameTitles = {frame: title for title, frame in app.frames()}
+        orgFramesSet = set(wrapperWidgets)
+        newFramesSet = set(frameTitles)
         for frame in orgFramesSet - newFramesSet:
-            self.removeFrame(name, orgFrames[frame])
+            wrapperWidget = wrapperWidgets[frame]
+            self.removeFrame(name, wrapperWidget)
         for frame in newFramesSet - orgFramesSet:
-            self.addFrame(name, frame, info)
+            title = frameTitles[frame]
+            self.addFrame(name, title, frame, info)
         logger.info("Updated frames: %d -> %d", len(orgFramesSet), len(newFramesSet))
 
     def channelNames(self) -> Tuple[str]:
@@ -491,16 +496,18 @@ class Qiwis(QObject):
             raise ValueError("Only public method calls are allowed.")
         call = getattr(self, info.call)
         args = self._parseArgs(call, info.args)
-        reply = QMessageBox.warning(
-            None,
-            "qiwiscall",
-            f"The app {sender} requests for a qiwiscall {info.call} with {args}.",
-            QMessageBox.Ok | QMessageBox.Cancel,
-            QMessageBox.Cancel,
-        )
-        if reply == QMessageBox.Ok:
-            return call(**args)
-        raise RuntimeError("The user rejected the request.")
+        trust = self.appInfos[sender].trust
+        if not trust:
+            reply = QMessageBox.warning(
+                None,
+                "qiwiscall",
+                f"The app {sender} requests for a qiwiscall {info.call} with {args}.",
+                QMessageBox.Ok | QMessageBox.Cancel,
+                QMessageBox.Cancel,
+            )
+            if reply != QMessageBox.Ok:
+                raise RuntimeError("The user rejected the request.")
+        return call(**args)
 
     def _qiwiscall(self, sender: str, msg: str):
         """Will be connected to the qiwiscallRequested signal.
@@ -509,8 +516,7 @@ class Qiwis(QObject):
         In fact the partial method will be connected using functools.partial().
 
         Args:
-            sender: See _handleQiwiscall().
-            msg: See _handleQiwiscall().
+            See _handleQiwiscall().
         """
         try:
             value = self._handleQiwiscall(sender, msg)
@@ -569,11 +575,12 @@ class BaseApp(QObject):
         """The global constant namespace."""
         return self._constants
 
-    def frames(self) -> Iterable[QWidget]:
-        """Gets frames for which are managed by the App.
+    def frames(self) -> Iterable[Tuple[str, QWidget]]:
+        """Returns frames info for showing.
 
         Returns:
-            An iterable object of Frame objects for showing.
+            An iterable object with frames info for showing.
+            Each entry is a tuple with frame title and frame object.
         """
         return ()
 

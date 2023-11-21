@@ -81,9 +81,9 @@ class PollerApp(BaseApp):
         self.timer.start(1000 * self.viewerFrame.periodBox.value())
         self.timer.timeout.connect(self.poll)
 
-    def frames(self) -> Tuple[ViewerFrame]:
+    def frames(self) -> Tuple[Tuple[str, ViewerFrame]]:
         """Overridden."""
-        return (self.viewerFrame,)
+        return (("poller", self.viewerFrame),)
 
     def updateDB(self, content: dict):
         """Updates the database list using the transferred message.

@@ -89,15 +89,15 @@ class NumGenApp(BaseApp):
         self.generatorFrame.dbBox.currentIndexChanged.connect(self.setDB)
         self.generatorFrame.generateButton.clicked.connect(self.generateNumber)
 
-    def frames(self) -> Union[Tuple[GeneratorFrame, ViewerFrame], Tuple[GeneratorFrame]]:
+    def frames(self) -> Tuple[Tuple[str, Union[GeneratorFrame, ViewerFrame]], ...]:
         """Overridden.
         
         Once a number is generated, returns both frames.
         Otherwise, returns only the generator frame.
         """
         if self.isGenerated:
-            return (self.generatorFrame, self.viewerFrame)
-        return (self.generatorFrame,)
+            return (("generator", self.generatorFrame), ("viewer", self.viewerFrame))
+        return (("generator", self.generatorFrame),)
 
     def updateDB(self, content: dict):
         """Updates the database list using the transferred message.
