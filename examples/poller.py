@@ -83,7 +83,7 @@ class PollerApp(BaseApp):
 
     def frames(self) -> Tuple[Tuple[str, ViewerFrame]]:
         """Overridden."""
-        return (("poller", self.viewerFrame),)
+        return (("", self.viewerFrame),)
 
     def updateDB(self, content: dict):
         """Updates the database list using the transferred message.
