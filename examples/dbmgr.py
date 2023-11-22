@@ -114,7 +114,7 @@ class DBMgrApp(BaseApp):
 
     def frames(self) -> Tuple[Tuple[str, ManagerFrame]]:
         """Overridden."""
-        return (("database manager", self.managerFrame),)
+        return (("", self.managerFrame),)
 
     def sendDB(self, isAdded: bool, name: str):
         """Emits a broadcastRequested signal with the database list and a logging message.

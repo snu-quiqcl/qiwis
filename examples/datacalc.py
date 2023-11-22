@@ -81,7 +81,7 @@ class DataCalcApp(BaseApp):
 
     def frames(self) -> Tuple[Tuple[str, ViewerFrame]]:
         """Overridden."""
-        return (("database calculator", self.viewerFrame),)
+        return (("", self.viewerFrame),)
 
     def updateDB(self, content: dict):
         """Updates the database list using the transferred message.

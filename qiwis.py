@@ -261,14 +261,15 @@ class Qiwis(QObject):
             frame: The frame widget to show.
             info: The AppInfo object describing the app.
         """
+        frameTitle = f"{name} - {title}" if title else name
         if info.pos == "center":
             wrapperWidget = MdiSubWindow(self.centralWidget)
-            wrapperWidget.setWindowTitle(f"{name} - {title}" if title else name)
+            wrapperWidget.setWindowTitle(frameTitle)
             wrapperWidget.setWidget(frame)
             wrapperWidget.closed.connect(functools.partial(self.destroyApp, name))
             wrapperWidget.show()
         else:
-            wrapperWidget = QDockWidget(title, self.mainWindow)
+            wrapperWidget = QDockWidget(frameTitle, self.mainWindow)
             wrapperWidget.setWidget(frame)
             area = {
                 "left": Qt.LeftDockWidgetArea,

@@ -170,7 +170,7 @@ class LoggerApp(BaseApp):
 
     def frames(self) -> Tuple[Tuple[str, LoggerFrame]]:
         """Overridden."""
-        return (("logger", self.loggerFrame),)
+        return (("", self.loggerFrame),)
 
     @pyqtSlot(str)
     def addLog(self, content: str):
