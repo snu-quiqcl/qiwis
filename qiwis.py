@@ -226,7 +226,7 @@ class Qiwis(QObject):
         appInfos = appInfos if appInfos else {}
         self.setIcon(icon_path)
         self.load(appInfos)
-        self.mainWindow.show()
+        self.mainWindow.showMaximized()
 
     def setIcon(self, icon_path: Optional[str]):
         """Sets the icon image.
