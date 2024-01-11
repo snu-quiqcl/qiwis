@@ -778,7 +778,7 @@ def _get_argparser() -> argparse.ArgumentParser:
         description="QuIqcl Widget Integration Software"
     )
     parser.add_argument(
-        "-m", "--maximize", dest="is_maximized", default=False,
+        "-m", "--maximize", dest="is_maximized", action="store_true",
         help="Whether the initial screen is maximized or not"
     )
     parser.add_argument(
