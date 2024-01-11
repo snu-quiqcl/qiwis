@@ -763,6 +763,7 @@ def _add_to_path(path: str):
 def _get_argparser() -> argparse.ArgumentParser:
     """Parses command line arguments.
 
+    -m, --maximize: Maximizes the initial screen size.
     -c, --config: A path of set-up file.
 
     Returns:
@@ -770,6 +771,10 @@ def _get_argparser() -> argparse.ArgumentParser:
     """
     parser = argparse.ArgumentParser(
         description="QuIqcl Widget Integration Software"
+    )
+    parser.add_argument(
+        "-m", "--maximize", dest="is_maximized", default=False,
+        help="Whether the initial screen is maximized or not"
     )
     parser.add_argument(
         "-c", "--config", dest="config_path", default="./config.json",
