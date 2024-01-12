@@ -202,11 +202,13 @@ class Qiwis(QObject):
         self,
         appInfos: Optional[Mapping[str, AppInfo]] = None,
         constants: Optional[Tuple] = None,
+        isMaximized: bool = False,
         parent: Optional[QObject] = None):
         """
         Args:
             appInfos: See Qiwis.load(). None or an empty dictionary for loading no apps.
             constants: The global constant namespace. See set_global_constant_namespace().
+            isMaximized: See "-m" option in _get_argparser().
             parent: A parent object.
         """
         super().__init__(parent=parent)
@@ -226,7 +228,10 @@ class Qiwis(QObject):
         appInfos = appInfos if appInfos else {}
         self.setIcon(icon_path)
         self.load(appInfos)
-        self.mainWindow.show()
+        if isMaximized:
+            self.mainWindow.showMaximized()
+        else:
+            self.mainWindow.show()
 
     def setIcon(self, icon_path: Optional[str]):
         """Sets the icon image.
@@ -763,6 +768,7 @@ def _add_to_path(path: str):
 def _get_argparser() -> argparse.ArgumentParser:
     """Parses command line arguments.
 
+    -m, --maximize: Maximizes the initial screen size.
     -c, --config: A path of set-up file.
 
     Returns:
@@ -770,6 +776,10 @@ def _get_argparser() -> argparse.ArgumentParser:
     """
     parser = argparse.ArgumentParser(
         description="QuIqcl Widget Integration Software"
+    )
+    parser.add_argument(
+        "-m", "--maximize", dest="is_maximized", action="store_true",
+        help="Whether the initial screen is maximized or not"
     )
     parser.add_argument(
         "-c", "--config", dest="config_path", default="./config.json",
@@ -840,7 +850,7 @@ def main():
     # start GUI
     qapp = QApplication(sys.argv)
     constants_ = set_global_constant_namespace(constants)
-    _qiwis = Qiwis(app_infos, constants_)
+    _qiwis = Qiwis(app_infos, constants_, args.is_maximized)
     logger.info("Now the QApplication starts")
     qapp.exec_()
 
